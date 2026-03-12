@@ -37,7 +37,7 @@ private struct FabricButtonBody: View {
             .padding(.horizontal, FabricSpacing.lg)
             .background { backgroundView(isPressed: isPressed) }
             .clipShape(shape)
-            .scaleEffect(isPressed && !reduceMotion ? 0.97 : 1.0)
+            .scaleEffect(isPressed && !reduceMotion ? 0.95 : 1.0)
             .opacity(isEnabled ? 1.0 : 0.5)
             .animation(
                 reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.7),
@@ -98,7 +98,7 @@ private struct FabricButtonBody: View {
 
     private var foregroundColor: Color {
         switch variant {
-        case .primary:   return FabricColors.parchment
+        case .primary:   return FabricColors.onPrimary
         case .secondary: return FabricColors.inkPrimary
         case .ghost:     return FabricColors.inkSecondary
         }

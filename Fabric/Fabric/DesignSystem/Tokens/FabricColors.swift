@@ -1,60 +1,110 @@
 import SwiftUI
+import AppKit
 
 enum FabricColors {
 
-    // MARK: - Surfaces
-    // Wider value spread between layers for visible depth
+    // MARK: - Adaptive Helpers
 
-    /// Window/page background — warm raw linen
-    static let linen     = Color(hue: 36/360, saturation: 0.18, brightness: 0.92)
-    /// Card surface — slightly cooler, clearly distinct from linen
-    static let canvas    = Color(hue: 40/360, saturation: 0.08, brightness: 0.97)
-    /// Lightest surface — text field fills, inset areas
-    static let parchment = Color(hue: 42/360, saturation: 0.06, brightness: 0.99)
+    /// HSB color that adapts to light/dark appearance (alpha = 1).
+    private static func hsb(
+        _ lH: CGFloat, _ lS: CGFloat, _ lB: CGFloat,
+        dark dH: CGFloat, _ dS: CGFloat, _ dB: CGFloat
+    ) -> Color {
+        Color(nsColor: NSColor(name: nil, dynamicProvider: { appearance in
+            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            let (h, s, b) = isDark ? (dH, dS, dB) : (lH, lS, lB)
+            return NSColor(hue: h, saturation: s, brightness: b, alpha: 1)
+        }))
+    }
+
+    /// HSBA color that adapts to light/dark appearance.
+    private static func hsba(
+        _ lH: CGFloat, _ lS: CGFloat, _ lB: CGFloat, _ lA: CGFloat,
+        dark dH: CGFloat, _ dS: CGFloat, _ dB: CGFloat, _ dA: CGFloat
+    ) -> Color {
+        Color(nsColor: NSColor(name: nil, dynamicProvider: { appearance in
+            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            let (h, s, b, a) = isDark ? (dH, dS, dB, dA) : (lH, lS, lB, lA)
+            return NSColor(hue: h, saturation: s, brightness: b, alpha: a)
+        }))
+    }
+
+    // MARK: - Surfaces
+    // Light: warm linen tones.  Dark: warm charcoal-brown (dark wool / denim).
+
+    /// Window/page background — warm raw linen / deep charcoal
+    static let linen     = hsb(36/360, 0.18, 0.92, dark: 25/360, 0.15, 0.13)
+    /// Card surface — slightly cooler / lifted above background
+    static let canvas    = hsb(40/360, 0.08, 0.97, dark: 25/360, 0.10, 0.19)
+    /// Lightest surface — text field fills, inset areas / recessed dark
+    static let parchment = hsb(42/360, 0.06, 0.99, dark: 22/360, 0.10, 0.15)
     /// Dark accent surface — section backgrounds, emphasis areas
-    static let burlap    = Color(hue: 28/360, saturation: 0.22, brightness: 0.76)
+    static let burlap    = hsb(28/360, 0.22, 0.76, dark: 28/360, 0.15, 0.30)
 
     // MARK: - Ink
-    // Warm brown-black family — like walnut ink on cloth
+    // Light: warm brown-black (walnut ink).  Dark: warm cream (undyed thread).
 
-    /// Primary text — deep warm brown, ~10:1 against canvas (AAA)
-    static let inkPrimary   = Color(hue: 20/360, saturation: 0.45, brightness: 0.18)
+    /// Primary text — ~10:1 against canvas in both modes (AAA)
+    static let inkPrimary   = hsb(20/360, 0.45, 0.18, dark: 35/360, 0.10, 0.90)
     /// Secondary text — ~5.5:1 against canvas (AA)
-    static let inkSecondary = Color(hue: 22/360, saturation: 0.28, brightness: 0.38)
+    static let inkSecondary = hsb(22/360, 0.28, 0.38, dark: 30/360, 0.08, 0.68)
     /// Decorative/placeholder — below AA
-    static let inkTertiary  = Color(hue: 25/360, saturation: 0.12, brightness: 0.60)
+    static let inkTertiary  = hsb(25/360, 0.12, 0.60, dark: 25/360, 0.06, 0.45)
 
     // MARK: - Accents
-    // Natural dye tones — richer and more alive
+    // Natural dye tones — slightly brighter in dark mode to pop against dark ground.
 
     /// Primary action — deep calm blue with warmth
-    static let indigo = Color(hue: 225/360, saturation: 0.35, brightness: 0.52)
+    static let indigo = hsb(225/360, 0.35, 0.52, dark: 225/360, 0.30, 0.65)
     /// Destructive/warning — warm terracotta
-    static let madder = Color(hue: 12/360,  saturation: 0.50, brightness: 0.60)
+    static let madder = hsb(12/360, 0.50, 0.60, dark: 12/360, 0.42, 0.72)
     /// Success/positive — muted sage
-    static let sage   = Color(hue: 145/360, saturation: 0.22, brightness: 0.58)
+    static let sage   = hsb(145/360, 0.22, 0.58, dark: 145/360, 0.20, 0.65)
     /// Warm highlight — golden ochre
-    static let ochre  = Color(hue: 38/360,  saturation: 0.55, brightness: 0.72)
+    static let ochre  = hsb(38/360, 0.55, 0.72, dark: 38/360, 0.48, 0.78)
 
     // MARK: - Functional
-    // Warm shadows — not cold gray, but tinted like real cloth shadows
+    // Shadows need higher opacity on dark surfaces. Dark mode drops warm tint.
 
     /// Ambient shadow — warm, diffuse
-    static let shadow      = Color(hue: 25/360, saturation: 0.20, brightness: 0.30).opacity(0.10)
+    static let shadow      = hsba(25/360, 0.20, 0.30, 0.10, dark: 0, 0, 0, 0.30)
     /// Tight shadow — close, dark
-    static let shadowTight = Color(hue: 25/360, saturation: 0.25, brightness: 0.20).opacity(0.14)
+    static let shadowTight = hsba(25/360, 0.25, 0.20, 0.14, dark: 0, 0, 0, 0.40)
     /// Inner shadow for recessed elements
-    static let innerShadow = Color(hue: 20/360, saturation: 0.15, brightness: 0.25).opacity(0.12)
+    static let innerShadow = hsba(20/360, 0.15, 0.25, 0.12, dark: 0, 0, 0, 0.30)
     /// Top-edge highlight — light catching the weave
-    static let highlight   = Color.white.opacity(0.25)
+    static let highlight: Color = {
+        Color(nsColor: NSColor(name: nil, dynamicProvider: { appearance in
+            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            return NSColor.white.withAlphaComponent(isDark ? 0.06 : 0.25)
+        }))
+    }()
 
     // MARK: - Primary Button Fills
-    // Opaque pre-composited colors — guaranteed contrast against parchment text
+    // Opaque — guaranteed contrast against onPrimary text in both modes.
 
-    /// Default ~5.2:1 vs parchment
-    static let buttonPrimary        = Color(hue: 225/360, saturation: 0.35, brightness: 0.46)
-    /// Hovered ~5.7:1 vs parchment
-    static let buttonPrimaryHovered = Color(hue: 225/360, saturation: 0.35, brightness: 0.44)
-    /// Pressed ~6.1:1 vs parchment
-    static let buttonPrimaryPressed = Color(hue: 225/360, saturation: 0.35, brightness: 0.42)
+    /// Default ~5.2:1 (light) / ~5.5:1 (dark) vs onPrimary
+    static let buttonPrimary        = hsb(225/360, 0.35, 0.46, dark: 225/360, 0.30, 0.55)
+    /// Hovered ~5.7:1 / ~5.9:1
+    static let buttonPrimaryHovered = hsb(225/360, 0.35, 0.44, dark: 225/360, 0.30, 0.52)
+    /// Pressed ~6.1:1 / ~6.5:1
+    static let buttonPrimaryPressed = hsb(225/360, 0.35, 0.42, dark: 225/360, 0.30, 0.48)
+
+    // MARK: - Semantic
+
+    /// Content color on primary-colored fills (button text, toggle thumbs).
+    /// Warm cream in both modes — stays light regardless of appearance.
+    static let onPrimary = hsb(42/360, 0.06, 0.99, dark: 40/360, 0.06, 0.95)
+
+    /// Ink micro-shadow — always dark, prevents glow effect in dark mode.
+    static let inkShadow = hsba(20/360, 0.15, 0.10, 0.15, dark: 0, 0, 0, 0.25)
+
+    // MARK: - Connectors & Decorative
+
+    /// Warm connector line for timelines and step indicators
+    static let connector = hsba(25/360, 0.12, 0.50, 0.18,
+                                dark: 25/360, 0.06, 0.60, 0.22)
+    /// Badge/chip background tint
+    static let badgeFill = hsba(28/360, 0.15, 0.76, 0.12,
+                                dark: 28/360, 0.10, 0.40, 0.18)
 }

@@ -60,14 +60,6 @@ enum FabricInkStyle {
         case .tertiary:  return 0
         }
     }
-
-    var shadowOpacity: Double {
-        switch self {
-        case .primary:   return 0.15
-        case .secondary: return 0.10
-        case .tertiary:  return 0
-        }
-    }
 }
 
 // MARK: - Typography Modifier
@@ -92,7 +84,7 @@ struct FabricInkModifier: ViewModifier {
         content
             .foregroundStyle(style.color)
             .shadow(
-                color: style.color.opacity(style.shadowOpacity),
+                color: FabricColors.inkShadow,
                 radius: style.shadowRadius,
                 x: 0,
                 y: 0.3

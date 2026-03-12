@@ -14,6 +14,7 @@ enum FabricSpacing {
 
     // MARK: - Corner Radii (iOS 26 continuous corners — plush, pillowy)
 
+    static let radiusXs: CGFloat = 8     // chips, badges
     static let radiusSm: CGFloat = 16
     static let radiusMd: CGFloat = 24
     static let radiusLg: CGFloat = 32
@@ -32,4 +33,15 @@ enum FabricSpacing {
     static let toggleTrackW:    CGFloat = 52
     static let toggleTrackH:    CGFloat = 32
     static let toggleThumb:     CGFloat = 26
+
+    // MARK: - Small Elements
+
+    static let connectorWidth:    CGFloat = 2
+    static let badgeHeight:       CGFloat = 22
+    static let chipHeight:        CGFloat = 26
+    static let stepIndicatorSize: CGFloat = 32
+    static let timelineDotSize:   CGFloat = 12
+    static let timelineDotSizeLg: CGFloat = 18
+    static let progressBarHeight: CGFloat = 8
+    static let columnMinWidth:    CGFloat = 280
 }

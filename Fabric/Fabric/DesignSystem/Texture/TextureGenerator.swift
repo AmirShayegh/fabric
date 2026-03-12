@@ -83,28 +83,31 @@ enum TextureGenerator {
                 // Deterministic hash noise → 0...1
                 let n = noise(x: x, y: y, seed: seed)
 
-                // Weave modulation: every 3rd row/col gets 1.3x intensity
-                let weave = weaveWeight(x: x, y: y, spacing: 3)
+                // Weave modulation: every 2nd row/col gets boosted —
+                // denser grid creates more textile-like warp/weft character
+                let weave = weaveWeight(x: x, y: y, spacing: 2)
 
                 // Signed deviation from 0.5 midpoint
                 let deviation = (n - 0.5) * 2.0 * weave
 
-                // Map to RGBA: white pixels for positive deviation, black for negative
+                // Map to warm-tinted RGBA: cream highlights, warm brown shadows
                 let alpha = abs(deviation) * intensity
 
                 if deviation > 0 {
-                    // White pixel at low opacity
-                    let premultiplied = UInt8(min(alpha * 255, 255))
-                    buffer[offset + 0] = premultiplied  // R
-                    buffer[offset + 1] = premultiplied  // G
-                    buffer[offset + 2] = premultiplied  // B
-                    buffer[offset + 3] = premultiplied  // A
+                    // Warm cream highlight (not pure white)
+                    let a = UInt8(min(alpha * 255, 255))
+                    buffer[offset + 0] = a       // R (full)
+                    buffer[offset + 1] = UInt8(min(Float(a) * 0.96, 255))  // G (slightly less)
+                    buffer[offset + 2] = UInt8(min(Float(a) * 0.90, 255))  // B (warm tint)
+                    buffer[offset + 3] = a       // A
                 } else {
-                    // Black pixel at low opacity
-                    buffer[offset + 0] = 0  // R
-                    buffer[offset + 1] = 0  // G
-                    buffer[offset + 2] = 0  // B
-                    buffer[offset + 3] = UInt8(min(alpha * 255, 255))  // A
+                    // Warm brown shadow (not pure black)
+                    let a = UInt8(min(alpha * 255, 255))
+                    let tint = UInt8(min(Float(a) * 0.12, 255))
+                    buffer[offset + 0] = tint    // R (slight warmth)
+                    buffer[offset + 1] = UInt8(min(Float(tint) * 0.7, 255))  // G
+                    buffer[offset + 2] = 0       // B
+                    buffer[offset + 3] = a       // A
                 }
             }
         }
@@ -122,10 +125,11 @@ enum TextureGenerator {
         return Float(abs(h) % 10000) / 10000.0
     }
 
-    /// Weave modulation: every Nth row/col gets boosted intensity
+    /// Weave modulation: every Nth row/col gets boosted intensity.
+    /// Simulates warp/weft thread crossings in woven cloth.
     private static func weaveWeight(x: Int, y: Int, spacing: Int) -> Float {
-        let rowThread: Float = (y % spacing == 0) ? 1.3 : 1.0
-        let colThread: Float = (x % spacing == 0) ? 1.3 : 1.0
+        let rowThread: Float = (y % spacing == 0) ? 1.5 : 1.0
+        let colThread: Float = (x % spacing == 0) ? 1.5 : 1.0
         return rowThread * colThread
     }
 

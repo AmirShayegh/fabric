@@ -21,7 +21,7 @@ struct FabricCard<Content: View>: View {
             .overlay {
                 shape.strokeBorder(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.35), Color.clear],
+                        colors: [FabricColors.highlight, Color.clear],
                         startPoint: .top,
                         endPoint: .center
                     ),

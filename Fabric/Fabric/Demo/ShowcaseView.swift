@@ -1,4 +1,48 @@
 import SwiftUI
+import UniformTypeIdentifiers
+
+// MARK: - Kanban Task Model
+
+struct KanbanTask: Identifiable, Codable, Equatable, Transferable {
+    let id: String
+    let title: String
+    let description: String?
+    let tagLabel: String
+    let tagAccentName: String
+
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: .json)
+    }
+
+    var accent: FabricAccent {
+        switch tagAccentName {
+        case "indigo": return .indigo
+        case "madder": return .madder
+        case "sage":   return .sage
+        case "ochre":  return .ochre
+        default:       return .indigo
+        }
+    }
+
+    var fabricTags: [FabricTaskCard.Tag] {
+        [.init(tagLabel, accent: accent, id: "\(id)-\(tagLabel)")]
+    }
+
+    init(
+        _ title: String,
+        description: String? = nil,
+        tag: String,
+        accent: String
+    ) {
+        self.id = UUID().uuidString
+        self.title = title
+        self.description = description
+        self.tagLabel = tag
+        self.tagAccentName = accent
+    }
+}
+
+// MARK: - ShowcaseView
 
 struct ShowcaseView: View {
 
@@ -8,6 +52,26 @@ struct ShowcaseView: View {
     @State private var toggleNotifications = true
     @State private var toggleAutoSave = false
     @State private var toggleDarkMode = true
+    @State private var currentStep: Int = 0
+    @State private var progressValue: Double = 0.65
+    @State private var ringValue: Double = 0.40
+
+    // Kanban state
+    @State private var todoTasks: [KanbanTask] = [
+        KanbanTask("Design navigation", tag: "Design", accent: "indigo"),
+        KanbanTask("API endpoints", tag: "Dev", accent: "sage"),
+        KanbanTask("Write tests", tag: "Dev", accent: "sage"),
+    ]
+    @State private var inProgressTasks: [KanbanTask] = [
+        KanbanTask("Color system", tag: "Design", accent: "indigo"),
+        KanbanTask("Database schema", description: "Finalize table structure", tag: "Dev", accent: "sage"),
+    ]
+    @State private var doneTasks: [KanbanTask] = [
+        KanbanTask("Project brief", tag: "Planning", accent: "ochre"),
+    ]
+    @State private var todoTargeted = false
+    @State private var inProgressTargeted = false
+    @State private var doneTargeted = false
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -19,11 +83,20 @@ struct ShowcaseView: View {
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 fullWidthSections
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                kanbanDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                timelineDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                progressDemo
             }
             .padding(.horizontal, FabricSpacing.xxl)
             .padding(.vertical, FabricSpacing.xxxl)
         }
-        .fabricSurface(FabricColors.linen, textureIntensity: 0.035)
+        .fabricSurface(FabricColors.linen, textureIntensity: 0.045)
         .frame(minWidth: 860, minHeight: 680)
     }
 
@@ -120,9 +193,20 @@ struct ShowcaseView: View {
 
     private func swatch(_ name: String, _ color: Color) -> some View {
         VStack(spacing: FabricSpacing.xs) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            FabricSpacing.shape(radius: FabricSpacing.radiusXs)
                 .fill(color)
                 .frame(width: 52, height: 40)
+                .overlay {
+                    FabricSpacing.shape(radius: FabricSpacing.radiusXs)
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [FabricColors.highlight, Color.clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 0.5
+                        )
+                }
                 .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
                 .shadow(color: FabricColors.shadow, radius: 4, x: 0, y: 2)
 
@@ -286,6 +370,149 @@ struct ShowcaseView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+    // MARK: - Kanban Demo
+
+    private var kanbanDemo: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+            Text("Kanban Board").fabricTitle()
+            Text("Drag cards between columns")
+                .fabricCaption()
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .top, spacing: FabricSpacing.md) {
+                    kanbanColumn("To Do", tasks: $todoTasks, isTargeted: $todoTargeted)
+                    kanbanColumn("In Progress", tasks: $inProgressTasks, isTargeted: $inProgressTargeted)
+                    kanbanColumn("Done", tasks: $doneTasks, isTargeted: $doneTargeted)
+                }
+            }
+        }
+    }
+
+    private func kanbanColumn(
+        _ title: String,
+        tasks: Binding<[KanbanTask]>,
+        isTargeted: Binding<Bool>
+    ) -> some View {
+        FabricKanbanColumn(title, count: tasks.wrappedValue.count, isDropTarget: isTargeted.wrappedValue) {
+            ForEach(tasks.wrappedValue) { task in
+                FabricTaskCard(
+                    task.title,
+                    description: task.description,
+                    tags: task.fabricTags
+                )
+                .draggable(task)
+            }
+        }
+        .dropDestination(for: KanbanTask.self) { droppedTasks, _ in
+            for task in droppedTasks {
+                removeTask(task)
+                tasks.wrappedValue.append(task)
+            }
+            return true
+        } isTargeted: { targeted in
+            isTargeted.wrappedValue = targeted
+        }
+    }
+
+    private func removeTask(_ task: KanbanTask) {
+        todoTasks.removeAll { $0.id == task.id }
+        inProgressTasks.removeAll { $0.id == task.id }
+        doneTasks.removeAll { $0.id == task.id }
+    }
+
+    // MARK: - Timeline Demo
+
+    private var timelineDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Timeline").fabricTitle()
+
+                FabricTimeline(items: [
+                    .init(
+                        timestamp: "Jan 15",
+                        title: "Project kickoff",
+                        style: .milestone(accent: .sage)
+                    ),
+                    .init(
+                        timestamp: "Jan 22",
+                        title: "Design explorations complete",
+                        description: "Settled on warm textile direction"
+                    ),
+                    .init(
+                        timestamp: "Feb 3",
+                        title: "Component library started"
+                    ),
+                    .init(
+                        timestamp: "Feb 14",
+                        title: "Design review",
+                        description: "Stakeholder sign-off on all tokens",
+                        style: .milestone(accent: .indigo)
+                    ),
+                    .init(
+                        timestamp: "Mar 1",
+                        title: "Development sprint begins"
+                    ),
+                ])
+            }
+        }
+    }
+
+    // MARK: - Progress Demo
+
+    private var progressDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.xl) {
+                Text("Progress").fabricTitle()
+
+                // Step indicator
+                VStack(spacing: FabricSpacing.md) {
+                    FabricStepIndicator(
+                        steps: ["Brief", "Design", "Review", "Ship"],
+                        currentStep: currentStep
+                    )
+                    HStack(spacing: FabricSpacing.md) {
+                        Button("Back") { currentStep = max(0, currentStep - 1) }
+                            .buttonStyle(.fabricGhost)
+                        Button("Next") { currentStep = min(3, currentStep + 1) }
+                            .buttonStyle(.fabricGhost)
+                    }
+                }
+
+                // Divider
+                Rectangle()
+                    .fill(FabricColors.inkTertiary.opacity(0.15))
+                    .frame(height: 0.5)
+
+                // Progress bar
+                FabricProgressBar(
+                    value: progressValue,
+                    label: "Upload progress",
+                    showPercentage: true,
+                    accent: .indigo
+                )
+
+                // Progress ring
+                HStack(spacing: FabricSpacing.xl) {
+                    FabricProgressRing(value: ringValue, accent: .sage) {
+                        Text("40%").fabricCaption()
+                    }
+                    .frame(width: 80, height: 80)
+
+                    FabricProgressRing(value: 0.75, accent: .indigo) {
+                        Text("75%").fabricCaption()
+                    }
+                    .frame(width: 80, height: 80)
+
+                    FabricProgressRing(value: 1.0, accent: .ochre) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(FabricColors.ochre)
+                    }
+                    .frame(width: 80, height: 80)
+                }
             }
         }
     }

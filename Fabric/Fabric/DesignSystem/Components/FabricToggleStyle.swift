@@ -55,8 +55,19 @@ private struct FabricToggleBody: View {
                 .innerShadow(trackShape, color: FabricColors.innerShadow, radius: 2, spread: 2.5, y: 1)
 
             Circle()
-                .fill(FabricColors.parchment)
+                .fill(FabricColors.onPrimary)
                 .frame(width: FabricSpacing.toggleThumb, height: FabricSpacing.toggleThumb)
+                .overlay {
+                    Circle()
+                        .strokeBorder(
+                            LinearGradient(
+                                colors: [FabricColors.highlight, Color.clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 0.5
+                        )
+                }
                 .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
                 .shadow(color: FabricColors.shadow, radius: 3, x: 0, y: 2)
                 .padding(.horizontal, 3)
@@ -66,9 +77,9 @@ private struct FabricToggleBody: View {
 
     private func trackFill(isOn: Bool) -> Color {
         if isOn {
-            return isHovered ? FabricColors.indigo.opacity(0.38) : FabricColors.indigo.opacity(0.30)
+            return isHovered ? FabricColors.indigo.opacity(0.42) : FabricColors.indigo.opacity(0.28)
         } else {
-            return isHovered ? FabricColors.burlap.opacity(0.38) : FabricColors.burlap.opacity(0.30)
+            return isHovered ? FabricColors.burlap.opacity(0.42) : FabricColors.burlap.opacity(0.28)
         }
     }
 }
