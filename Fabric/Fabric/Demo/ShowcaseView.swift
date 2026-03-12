@@ -182,17 +182,17 @@ struct ShowcaseView: View {
                 VStack(alignment: .leading, spacing: FabricSpacing.md) {
                     VStack(alignment: .leading, spacing: FabricSpacing.xs) {
                         Text("Name").fabricCaption()
-                        FabricTextField(placeholder: "Enter your name", text: $nameField)
+                        FabricTextField(label: "Name", placeholder: "Enter your name", text: $nameField)
                     }
 
                     VStack(alignment: .leading, spacing: FabricSpacing.xs) {
                         Text("Email").fabricCaption()
-                        FabricTextField(placeholder: "you@example.com", text: $emailField)
+                        FabricTextField(label: "Email", placeholder: "you@example.com", text: $emailField)
                     }
 
                     VStack(alignment: .leading, spacing: FabricSpacing.xs) {
                         Text("Notes").fabricCaption()
-                        FabricTextField(placeholder: "Optional notes...", text: $notesField)
+                        FabricTextField(label: "Notes", placeholder: "Optional notes...", text: $notesField)
                     }
                 }
 
@@ -273,7 +273,7 @@ struct ShowcaseView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: FabricSpacing.lg) {
-                    FabricTextField(placeholder: "Quick note...", text: $notesField)
+                    FabricTextField(label: "Note", placeholder: "Quick note...", text: $notesField)
 
                     Toggle("Remember me", isOn: $toggleNotifications)
                         .toggleStyle(.fabric)

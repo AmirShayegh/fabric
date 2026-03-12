@@ -6,17 +6,28 @@ struct FabricButtonStyle: ButtonStyle {
 
     let variant: Variant
 
+    func makeBody(configuration: Configuration) -> some View {
+        FabricButtonBody(variant: variant, configuration: configuration)
+    }
+}
+
+// MARK: - Body View (owns @State for stable hover tracking)
+
+private struct FabricButtonBody: View {
+
+    let variant: FabricButtonStyle.Variant
+    let configuration: ButtonStyleConfiguration
+
+    @State private var isHovered = false
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.displayScale) private var displayScale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    @State private var isHovered = false
 
     private var shape: RoundedRectangle {
         FabricSpacing.shape(radius: FabricSpacing.radiusSm)
     }
 
-    func makeBody(configuration: Configuration) -> some View {
+    var body: some View {
         let isPressed = configuration.isPressed
 
         configuration.label
@@ -55,7 +66,6 @@ struct FabricButtonStyle: ButtonStyle {
                 )
             }
 
-            // Soft top-edge highlight — disappears on press
             if !isPressed && variant != .ghost {
                 shape.strokeBorder(
                     LinearGradient(
@@ -67,7 +77,6 @@ struct FabricButtonStyle: ButtonStyle {
                 )
             }
         }
-        // Inner shadow on press (cloth depression)
         .innerShadow(
             shape,
             color: FabricColors.innerShadow,
@@ -75,7 +84,6 @@ struct FabricButtonStyle: ButtonStyle {
             spread: isPressed ? 5 : 0,
             y: isPressed ? 2 : 0
         )
-        // Double shadow for depth: tight + ambient
         .shadow(
             color: isPressed || !isEnabled ? .clear : FabricColors.shadowTight,
             radius: 1, x: 0, y: 1
@@ -99,9 +107,9 @@ struct FabricButtonStyle: ButtonStyle {
     private func backgroundColor(isPressed: Bool) -> Color {
         switch variant {
         case .primary:
-            if isPressed { return FabricColors.indigo.opacity(0.90) }
-            if isHovered { return FabricColors.indigo.opacity(0.85) }
-            return FabricColors.indigo.opacity(0.78)
+            if isPressed { return FabricColors.buttonPrimaryPressed }
+            if isHovered { return FabricColors.buttonPrimaryHovered }
+            return FabricColors.buttonPrimary
         case .secondary:
             if isPressed { return FabricColors.burlap.opacity(0.35) }
             if isHovered { return FabricColors.canvas }

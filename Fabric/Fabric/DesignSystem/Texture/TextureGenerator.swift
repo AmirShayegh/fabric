@@ -4,7 +4,13 @@ import CoreGraphics
 enum TextureGenerator {
 
     private static let baseTilePoints: CGFloat = 64
-    private static let cache = NSCache<NSString, CGImage>()
+
+    private static let cache: NSCache<NSString, CGImage> = {
+        let c = NSCache<NSString, CGImage>()
+        c.countLimit = 8
+        c.totalCostLimit = 4 * 1024 * 1024  // 4 MB
+        return c
+    }()
 
     /// Generate a tileable linen/fabric texture as an ImagePaint.
     ///
@@ -37,7 +43,7 @@ enum TextureGenerator {
         intensity: CGFloat = 0.04,
         seed: Int = 42
     ) -> CGImage {
-        let pixelSize = Int(round(baseTilePoints * displayScale))
+        let pixelSize = max(1, min(512, Int(round(baseTilePoints * displayScale))))
         let key = "\(pixelSize)-\(intensity)-\(seed)" as NSString
 
         if let cached = cache.object(forKey: key) {
@@ -45,7 +51,7 @@ enum TextureGenerator {
         }
 
         let cgImage = generateTile(pixelSize: pixelSize, intensity: Float(intensity), seed: seed)
-        cache.setObject(cgImage, forKey: key)
+        cache.setObject(cgImage, forKey: key, cost: pixelSize * pixelSize * 4)
         return cgImage
     }
 

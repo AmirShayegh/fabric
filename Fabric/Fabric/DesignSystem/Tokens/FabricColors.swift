@@ -47,4 +47,14 @@ enum FabricColors {
     static let innerShadow = Color(hue: 20/360, saturation: 0.15, brightness: 0.25).opacity(0.12)
     /// Top-edge highlight — light catching the weave
     static let highlight   = Color.white.opacity(0.25)
+
+    // MARK: - Primary Button Fills
+    // Opaque pre-composited colors — guaranteed contrast against parchment text
+
+    /// Default ~5.2:1 vs parchment
+    static let buttonPrimary        = Color(hue: 225/360, saturation: 0.35, brightness: 0.46)
+    /// Hovered ~5.7:1 vs parchment
+    static let buttonPrimaryHovered = Color(hue: 225/360, saturation: 0.35, brightness: 0.44)
+    /// Pressed ~6.1:1 vs parchment
+    static let buttonPrimaryPressed = Color(hue: 225/360, saturation: 0.35, brightness: 0.42)
 }
