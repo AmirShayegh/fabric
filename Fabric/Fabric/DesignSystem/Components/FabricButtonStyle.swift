@@ -1,0 +1,123 @@
+import SwiftUI
+
+struct FabricButtonStyle: ButtonStyle {
+
+    enum Variant { case primary, secondary, ghost }
+
+    let variant: Variant
+
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.displayScale) private var displayScale
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @State private var isHovered = false
+
+    private var shape: RoundedRectangle {
+        FabricSpacing.shape(radius: FabricSpacing.radiusSm)
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        let isPressed = configuration.isPressed
+
+        configuration.label
+            .fabricTypography(.label)
+            .foregroundStyle(foregroundColor)
+            .frame(minWidth: FabricSpacing.buttonMinWidth, minHeight: FabricSpacing.buttonHeight)
+            .padding(.horizontal, FabricSpacing.lg)
+            .background { backgroundView(isPressed: isPressed) }
+            .clipShape(shape)
+            .scaleEffect(isPressed && !reduceMotion ? 0.97 : 1.0)
+            .opacity(isEnabled ? 1.0 : 0.5)
+            .animation(
+                reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.7),
+                value: isPressed
+            )
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.15),
+                value: isHovered
+            )
+            .onHover { hovering in
+                guard isEnabled else { return }
+                isHovered = hovering
+            }
+    }
+
+    // MARK: - Background
+
+    @ViewBuilder
+    private func backgroundView(isPressed: Bool) -> some View {
+        ZStack {
+            shape.fill(backgroundColor(isPressed: isPressed))
+
+            if variant != .ghost {
+                shape.foregroundStyle(
+                    TextureGenerator.linenPaint(displayScale: displayScale, intensity: 0.025)
+                )
+            }
+
+            // Soft top-edge highlight — disappears on press
+            if !isPressed && variant != .ghost {
+                shape.strokeBorder(
+                    LinearGradient(
+                        colors: [FabricColors.highlight, Color.clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.75
+                )
+            }
+        }
+        // Inner shadow on press (cloth depression)
+        .innerShadow(
+            shape,
+            color: FabricColors.innerShadow,
+            radius: isPressed ? 4 : 0,
+            spread: isPressed ? 5 : 0,
+            y: isPressed ? 2 : 0
+        )
+        // Double shadow for depth: tight + ambient
+        .shadow(
+            color: isPressed || !isEnabled ? .clear : FabricColors.shadowTight,
+            radius: 1, x: 0, y: 1
+        )
+        .shadow(
+            color: isPressed || !isEnabled ? .clear : FabricColors.shadow,
+            radius: 6, x: 0, y: 3
+        )
+    }
+
+    // MARK: - Colors
+
+    private var foregroundColor: Color {
+        switch variant {
+        case .primary:   return FabricColors.parchment
+        case .secondary: return FabricColors.inkPrimary
+        case .ghost:     return FabricColors.inkSecondary
+        }
+    }
+
+    private func backgroundColor(isPressed: Bool) -> Color {
+        switch variant {
+        case .primary:
+            if isPressed { return FabricColors.indigo.opacity(0.90) }
+            if isHovered { return FabricColors.indigo.opacity(0.85) }
+            return FabricColors.indigo.opacity(0.78)
+        case .secondary:
+            if isPressed { return FabricColors.burlap.opacity(0.35) }
+            if isHovered { return FabricColors.canvas }
+            return FabricColors.canvas.opacity(0.90)
+        case .ghost:
+            if isPressed { return FabricColors.burlap.opacity(0.18) }
+            if isHovered { return FabricColors.burlap.opacity(0.08) }
+            return Color.clear
+        }
+    }
+}
+
+// MARK: - Convenience
+
+extension ButtonStyle where Self == FabricButtonStyle {
+    static var fabric:          FabricButtonStyle { .init(variant: .primary) }
+    static var fabricSecondary: FabricButtonStyle { .init(variant: .secondary) }
+    static var fabricGhost:     FabricButtonStyle { .init(variant: .ghost) }
+}
