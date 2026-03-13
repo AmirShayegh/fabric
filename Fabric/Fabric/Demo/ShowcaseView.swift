@@ -76,6 +76,11 @@ struct ShowcaseView: View {
     @State private var todoTargeted = false
     @State private var inProgressTargeted = false
     @State private var doneTargeted = false
+    /// Tracks which card is the active drop target by identity (not index).
+    /// Live indices are computed from task arrays inside handlers.
+    @State private var dropTarget: (column: String, taskID: String)? = nil
+
+    private let allColumnNames = ["To Do", "In Progress", "Done"]
 
     var body: some View {
         ScrollView(.vertical) {
@@ -401,7 +406,7 @@ struct ShowcaseView: View {
     private var kanbanDemo: some View {
         VStack(alignment: .leading, spacing: FabricSpacing.lg) {
             Text("Kanban Board").fabricTitle()
-            Text("Drag cards between columns")
+            Text("Drag cards between columns — reorder within or move across")
                 .fabricCaption()
 
             ScrollView(.horizontal) {
@@ -415,35 +420,181 @@ struct ShowcaseView: View {
     }
 
     private func kanbanColumn(
-        _ title: String,
+        _ columnId: String,
         tasks: Binding<[KanbanTask]>,
         isTargeted: Binding<Bool>
     ) -> some View {
-        FabricKanbanColumn(title, count: tasks.wrappedValue.count, isDropTarget: isTargeted.wrappedValue) {
+        FabricKanbanColumn(columnId, count: tasks.wrappedValue.count, isDropTarget: isTargeted.wrappedValue) {
             ForEach(tasks.wrappedValue) { task in
-                FabricTaskCard(
-                    task.title,
-                    description: task.description,
-                    tags: task.fabricTags
-                )
-                .draggable(task)
+                VStack(spacing: FabricSpacing.sm) {
+                    // Placeholder scoped with its own animation
+                    if dropTarget?.column == columnId && dropTarget?.taskID == task.id {
+                        FabricDropPlaceholder(accent: .indigo)
+                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    }
+
+                    FabricTaskCard(
+                        task.title,
+                        description: task.description,
+                        tags: task.fabricTags,
+                        // Always pass closures — they guard live index internally
+                        onMoveUp: {
+                            guard let idx = tasks.wrappedValue.firstIndex(where: { $0.id == task.id }),
+                                  idx > 0 else { return }
+                            withAnimation(FabricAnimation.reorder) {
+                                tasks.wrappedValue.swapAt(idx, idx - 1)
+                            }
+                            announceMove(task, position: idx, column: columnId)
+                        },
+                        onMoveDown: {
+                            guard let idx = tasks.wrappedValue.firstIndex(where: { $0.id == task.id }),
+                                  idx < tasks.wrappedValue.count - 1 else { return }
+                            withAnimation(FabricAnimation.reorder) {
+                                tasks.wrappedValue.swapAt(idx, idx + 1)
+                            }
+                            announceMove(task, position: idx + 2, column: columnId)
+                        },
+                        onMoveToColumn: { target in moveToColumn(task, target: target) },
+                        availableColumns: allColumnNames.filter { $0 != columnId }
+                    )
+                    .draggable(task) {
+                        FabricTaskCard(
+                            task.title,
+                            description: task.description,
+                            tags: task.fabricTags
+                        )
+                        .frame(width: FabricAnimation.dragPreviewWidth)
+                        .opacity(FabricAnimation.dragPreviewOpacity)
+                        .shadow(color: FabricColors.shadow, radius: 16, y: 8)
+                    }
+                }
+                .dropDestination(for: KanbanTask.self) { droppedTasks, _ in
+                    defer { clearDropState() }
+                    guard droppedTasks.count == 1, let dropped = droppedTasks.first else { return false }
+                    guard dropped.id != task.id else { return true }
+
+                    guard let targetIndex = tasks.wrappedValue.firstIndex(where: { $0.id == task.id }) else { return false }
+                    let sourceIndex = tasks.wrappedValue.firstIndex(where: { $0.id == dropped.id })
+
+                    withAnimation(FabricAnimation.reorder) {
+                        removeTask(dropped)
+                        let adjusted = if let sourceIndex, sourceIndex < targetIndex {
+                            targetIndex - 1
+                        } else {
+                            targetIndex
+                        }
+                        tasks.wrappedValue.insert(dropped, at: min(adjusted, tasks.wrappedValue.count))
+                    }
+                    let finalIndex = tasks.wrappedValue.firstIndex(where: { $0.id == dropped.id }) ?? 0
+                    announceMove(dropped, position: finalIndex + 1, column: columnId)
+                    return true
+                } isTargeted: { targeted in
+                    if targeted {
+                        dropTarget = (column: columnId, taskID: task.id)
+                    } else if dropTarget?.column == columnId && dropTarget?.taskID == task.id {
+                        dropTarget = nil
+                    }
+                }
+            }
+
+            // End-of-column placeholder
+            if isTargeted.wrappedValue && dropTarget?.column != columnId {
+                FabricDropPlaceholder(accent: .indigo)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
+        // Animate the entire column content when tasks change order or placeholder appears
+        .animation(FabricAnimation.reorder, value: tasks.wrappedValue.map(\.id))
+        .animation(FabricAnimation.reorder, value: dropTarget?.column == columnId ? dropTarget?.taskID : nil)
         .dropDestination(for: KanbanTask.self) { droppedTasks, _ in
-            for task in droppedTasks {
-                removeTask(task)
-                tasks.wrappedValue.append(task)
+            defer { clearDropState() }
+            guard droppedTasks.count == 1, let dropped = droppedTasks.first else { return false }
+
+            // If a card-level insertion is active for this column, route to that position
+            if let active = dropTarget, active.column == columnId,
+               let targetIndex = tasks.wrappedValue.firstIndex(where: { $0.id == active.taskID }) {
+                let sourceIndex = tasks.wrappedValue.firstIndex(where: { $0.id == dropped.id })
+                withAnimation(FabricAnimation.reorder) {
+                    removeTask(dropped)
+                    let adjusted = if let sourceIndex, sourceIndex < targetIndex {
+                        targetIndex - 1
+                    } else {
+                        targetIndex
+                    }
+                    tasks.wrappedValue.insert(dropped, at: min(adjusted, tasks.wrappedValue.count))
+                }
+                let finalIndex = tasks.wrappedValue.firstIndex(where: { $0.id == dropped.id }) ?? 0
+                announceMove(dropped, position: finalIndex + 1, column: columnId)
+                return true
             }
+
+            // Same-column: move to end
+            if let sourceIndex = tasks.wrappedValue.firstIndex(where: { $0.id == dropped.id }) {
+                guard sourceIndex < tasks.wrappedValue.count - 1 else { return true }
+                withAnimation(FabricAnimation.reorder) {
+                    tasks.wrappedValue.move(
+                        fromOffsets: IndexSet(integer: sourceIndex),
+                        toOffset: tasks.wrappedValue.count
+                    )
+                }
+                announceMove(dropped, position: tasks.wrappedValue.count, column: columnId)
+                return true
+            }
+
+            // Cross-column: remove from source, append to target
+            withAnimation(FabricAnimation.reorder) {
+                removeTask(dropped)
+                tasks.wrappedValue.append(dropped)
+            }
+            announceMove(dropped, position: tasks.wrappedValue.count, column: columnId)
             return true
         } isTargeted: { targeted in
-            isTargeted.wrappedValue = targeted
+            isTargeted.wrappedValue = targeted && dropTarget?.column != columnId
         }
+        .animation(FabricAnimation.press, value: isTargeted.wrappedValue)
     }
+
+    // MARK: - Kanban Helpers
 
     private func removeTask(_ task: KanbanTask) {
         todoTasks.removeAll { $0.id == task.id }
         inProgressTasks.removeAll { $0.id == task.id }
         doneTasks.removeAll { $0.id == task.id }
+    }
+
+    private func clearDropState() {
+        dropTarget = nil
+    }
+
+    private func moveToColumn(_ task: KanbanTask, target: String) {
+        withAnimation(FabricAnimation.reorder) {
+            removeTask(task)
+            switch target {
+            case "To Do": todoTasks.append(task)
+            case "In Progress": inProgressTasks.append(task)
+            case "Done": doneTasks.append(task)
+            default: break
+            }
+        }
+        announceMove(task, position: nil, column: target)
+    }
+
+    private func announceMove(_ task: KanbanTask?, position: Int?, column: String) {
+        guard let task else { return }
+        let message = if let position {
+            "Moved \(task.title) to position \(position) in \(column)"
+        } else {
+            "Moved \(task.title) to \(column)"
+        }
+        guard let window = NSApp.mainWindow else { return }
+        NSAccessibility.post(
+            element: window,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: message,
+                .priority: NSAccessibilityPriorityLevel.high
+            ]
+        )
     }
 
     // MARK: - Timeline Demo

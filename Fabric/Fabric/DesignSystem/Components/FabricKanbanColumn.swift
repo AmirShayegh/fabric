@@ -43,7 +43,7 @@ struct FabricKanbanColumn<Content: View>: View {
                 .frame(height: 0.5)
 
             // Content
-            LazyVStack(spacing: FabricSpacing.sm) {
+            VStack(spacing: FabricSpacing.sm) {
                 content
             }
         }
@@ -51,9 +51,9 @@ struct FabricKanbanColumn<Content: View>: View {
         .frame(minWidth: FabricSpacing.columnMinWidth, alignment: .top)
         .fabricSurface(
             isDropTarget
-                ? FabricColors.parchment.opacity(0.95)
+                ? FabricColors.indigo.opacity(0.04)
                 : FabricColors.parchment,
-            textureIntensity: 0.02
+            textureIntensity: isDropTarget ? 0.015 : 0.02
         )
         .clipShape(shape)
         .innerShadow(
@@ -64,11 +64,12 @@ struct FabricKanbanColumn<Content: View>: View {
         .overlay {
             if isDropTarget {
                 shape.strokeBorder(
-                    FabricColors.indigo.opacity(0.30),
-                    lineWidth: 1.5
+                    FabricColors.indigo.opacity(0.50),
+                    lineWidth: 2.0
                 )
             }
         }
+        .scaleEffect(isDropTarget && !reduceMotion ? FabricAnimation.dropTargetScale : 1.0)
         .opacity(isEnabled ? 1.0 : 0.5)
         .animation(
             reduceMotion ? nil : FabricAnimation.press,

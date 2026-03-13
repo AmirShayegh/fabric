@@ -7,6 +7,16 @@ struct FabricTaskCard: View {
     let tags: [Tag]?
     let onTap: (() -> Void)?
 
+    /// Advanced hook for apps managing drag lifecycle externally (e.g., AppKit bridging).
+    /// SwiftUI's `.draggable()` has no reliable cancel callback, so the ShowcaseView
+    /// demo does NOT wire this binding. When true: lifted shadows, scale, rotation, ghost opacity.
+    @Binding var isDragging: Bool
+
+    let onMoveUp: (() -> Void)?
+    let onMoveDown: (() -> Void)?
+    let onMoveToColumn: ((String) -> Void)?
+    let availableColumns: [String]
+
     struct Tag: Identifiable, Equatable {
         let id: String
         let label: String
@@ -24,12 +34,22 @@ struct FabricTaskCard: View {
         _ title: String,
         description: String? = nil,
         tags: [Tag]? = nil,
-        onTap: (() -> Void)? = nil
+        isDragging: Binding<Bool> = .constant(false),
+        onTap: (() -> Void)? = nil,
+        onMoveUp: (() -> Void)? = nil,
+        onMoveDown: (() -> Void)? = nil,
+        onMoveToColumn: ((String) -> Void)? = nil,
+        availableColumns: [String] = []
     ) {
         self.title = title
         self.description = description
         self.tags = tags
+        self._isDragging = isDragging
         self.onTap = onTap
+        self.onMoveUp = onMoveUp
+        self.onMoveDown = onMoveDown
+        self.onMoveToColumn = onMoveToColumn
+        self.availableColumns = availableColumns
     }
 
     var body: some View {
@@ -37,7 +57,12 @@ struct FabricTaskCard: View {
             title: title,
             description: description,
             tags: tags,
-            onTap: onTap
+            isDragging: isDragging,
+            onTap: onTap,
+            onMoveUp: onMoveUp,
+            onMoveDown: onMoveDown,
+            onMoveToColumn: onMoveToColumn,
+            availableColumns: availableColumns
         )
     }
 }
@@ -49,7 +74,12 @@ private struct FabricTaskCardBody: View {
     let title: String
     let description: String?
     let tags: [FabricTaskCard.Tag]?
+    let isDragging: Bool
     let onTap: (() -> Void)?
+    let onMoveUp: (() -> Void)?
+    let onMoveDown: (() -> Void)?
+    let onMoveToColumn: ((String) -> Void)?
+    let availableColumns: [String]
 
     @State private var isHovered = false
     @State private var isPressed = false
@@ -99,15 +129,15 @@ private struct FabricTaskCardBody: View {
         }
         .shadow(
             color: isPressed || !isEnabled ? .clear : FabricColors.shadowTight,
-            radius: isHovered ? 1.5 : 1,
+            radius: isDragging ? FabricAnimation.dragContactShadowRadius : (isHovered ? 1.5 : 1),
             x: 0,
-            y: isHovered ? 1.5 : 1
+            y: isDragging ? FabricAnimation.dragContactShadowY : (isHovered ? 1.5 : 1)
         )
         .shadow(
             color: isPressed || !isEnabled ? .clear : FabricColors.shadow,
-            radius: isHovered ? 12 : 8,
+            radius: isDragging ? FabricAnimation.dragShadowRadius : (isHovered ? 12 : 8),
             x: 0,
-            y: isHovered ? 6 : 4
+            y: isDragging ? FabricAnimation.dragShadowY : (isHovered ? 6 : 4)
         )
         .innerShadow(
             shape,
@@ -117,8 +147,10 @@ private struct FabricTaskCardBody: View {
             y: isPressed ? 2 : 0
         )
         .scaleEffect(isPressed && !reduceMotion ? 0.95 : 1.0)
+        .scaleEffect(isDragging && !reduceMotion ? FabricAnimation.liftScale : 1.0)
+        .rotationEffect(.degrees(isDragging && !reduceMotion ? FabricAnimation.liftRotation : 0))
         .offset(y: isHovered && !isPressed && !reduceMotion ? -2 : 0)
-        .opacity(isEnabled ? 1.0 : 0.5)
+        .opacity(isDragging ? FabricAnimation.ghostOpacity : (isEnabled ? 1.0 : 0.5))
         .onHover { hovering in
             guard isEnabled else { return }
             isHovered = hovering
@@ -150,6 +182,10 @@ private struct FabricTaskCardBody: View {
             reduceMotion ? nil : FabricAnimation.press,
             value: isPressed
         )
+        .animation(
+            reduceMotion ? nil : FabricAnimation.lift,
+            value: isDragging
+        )
         .focusable(onTap != nil)
         .onKeyPress(.space) {
             guard isEnabled, let onTap else { return .ignored }
@@ -165,6 +201,12 @@ private struct FabricTaskCardBody: View {
         .accessibilityLabel(accessibilityText)
         .accessibilityAddTraits(onTap != nil ? .isButton : [])
         .accessibilityAction { guard isEnabled else { return }; onTap?() }
+        .modifier(MoveActionsModifier(
+            onMoveUp: onMoveUp,
+            onMoveDown: onMoveDown,
+            onMoveToColumn: onMoveToColumn,
+            availableColumns: availableColumns
+        ))
     }
 
     // MARK: - Background
@@ -188,5 +230,39 @@ private struct FabricTaskCardBody: View {
             parts.append("Tags: " + tags.map(\.label).joined(separator: ", "))
         }
         return parts.joined(separator: ". ")
+    }
+}
+
+// MARK: - Accessibility Move Actions
+
+/// Adds conditional accessibility actions for reordering and moving cards.
+/// Uses AnyView wrapping internally for the dynamic action list — acceptable since
+/// accessibility actions are metadata-only and do not affect layout identity.
+private struct MoveActionsModifier: ViewModifier {
+    let onMoveUp: (() -> Void)?
+    let onMoveDown: (() -> Void)?
+    let onMoveToColumn: ((String) -> Void)?
+    let availableColumns: [String]
+
+    func body(content: Content) -> some View {
+        // Build accessibility actions dynamically. Each action is pure metadata
+        // (no layout/animation impact), so dynamic composition is safe.
+        var result: AnyView = AnyView(content)
+
+        if let onMoveUp {
+            result = AnyView(result.accessibilityAction(named: "Move up") { onMoveUp() })
+        }
+        if let onMoveDown {
+            result = AnyView(result.accessibilityAction(named: "Move down") { onMoveDown() })
+        }
+        if let onMoveToColumn {
+            for column in availableColumns {
+                result = AnyView(result.accessibilityAction(named: "Move to \(column)") {
+                    onMoveToColumn(column)
+                })
+            }
+        }
+
+        return result
     }
 }
