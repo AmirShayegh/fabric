@@ -205,9 +205,6 @@
 			mainGroup = 1E5D4EEB2F629F3B00C7F9A5;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			packages = (
-				FAB00001000000000000003 /* XCLocalSwiftPackageReference ".." */,
-			);
 			productRefGroup = 1E5D4EF52F629F3B00C7F9A5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -586,17 +583,9 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		FAB00001000000000000003 /* XCLocalSwiftPackageReference ".." */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "..";
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		FAB00001000000000000002 /* Fabric */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FAB00001000000000000003 /* XCLocalSwiftPackageReference ".." */;
 			productName = Fabric;
 		};
 /* End XCSwiftPackageProductDependency section */
