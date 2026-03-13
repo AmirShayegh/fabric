@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FAB00001000000000000001 /* Fabric in Frameworks */ = {
+			isa = PBXBuildFile;
+			productRef = FAB00001000000000000002 /* Fabric */;
+		};
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1E5D4F022F629F3D00C7F9A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAB00001000000000000001 /* Fabric in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +120,7 @@
 			);
 			name = Fabric;
 			packageProductDependencies = (
+				FAB00001000000000000002 /* Fabric */,
 			);
 			productName = Fabric;
 			productReference = 1E5D4EF42F629F3B00C7F9A5 /* Fabric.app */;
@@ -573,6 +582,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FAB00001000000000000002 /* Fabric */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Fabric;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1E5D4EEC2F629F3B00C7F9A5 /* Project object */;
 }
