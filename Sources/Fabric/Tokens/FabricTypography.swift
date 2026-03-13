@@ -9,26 +9,38 @@ public enum FabricTextStyle {
     case body       // Reading text
     case label      // Button/control labels
     case caption    // Secondary info
+    case monoSmall  // Small monospaced (identifiers, short codes)
+    case monoCaption // Monospaced caption (fractions, dates, metadata)
+    case mono       // Monospaced body text (inline code, general mono)
+    case monoLarge  // Large monospaced data display (stat values)
 
     public var font: Font {
         switch self {
-        case .display: return .system(size: 38, weight: .regular, design: .serif)
-        case .title:   return .system(size: 28, weight: .medium, design: .serif)
-        case .heading: return .system(size: 18, weight: .semibold, design: .serif)
-        case .body:    return .system(size: 15, weight: .regular, design: .default)
-        case .label:   return .system(size: 15, weight: .medium, design: .default)
-        case .caption: return .system(size: 13, weight: .regular, design: .default)
+        case .display:     return .system(size: 38, weight: .regular, design: .serif)
+        case .title:       return .system(size: 28, weight: .medium, design: .serif)
+        case .heading:     return .system(size: 18, weight: .semibold, design: .serif)
+        case .body:        return .system(size: 15, weight: .regular, design: .default)
+        case .label:       return .system(size: 15, weight: .medium, design: .default)
+        case .caption:     return .system(size: 13, weight: .regular, design: .default)
+        case .monoSmall:   return .system(size: 11, weight: .medium, design: .monospaced)
+        case .monoCaption: return .system(size: 13, weight: .regular, design: .monospaced)
+        case .mono:        return .system(size: 15, weight: .regular, design: .monospaced)
+        case .monoLarge:   return .system(size: 28, weight: .semibold, design: .monospaced)
         }
     }
 
     public var tracking: CGFloat {
         switch self {
-        case .display: return 0.8
-        case .title:   return 0.5
-        case .heading: return 0.2
-        case .body:    return 0.1
-        case .label:   return 0.4
-        case .caption: return 0.2
+        case .display:     return 0.8
+        case .title:       return 0.5
+        case .heading:     return 0.2
+        case .body:        return 0.1
+        case .label:       return 0.4
+        case .caption:     return 0.2
+        case .monoSmall:   return 0.2
+        case .monoCaption: return 0.2
+        case .mono:        return 0.1
+        case .monoLarge:   return 0.0
         }
     }
 
@@ -36,7 +48,7 @@ public enum FabricTextStyle {
         switch self {
         case .display: return 6
         case .title:   return 4
-        case .body:    return 5
+        case .body, .mono: return 5
         default:       return 2
         }
     }
@@ -133,5 +145,21 @@ extension View {
 
     public func fabricCaption() -> some View {
         fabricTypography(.caption).fabricInk(.secondary)
+    }
+
+    public func fabricMonoSmall() -> some View {
+        fabricTypography(.monoSmall).fabricInk(.secondary)
+    }
+
+    public func fabricMonoCaption() -> some View {
+        fabricTypography(.monoCaption).fabricInk(.secondary)
+    }
+
+    public func fabricMono() -> some View {
+        fabricTypography(.mono).fabricInk(.primary)
+    }
+
+    public func fabricMonoLarge() -> some View {
+        fabricTypography(.monoLarge).fabricInk(.primary)
     }
 }

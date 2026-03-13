@@ -280,6 +280,28 @@ struct ShowcaseView: View {
                         Text("Secondary information in a quieter voice")
                             .fabricCaption()
                     }
+
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Mono Small").fabricCaption()
+                        Text("T-048 · ISS-001").fabricMonoSmall()
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Mono Caption").fabricCaption()
+                        Text("12 / 48 completed").fabricMonoCaption()
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Mono").fabricCaption()
+                        Text("let status = .complete").fabricMono()
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Mono Large").fabricCaption()
+                        Text("143").fabricMonoLarge()
+                    }
                 }
             }
         }
