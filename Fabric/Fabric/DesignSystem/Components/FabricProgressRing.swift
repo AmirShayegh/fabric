@@ -5,38 +5,19 @@ struct FabricProgressRing<Label: View>: View {
     let value: Double
     let lineWidth: CGFloat
     let accent: FabricAccent
-    @ViewBuilder let label: () -> Label
+    @ViewBuilder let label: Label
 
     init(
         value: Double,
         lineWidth: CGFloat = 6,
         accent: FabricAccent = .indigo,
-        @ViewBuilder label: @escaping () -> Label
+        @ViewBuilder label: () -> Label
     ) {
         self.value = value
         self.lineWidth = lineWidth
         self.accent = accent
-        self.label = label
+        self.label = label()
     }
-
-    var body: some View {
-        FabricProgressRingBody(
-            value: value,
-            lineWidth: lineWidth,
-            accent: accent,
-            label: label
-        )
-    }
-}
-
-// MARK: - Body View
-
-private struct FabricProgressRingBody<Label: View>: View {
-
-    let value: Double
-    let lineWidth: CGFloat
-    let accent: FabricAccent
-    @ViewBuilder let label: () -> Label
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
@@ -57,14 +38,13 @@ private struct FabricProgressRingBody<Label: View>: View {
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
-                .shadow(color: accent.foreground.opacity(0.28), radius: 6)
 
             // Center content
-            label()
+            label
         }
         .opacity(isEnabled ? 1.0 : 0.5)
         .animation(
-            reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.65),
+            reduceMotion ? nil : FabricAnimation.soft,
             value: clampedValue
         )
         .accessibilityElement(children: .ignore)

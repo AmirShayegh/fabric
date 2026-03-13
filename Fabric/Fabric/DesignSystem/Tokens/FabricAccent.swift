@@ -6,10 +6,10 @@ enum FabricAccent: CaseIterable {
     /// Full-strength foreground for text and icons
     var foreground: Color {
         switch self {
-        case .indigo: return FabricColors.indigo
-        case .madder: return FabricColors.madder
-        case .sage:   return FabricColors.sage
-        case .ochre:  return FabricColors.ochre
+        case .indigo: FabricColors.indigo
+        case .madder: FabricColors.madder
+        case .sage:   FabricColors.sage
+        case .ochre:  FabricColors.ochre
         }
     }
 
@@ -17,10 +17,10 @@ enum FabricAccent: CaseIterable {
     /// Opacity tuned per hue to maintain readable contrast with foreground text.
     var fill: Color {
         switch self {
-        case .indigo: return FabricColors.indigo.opacity(0.12)
-        case .madder: return FabricColors.madder.opacity(0.12)
-        case .sage:   return FabricColors.sage.opacity(0.14)
-        case .ochre:  return FabricColors.ochre.opacity(0.12)
+        case .indigo: FabricColors.indigo.opacity(0.12)
+        case .madder: FabricColors.madder.opacity(0.12)
+        case .sage:   FabricColors.sage.opacity(0.14)
+        case .ochre:  FabricColors.ochre.opacity(0.12)
         }
     }
 }

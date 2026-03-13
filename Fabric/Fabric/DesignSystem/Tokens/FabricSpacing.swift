@@ -21,27 +21,35 @@ enum FabricSpacing {
 
     /// Continuous corner shape (squircle) for that iOS feel
     static func shape(radius: CGFloat) -> RoundedRectangle {
-        RoundedRectangle(cornerRadius: radius, style: .continuous)
+        RoundedRectangle(cornerRadius: radius)
     }
 
     // MARK: - Component Sizing
 
-    static let buttonHeight:    CGFloat = 48
-    static let buttonMinWidth:  CGFloat = 100
+    static let buttonMinHeightSm: CGFloat = 32   // ghost
+    static let buttonMinHeightMd: CGFloat = 36   // primary
+    static let buttonMinHeightLg: CGFloat = 44   // secondary
+    static let buttonMinWidth:    CGFloat = 100
     static let textFieldHeight: CGFloat = 44
     static let cardPadding:     CGFloat = 24
-    static let toggleTrackW:    CGFloat = 52
-    static let toggleTrackH:    CGFloat = 32
-    static let toggleThumb:     CGFloat = 26
+    static let toggleTrackW:    CGFloat = 64
+    static let toggleTrackH:    CGFloat = 28
+    static let toggleThumb:     CGFloat = 24
+    static let toggleKnobW:     CGFloat = 39
+    static let togglePadding:   CGFloat = 2
 
     // MARK: - Small Elements
 
     static let connectorWidth:    CGFloat = 2
     static let badgeHeight:       CGFloat = 22
     static let chipHeight:        CGFloat = 26
-    static let stepIndicatorSize: CGFloat = 32
+    static let stepDotSize:       CGFloat = 12
     static let timelineDotSize:   CGFloat = 12
     static let timelineDotSizeLg: CGFloat = 18
-    static let progressBarHeight: CGFloat = 8
+    static let progressBarHeight: CGFloat = 4
     static let columnMinWidth:    CGFloat = 280
+    static let statusDotSize:     CGFloat = 8
+    static let pillHeight:        CGFloat = 22
+    static let sliderHeight:      CGFloat = 52
+    static let sliderIconWidth:   CGFloat = 32
 }

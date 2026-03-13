@@ -78,7 +78,7 @@ private struct FabricTaskCardBody: View {
             if let tags, !tags.isEmpty {
                 FabricFlowLayout(spacing: FabricSpacing.xs) {
                     ForEach(tags) { tag in
-                        FabricChip(tag.label, accent: tag.accent)
+                        FabricPill(tag.label, accent: tag.accent)
                     }
                 }
             }
@@ -126,28 +126,37 @@ private struct FabricTaskCardBody: View {
         .onChange(of: isEnabled) {
             if !isEnabled { isHovered = false; isPressed = false }
         }
-        .onTapGesture {
-            guard isEnabled, onTap != nil else { return }
-            if reduceMotion {
-                onTap?()
-            } else {
-                isPressed = true
-                withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
-                    isPressed = false
+        .simultaneousGesture(
+            onTap != nil
+                ? TapGesture().onEnded {
+                    guard isEnabled else { return }
+                    if reduceMotion {
+                        onTap?()
+                    } else {
+                        isPressed = true
+                        withAnimation(FabricAnimation.press) {
+                            isPressed = false
+                        }
+                        onTap?()
+                    }
                 }
-                onTap?()
-            }
-        }
+                : nil
+        )
         .animation(
-            reduceMotion ? nil : .easeOut(duration: 0.15),
+            reduceMotion ? nil : FabricAnimation.hover,
             value: isHovered
         )
         .animation(
-            reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.7),
+            reduceMotion ? nil : FabricAnimation.press,
             value: isPressed
         )
         .focusable(onTap != nil)
         .onKeyPress(.space) {
+            guard isEnabled, let onTap else { return .ignored }
+            onTap()
+            return .handled
+        }
+        .onKeyPress(.return) {
             guard isEnabled, let onTap else { return .ignored }
             onTap()
             return .handled

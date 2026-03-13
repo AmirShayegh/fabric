@@ -40,71 +40,43 @@ private struct FabricProgressBarBody: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.displayScale) private var displayScale
 
     private var clampedValue: Double { value.isFinite ? max(0, min(value, 1)) : 0 }
+    private let barHeight: CGFloat = FabricSpacing.progressBarHeight
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
-            if label != nil || showPercentage {
-                HStack {
-                    if let label {
-                        Text(label).fabricCaption()
-                    }
-                    Spacer()
-                    if showPercentage {
-                        Text("\(Int(clampedValue * 100))%")
-                            .fabricTypography(.caption)
-                            .foregroundStyle(FabricColors.inkTertiary)
-                    }
-                }
+        HStack(spacing: FabricSpacing.sm) {
+            if let label {
+                Text(label)
+                    .fabricTypography(.caption)
+                    .foregroundStyle(FabricColors.inkSecondary)
             }
 
+            // Track — simple rounded container with overflow clip
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    // Track — recessed groove
-                    Capsule()
-                        .fill(FabricColors.parchment)
-                        .innerShadow(
-                            Capsule(),
-                            color: FabricColors.innerShadow,
-                            radius: 2, spread: 2, y: 1
-                        )
+                    // Background — neutral connector tone
+                    RoundedRectangle(cornerRadius: barHeight / 2)
+                        .fill(FabricColors.connector.opacity(0.5))
 
-                    // Fill — elevated progress
-                    if clampedValue > 0 {
-                        Capsule()
-                            .fill(accent.foreground)
-                            .overlay {
-                                Capsule()
-                                    .foregroundStyle(
-                                        TextureGenerator.linenPaint(
-                                            displayScale: displayScale,
-                                            intensity: 0.02
-                                        )
-                                    )
-                            }
-                            .overlay {
-                                Capsule()
-                                    .strokeBorder(
-                                        LinearGradient(
-                                            colors: [FabricColors.highlight, Color.clear],
-                                            startPoint: .top,
-                                            endPoint: .bottom
-                                        ),
-                                        lineWidth: 0.5
-                                    )
-                            }
-                            .clipShape(Capsule())
-                            .frame(width: geo.size.width * clampedValue)
-                    }
+                    // Fill — solid accent, clipped by track shape
+                    RoundedRectangle(cornerRadius: barHeight / 2)
+                        .fill(accent.foreground)
+                        .frame(width: geo.size.width * clampedValue)
                 }
             }
-            .frame(height: FabricSpacing.progressBarHeight)
+            .frame(height: barHeight)
+
+            if showPercentage {
+                Text("\(Int(clampedValue * 100))%")
+                    .fabricTypography(.caption)
+                    .foregroundStyle(FabricColors.inkTertiary)
+                    .frame(minWidth: 32, alignment: .trailing)
+            }
         }
         .opacity(isEnabled ? 1.0 : 0.5)
         .animation(
-            reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.65),
+            reduceMotion ? nil : FabricAnimation.soft,
             value: clampedValue
         )
         .accessibilityElement(children: .ignore)

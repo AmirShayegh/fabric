@@ -2,18 +2,14 @@ import SwiftUI
 
 struct FabricCard<Content: View>: View {
 
-    @ViewBuilder let content: () -> Content
-
-    init(@ViewBuilder content: @escaping () -> Content) {
-        self.content = content
-    }
+    @ViewBuilder let content: Content
 
     private var shape: RoundedRectangle {
         FabricSpacing.shape(radius: FabricSpacing.radiusMd)
     }
 
     var body: some View {
-        content()
+        content
             .padding(FabricSpacing.cardPadding)
             .fabricSurface(FabricColors.canvas, textureIntensity: 0.025)
             .clipShape(shape)

@@ -18,23 +18,24 @@ private struct FabricToggleBody: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: FabricSpacing.md) {
-            configuration.label
-                .fabricBody()
-
-            toggleTrack(isOn: configuration.isOn)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
+        Button {
             guard isEnabled else { return }
             if reduceMotion {
                 configuration.isOn.toggle()
             } else {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                withAnimation(FabricAnimation.soft) {
                     configuration.isOn.toggle()
                 }
             }
+        } label: {
+            HStack(spacing: FabricSpacing.md) {
+                configuration.label
+                    .fabricBody()
+
+                toggleTrack(isOn: configuration.isOn)
+            }
         }
+        .buttonStyle(.plain)
         .onHover { hovering in
             guard isEnabled else { return }
             isHovered = hovering
@@ -44,21 +45,31 @@ private struct FabricToggleBody: View {
 
     // MARK: - Track
 
-    @ViewBuilder
     private func toggleTrack(isOn: Bool) -> some View {
-        let trackShape = Capsule()
+        let trackW = FabricSpacing.toggleTrackW
+        let trackH = FabricSpacing.toggleTrackH
+        let knobW = FabricSpacing.toggleKnobW
+        let pad = FabricSpacing.togglePadding
+        let knobOffset = isOn ? (trackW - knobW) / 2 - pad : -(trackW - knobW) / 2 + pad
 
-        ZStack(alignment: isOn ? .trailing : .leading) {
-            trackShape
+        return ZStack {
+            // Track fill
+            Capsule()
                 .fill(trackFill(isOn: isOn))
-                .frame(width: FabricSpacing.toggleTrackW, height: FabricSpacing.toggleTrackH)
-                .innerShadow(trackShape, color: FabricColors.innerShadow, radius: 2, spread: 2.5, y: 1)
 
-            Circle()
+            // "|" accessibility indicator — always present, opacity-toggled
+            Rectangle()
+                .fill(FabricColors.onPrimary.opacity(0.7))
+                .frame(width: 1, height: 10)
+                .offset(x: isOn ? -knobW / 2 - pad : 0)
+                .opacity(isOn ? 1 : 0)
+
+            // Pill-shaped knob — positioned via offset
+            Capsule()
                 .fill(FabricColors.onPrimary)
-                .frame(width: FabricSpacing.toggleThumb, height: FabricSpacing.toggleThumb)
+                .frame(width: knobW, height: FabricSpacing.toggleThumb)
                 .overlay {
-                    Circle()
+                    Capsule()
                         .strokeBorder(
                             LinearGradient(
                                 colors: [FabricColors.highlight, Color.clear],
@@ -70,16 +81,17 @@ private struct FabricToggleBody: View {
                 }
                 .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
                 .shadow(color: FabricColors.shadow, radius: 3, x: 0, y: 2)
-                .padding(.horizontal, 3)
+                .offset(x: knobOffset)
         }
+        .frame(width: trackW, height: trackH)
         .frame(minWidth: 44, minHeight: 44)
     }
 
     private func trackFill(isOn: Bool) -> Color {
         if isOn {
-            return isHovered ? FabricColors.indigo.opacity(0.42) : FabricColors.indigo.opacity(0.28)
+            isHovered ? FabricColors.indigo.opacity(0.55) : FabricColors.indigo.opacity(0.42)
         } else {
-            return isHovered ? FabricColors.burlap.opacity(0.42) : FabricColors.burlap.opacity(0.28)
+            isHovered ? FabricColors.burlap.opacity(0.42) : FabricColors.burlap.opacity(0.28)
         }
     }
 }

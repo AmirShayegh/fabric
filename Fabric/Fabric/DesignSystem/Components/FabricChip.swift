@@ -79,7 +79,7 @@ private struct FabricChipBody: View {
         }
         .opacity(isEnabled ? 1.0 : 0.5)
         .animation(
-            reduceMotion ? nil : .easeOut(duration: 0.15),
+            reduceMotion ? nil : FabricAnimation.hover,
             value: isHovered
         )
         .accessibilityElement(children: isRemovable ? .contain : .ignore)

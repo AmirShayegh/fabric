@@ -55,6 +55,10 @@ struct ShowcaseView: View {
     @State private var currentStep: Int = 0
     @State private var progressValue: Double = 0.65
     @State private var ringValue: Double = 0.40
+    @State private var errorBannerExpanded = false
+    @State private var sliderValue: Double = 0.35
+    @State private var volumeValue: Double = 0.65
+    @State private var brightnessValue: Double = 0.50
 
     // Kanban state
     @State private var todoTasks: [KanbanTask] = [
@@ -74,7 +78,7 @@ struct ShowcaseView: View {
     @State private var doneTargeted = false
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
+        ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 0) {
                 heroSection
                     .padding(.bottom, FabricSpacing.xxxl)
@@ -92,10 +96,29 @@ struct ShowcaseView: View {
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 progressDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                pillsAndDotsDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                statCardDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                feedbackDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                loadingDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                sliderDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                radarDemo
             }
             .padding(.horizontal, FabricSpacing.xxl)
             .padding(.vertical, FabricSpacing.xxxl)
         }
+        .scrollIndicators(.hidden)
         .fabricSurface(FabricColors.linen, textureIntensity: 0.045)
         .frame(minWidth: 860, minHeight: 680)
     }
@@ -266,12 +289,12 @@ struct ShowcaseView: View {
                 VStack(alignment: .leading, spacing: FabricSpacing.md) {
                     VStack(alignment: .leading, spacing: FabricSpacing.xs) {
                         Text("Name").fabricCaption()
-                        FabricTextField(label: "Name", placeholder: "Enter your name", text: $nameField)
+                        FabricTextField(label: "Name", placeholder: "Enter your name", text: $nameField, leadingIcon: "person")
                     }
 
                     VStack(alignment: .leading, spacing: FabricSpacing.xs) {
                         Text("Email").fabricCaption()
-                        FabricTextField(label: "Email", placeholder: "you@example.com", text: $emailField)
+                        FabricTextField(label: "Email", placeholder: "you@example.com", text: $emailField, leadingIcon: "envelope")
                     }
 
                     VStack(alignment: .leading, spacing: FabricSpacing.xs) {
@@ -381,7 +404,7 @@ struct ShowcaseView: View {
             Text("Drag cards between columns")
                 .fabricCaption()
 
-            ScrollView(.horizontal, showsIndicators: false) {
+            ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: FabricSpacing.md) {
                     kanbanColumn("To Do", tasks: $todoTasks, isTargeted: $todoTargeted)
                     kanbanColumn("In Progress", tasks: $inProgressTasks, isTargeted: $inProgressTargeted)
@@ -460,6 +483,208 @@ struct ShowcaseView: View {
         }
     }
 
+    // MARK: - Pills & Dots Demo
+
+    private var pillsAndDotsDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Pills & Dots").fabricTitle()
+
+                Text("Pills").fabricCaption()
+                FabricFlowLayout(spacing: FabricSpacing.sm) {
+                    FabricPill("Neutral")
+                    FabricPill("Indigo", accent: .indigo)
+                    FabricPill("Sage", accent: .sage)
+                    FabricPill("Ochre", accent: .ochre)
+                    FabricPill("Madder", accent: .madder)
+                }
+
+                Text("Status Dots").fabricCaption()
+                    .padding(.top, FabricSpacing.xs)
+                HStack(spacing: FabricSpacing.md) {
+                    HStack(spacing: FabricSpacing.xs) {
+                        FabricStatusDot(label: "Neutral")
+                        Text("Neutral").fabricCaption()
+                    }
+                    HStack(spacing: FabricSpacing.xs) {
+                        FabricStatusDot(accent: .sage, label: "Online")
+                        Text("Online").fabricCaption()
+                    }
+                    HStack(spacing: FabricSpacing.xs) {
+                        FabricStatusDot(accent: .madder, label: "Error")
+                        Text("Error").fabricCaption()
+                    }
+                    HStack(spacing: FabricSpacing.xs) {
+                        FabricStatusDot(accent: .ochre, label: "Warning")
+                        Text("Warning").fabricCaption()
+                    }
+                    HStack(spacing: FabricSpacing.xs) {
+                        FabricStatusDot()
+                        Text("Decorative").fabricCaption()
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Stat Card Demo
+
+    private var statCardDemo: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+            Text("Stat Cards").fabricTitle()
+
+            HStack(spacing: FabricSpacing.md) {
+                FabricStatCard(value: "2,847", label: "Total Users", accent: .indigo)
+                FabricStatCard(value: "98.5%", label: "Uptime", accent: .sage)
+                FabricStatCard(value: "12", label: "Open Issues", accent: .madder, tinted: true)
+                FabricStatCard(value: "$4.2K", label: "Revenue", accent: .ochre)
+            }
+        }
+    }
+
+    // MARK: - Feedback Demo
+
+    private var feedbackDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Feedback").fabricTitle()
+
+                Text("Empty State").fabricCaption()
+                FabricEmptyState(
+                    systemImage: "doc.text.magnifyingglass",
+                    title: "No Results Found",
+                    subtitle: "Try adjusting your search or filters.",
+                    action: .init(title: "Clear Filters") { }
+                )
+
+                Rectangle()
+                    .fill(FabricColors.inkTertiary.opacity(0.15))
+                    .frame(height: 0.5)
+
+                Text("Error Banner").fabricCaption()
+                FabricErrorBanner(
+                    "Build Warnings",
+                    warnings: [
+                        .init(id: "1", title: "AppDelegate.swift", subtitle: "Unused variable 'config'"),
+                        .init(id: "2", title: "ViewModel.swift", subtitle: "Expression implicitly coerced"),
+                        .init(id: "3", title: "Network.swift", subtitle: "Deprecated API usage"),
+                    ],
+                    isExpanded: $errorBannerExpanded
+                )
+
+                Rectangle()
+                    .fill(FabricColors.inkTertiary.opacity(0.15))
+                    .frame(height: 0.5)
+
+                Text("Skeleton").fabricCaption()
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    FabricSkeleton(.line, height: 16)
+                    FabricSkeleton(.block(lines: 3), height: 12)
+                }
+                .frame(maxWidth: 400)
+            }
+        }
+    }
+
+    // MARK: - Slider Demo
+
+    private var sliderDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Sliders").fabricTitle()
+
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    Text("Volume").fabricCaption()
+                    FabricSlider(
+                        value: $volumeValue,
+                        label: "Volume",
+                        accent: .indigo,
+                        leadingIcon: "speaker.fill",
+                        trailingIcon: "speaker.wave.3.fill"
+                    )
+
+                    Text("Brightness").fabricCaption()
+                    FabricSlider(
+                        value: $brightnessValue,
+                        label: "Brightness",
+                        accent: .ochre,
+                        leadingIcon: "sun.min",
+                        trailingIcon: "sun.max"
+                    )
+
+                    Text("With Ticks").fabricCaption()
+                    FabricSlider(
+                        value: $sliderValue,
+                        accent: .sage,
+                        ticks: 5
+                    )
+
+                    Text("Plain").fabricCaption()
+                    FabricSlider(value: $sliderValue, accent: .madder)
+                }
+            }
+        }
+    }
+
+    // MARK: - Loading Demo
+
+    private var loadingDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Loading").fabricTitle()
+
+                HStack(spacing: FabricSpacing.xxl) {
+                    VStack(spacing: FabricSpacing.md) {
+                        Text("Dots").fabricCaption()
+                        FabricLoadingIndicator(.dots, accent: .indigo, label: "Processing")
+                    }
+
+                    VStack(spacing: FabricSpacing.md) {
+                        Text("Ring").fabricCaption()
+                        FabricLoadingIndicator(.ring, accent: .sage, label: "Syncing")
+                    }
+
+                    VStack(spacing: FabricSpacing.md) {
+                        Text("Ochre Dots").fabricCaption()
+                        FabricLoadingIndicator(.dots, accent: .ochre)
+                    }
+
+                    VStack(spacing: FabricSpacing.md) {
+                        Text("Madder Ring").fabricCaption()
+                        FabricLoadingIndicator(.ring, accent: .madder)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Radar Demo
+
+    private var radarDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Radar Scanner").fabricTitle()
+
+                HStack(spacing: FabricSpacing.xl) {
+                    FabricRadarScanner(accent: .sage)
+                        .frame(width: 120, height: 120)
+
+                    FabricRadarScanner(accent: .indigo)
+                        .frame(width: 120, height: 120)
+
+                    VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                        Text("Monitoring").fabricHeading()
+                        Text("Active scanning for changes across monitored endpoints. Each blip represents a detected signal.")
+                            .fabricBody()
+                            .foregroundStyle(FabricColors.inkSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+    }
+
     // MARK: - Progress Demo
 
     private var progressDemo: some View {
@@ -471,7 +696,8 @@ struct ShowcaseView: View {
                 VStack(spacing: FabricSpacing.md) {
                     FabricStepIndicator(
                         steps: ["Brief", "Design", "Review", "Ship"],
-                        currentStep: currentStep
+                        currentStep: currentStep,
+                        onStepTapped: { step in currentStep = step }
                     )
                     HStack(spacing: FabricSpacing.md) {
                         Button("Back") { currentStep = max(0, currentStep - 1) }

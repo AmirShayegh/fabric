@@ -5,7 +5,7 @@ struct FabricKanbanColumn<Content: View>: View {
     let title: String
     let count: Int?
     let isDropTarget: Bool
-    @ViewBuilder let content: () -> Content
+    @ViewBuilder let content: Content
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -18,12 +18,12 @@ struct FabricKanbanColumn<Content: View>: View {
         _ title: String,
         count: Int? = nil,
         isDropTarget: Bool = false,
-        @ViewBuilder content: @escaping () -> Content
+        @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.count = count
         self.isDropTarget = isDropTarget
-        self.content = content
+        self.content = content()
     }
 
     var body: some View {
@@ -44,7 +44,7 @@ struct FabricKanbanColumn<Content: View>: View {
 
             // Content
             LazyVStack(spacing: FabricSpacing.sm) {
-                content()
+                content
             }
         }
         .padding(FabricSpacing.md)
@@ -71,7 +71,7 @@ struct FabricKanbanColumn<Content: View>: View {
         }
         .opacity(isEnabled ? 1.0 : 0.5)
         .animation(
-            reduceMotion ? nil : .spring(response: 0.25, dampingFraction: 0.7),
+            reduceMotion ? nil : FabricAnimation.press,
             value: isDropTarget
         )
         .accessibilityElement(children: .contain)
