@@ -19,19 +19,19 @@
 			containerPortal = 1E5D4EEC2F629F3B00C7F9A5 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 1E5D4EF32F629F3B00C7F9A5;
-			remoteInfo = Fabric;
+			remoteInfo = FabricDemo;
 		};
 		1E5D4F0C2F629F3D00C7F9A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E5D4EEC2F629F3B00C7F9A5 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 1E5D4EF32F629F3B00C7F9A5;
-			remoteInfo = Fabric;
+			remoteInfo = FabricDemo;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1E5D4EF42F629F3B00C7F9A5 /* Fabric.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Fabric.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E5D4EF42F629F3B00C7F9A5 /* FabricDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FabricDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E5D4F012F629F3D00C7F9A5 /* FabricTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FabricTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E5D4F0B2F629F3D00C7F9A5 /* FabricUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FabricUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -93,7 +93,7 @@
 		1E5D4EF52F629F3B00C7F9A5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1E5D4EF42F629F3B00C7F9A5 /* Fabric.app */,
+				1E5D4EF42F629F3B00C7F9A5 /* FabricDemo.app */,
 				1E5D4F012F629F3D00C7F9A5 /* FabricTests.xctest */,
 				1E5D4F0B2F629F3D00C7F9A5 /* FabricUITests.xctest */,
 			);
@@ -103,9 +103,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1E5D4EF32F629F3B00C7F9A5 /* Fabric */ = {
+		1E5D4EF32F629F3B00C7F9A5 /* FabricDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1E5D4F152F629F3D00C7F9A5 /* Build configuration list for PBXNativeTarget "Fabric" */;
+			buildConfigurationList = 1E5D4F152F629F3D00C7F9A5 /* Build configuration list for PBXNativeTarget "FabricDemo" */;
 			buildPhases = (
 				1E5D4EF02F629F3B00C7F9A5 /* Sources */,
 				1E5D4EF12F629F3B00C7F9A5 /* Frameworks */,
@@ -118,12 +118,12 @@
 			fileSystemSynchronizedGroups = (
 				1E5D4EF62F629F3B00C7F9A5 /* Fabric */,
 			);
-			name = Fabric;
+			name = FabricDemo;
 			packageProductDependencies = (
 				FAB00001000000000000002 /* Fabric */,
 			);
-			productName = Fabric;
-			productReference = 1E5D4EF42F629F3B00C7F9A5 /* Fabric.app */;
+			productName = FabricDemo;
+			productReference = 1E5D4EF42F629F3B00C7F9A5 /* FabricDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 		1E5D4F002F629F3D00C7F9A5 /* FabricTests */ = {
@@ -205,6 +205,9 @@
 			mainGroup = 1E5D4EEB2F629F3B00C7F9A5;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
+			packages = (
+				FAB00001000000000000003 /* XCLocalSwiftPackageReference ".." */,
+			);
 			productRefGroup = 1E5D4EF52F629F3B00C7F9A5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -267,12 +270,12 @@
 /* Begin PBXTargetDependency section */
 		1E5D4F032F629F3D00C7F9A5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1E5D4EF32F629F3B00C7F9A5 /* Fabric */;
+			target = 1E5D4EF32F629F3B00C7F9A5 /* FabricDemo */;
 			targetProxy = 1E5D4F022F629F3D00C7F9A5 /* PBXContainerItemProxy */;
 		};
 		1E5D4F0D2F629F3D00C7F9A5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 1E5D4EF32F629F3B00C7F9A5 /* Fabric */;
+			target = 1E5D4EF32F629F3B00C7F9A5 /* FabricDemo */;
 			targetProxy = 1E5D4F0C2F629F3D00C7F9A5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -479,7 +482,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fabric.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fabric";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FabricDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FabricDemo";
 			};
 			name = Debug;
 		};
@@ -500,7 +503,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Fabric.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Fabric";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FabricDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FabricDemo";
 			};
 			name = Release;
 		};
@@ -519,7 +522,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = Fabric;
+				TEST_TARGET_NAME = FabricDemo;
 			};
 			name = Debug;
 		};
@@ -538,7 +541,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = Fabric;
+				TEST_TARGET_NAME = FabricDemo;
 			};
 			name = Release;
 		};
@@ -554,7 +557,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1E5D4F152F629F3D00C7F9A5 /* Build configuration list for PBXNativeTarget "Fabric" */ = {
+		1E5D4F152F629F3D00C7F9A5 /* Build configuration list for PBXNativeTarget "FabricDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1E5D4F162F629F3D00C7F9A5 /* Debug */,
@@ -583,9 +586,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		FAB00001000000000000003 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "..";
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		FAB00001000000000000002 /* Fabric */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = FAB00001000000000000003 /* XCLocalSwiftPackageReference ".." */;
 			productName = Fabric;
 		};
 /* End XCSwiftPackageProductDependency section */

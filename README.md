@@ -144,7 +144,13 @@ All colors adapt automatically via dynamic color providers. Light mode uses warm
 
 ## Demo App
 
-The repo includes a showcase app at `Fabric/Fabric.xcodeproj`. Open the workspace at `Fabric/Fabric.xcworkspace` to build and run the demo with the local package.
+The repo includes a showcase app (target: `FabricDemo`). Open the workspace to build and run:
+
+```
+open Fabric/Fabric.xcworkspace
+```
+
+Select the **FabricDemo** scheme and run. The workspace resolves the local Fabric package automatically.
 
 ## License
 
