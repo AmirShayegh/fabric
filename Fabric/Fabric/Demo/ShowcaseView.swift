@@ -479,6 +479,7 @@ struct ShowcaseView: View {
                         title: "Development sprint begins"
                     ),
                 ])
+                .padding(.horizontal, FabricSpacing.lg)
             }
         }
     }

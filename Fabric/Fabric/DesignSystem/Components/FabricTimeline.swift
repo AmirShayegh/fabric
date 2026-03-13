@@ -30,6 +30,17 @@ struct FabricTimelineItem: Identifiable {
     }
 }
 
+// MARK: - Custom Alignment (connector line ↔ dot center ↔ content center)
+
+extension HorizontalAlignment {
+    fileprivate struct DotCenter: AlignmentID {
+        static func defaultValue(in context: ViewDimensions) -> CGFloat {
+            context[HorizontalAlignment.center]
+        }
+    }
+    fileprivate static let dotCenter = HorizontalAlignment(DotCenter.self)
+}
+
 // MARK: - Timeline Container
 
 struct FabricTimeline: View {
@@ -41,28 +52,69 @@ struct FabricTimeline: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .dotCenter, spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                FabricTimelineRow(
+                FabricTimelineConnector(
                     item: item,
-                    isFirst: index == 0,
-                    isLast: index == items.count - 1
+                    isFirst: index == 0
                 )
+
+                FabricTimelineContentBlock(item: item)
+                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
             }
         }
         .accessibilityElement(children: .contain)
     }
 }
 
-// MARK: - Timeline Row
+// MARK: - Content Block
 
-private struct FabricTimelineRow: View {
+private struct FabricTimelineContentBlock: View {
+
+    let item: FabricTimelineItem
+
+    private var isMilestone: Bool {
+        if case .milestone = item.style { true }
+        else { false }
+    }
+
+    var body: some View {
+        VStack(spacing: FabricSpacing.xs) {
+            Text(item.title)
+                .fabricTypography(isMilestone ? .heading : .label)
+                .fabricInk(.primary)
+                .multilineTextAlignment(.center)
+
+            if let description = item.description {
+                Text(description)
+                    .fabricTypography(.body)
+                    .foregroundStyle(FabricColors.inkSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText)
+        .accessibilityAddTraits(isMilestone ? .isHeader : [])
+    }
+
+    private var accessibilityText: String {
+        var parts = [String]()
+        if isMilestone { parts.append("Milestone") }
+        parts.append(item.timestamp)
+        parts.append(item.title)
+        if let desc = item.description { parts.append(desc) }
+        return parts.joined(separator: ". ")
+    }
+}
+
+// MARK: - Connector
+
+private struct FabricTimelineConnector: View {
 
     let item: FabricTimelineItem
     let isFirst: Bool
-    let isLast: Bool
-
-    private let railWidth: CGFloat = 40
 
     private var isMilestone: Bool {
         if case .milestone = item.style { true }
@@ -79,41 +131,37 @@ private struct FabricTimelineRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: FabricSpacing.md) {
-            railColumn
-            contentView
+        VStack(alignment: .dotCenter, spacing: 0) {
+            if !isFirst {
+                connectorLine
+                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
+            }
+
+            HStack(spacing: FabricSpacing.sm) {
+                dotView
+
+                Text(item.timestamp)
+                    .fabricTypography(.caption)
+                    .foregroundStyle(accent?.foreground ?? FabricColors.inkTertiary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .help(item.timestamp)
+            }
+            .alignmentGuide(.dotCenter) { _ in dotSize / 2 }
+
+            connectorLine
+                .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
+        .padding(.vertical, FabricSpacing.sm)
+        .accessibilityHidden(true)
     }
 
-    // MARK: - Rail Column
-    //
-    // Uses VStack(spacing: 0) with top-segment / dot / elastic-bottom-segment.
-    // The bottom segment's .frame(maxHeight: .infinity) guarantees the connector
-    // line stretches to fill the full row height.
+    // MARK: - Line Segment
 
-    private var railColumn: some View {
-        Color.clear
-            .frame(width: railWidth)
-            .overlay(alignment: .top) {
-                VStack(spacing: 0) {
-                    // Top segment — fixed height matching content's vertical padding
-                    Rectangle()
-                        .fill(isFirst ? Color.clear : FabricColors.connector)
-                        .frame(width: FabricSpacing.connectorWidth, height: FabricSpacing.sm)
-
-                    // Dot
-                    dotView
-
-                    // Bottom segment — elastic, fills remaining row height
-                    Rectangle()
-                        .fill(isLast ? Color.clear : FabricColors.connector)
-                        .frame(width: FabricSpacing.connectorWidth)
-                        .frame(maxHeight: .infinity)
-                }
-            }
-            .accessibilityHidden(true)
+    private var connectorLine: some View {
+        Rectangle()
+            .fill(FabricColors.connector)
+            .frame(width: FabricSpacing.connectorWidth, height: FabricSpacing.lg)
     }
 
     // MARK: - Dot
@@ -149,39 +197,5 @@ private struct FabricTimelineRow: View {
                     radius: 1.5, spread: 1.5, y: 0.5
                 )
         }
-    }
-
-    // MARK: - Content
-
-    private var contentView: some View {
-        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
-            Text(item.timestamp)
-                .fabricTypography(.caption)
-                .foregroundStyle(accent?.foreground ?? FabricColors.inkTertiary)
-
-            Text(item.title)
-                .fabricTypography(isMilestone ? .heading : .label)
-                .fabricInk(.primary)
-
-            if let description = item.description {
-                Text(description)
-                    .fabricTypography(.body)
-                    .foregroundStyle(FabricColors.inkSecondary)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(.vertical, FabricSpacing.sm)
-    }
-
-    // MARK: - Accessibility
-
-    private var accessibilityText: String {
-        var parts = [String]()
-        if isMilestone { parts.append("Milestone") }
-        parts.append(item.timestamp)
-        parts.append(item.title)
-        if let desc = item.description { parts.append(desc) }
-        return parts.joined(separator: ". ")
     }
 }
