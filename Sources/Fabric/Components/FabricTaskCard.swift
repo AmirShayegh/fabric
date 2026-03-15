@@ -96,13 +96,13 @@ private struct FabricTaskCardBody: View {
             Text(title)
                 .fabricTypography(.label)
                 .fabricInk(.primary)
+                .fixedSize(horizontal: false, vertical: true)
 
             if let description {
                 Text(description)
                     .fabricTypography(.caption)
                     .foregroundStyle(FabricColors.inkSecondary)
                     .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
             }
 
             if let tags, !tags.isEmpty {

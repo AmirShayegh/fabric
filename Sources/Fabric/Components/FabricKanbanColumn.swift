@@ -5,6 +5,7 @@ public struct FabricKanbanColumn<Content: View>: View {
     public let title: String
     public let count: Int?
     public let isDropTarget: Bool
+    public let columnWidth: CGFloat?
     @ViewBuilder public let content: Content
 
     @Environment(\.isEnabled) private var isEnabled
@@ -18,11 +19,13 @@ public struct FabricKanbanColumn<Content: View>: View {
         _ title: String,
         count: Int? = nil,
         isDropTarget: Bool = false,
+        columnWidth: CGFloat? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.count = count
         self.isDropTarget = isDropTarget
+        self.columnWidth = columnWidth
         self.content = content()
     }
 
@@ -48,7 +51,11 @@ public struct FabricKanbanColumn<Content: View>: View {
             }
         }
         .padding(FabricSpacing.md)
-        .frame(minWidth: FabricSpacing.columnMinWidth, alignment: .top)
+        .frame(
+            minWidth: max(columnWidth ?? FabricSpacing.columnMinWidth, FabricSpacing.columnMinWidth),
+            maxWidth: columnWidth.map { max($0, FabricSpacing.columnMinWidth) } ?? .infinity,
+            alignment: .top
+        )
         .fabricSurface(
             isDropTarget
                 ? FabricColors.indigo.opacity(0.04)
