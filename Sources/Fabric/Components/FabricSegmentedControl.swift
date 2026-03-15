@@ -95,7 +95,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                     }
                     .fabricShadow(.low)
                     .matchedGeometryEffect(id: selection, in: namespace, isSource: false)
-                    .animation(reduceMotion ? nil : .spring(response: 0.30, dampingFraction: 0.90), value: selection)
+                    .animation(reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.88), value: selection)
             }
         }
         .padding(FabricSpacing.xs)
