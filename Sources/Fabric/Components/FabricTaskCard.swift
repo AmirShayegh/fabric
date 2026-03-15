@@ -205,6 +205,7 @@ private struct FabricTaskCardBody: View {
             value: isSelected
         )
         .focusable(onTap != nil)
+        .focusEffectDisabled()
         #if os(macOS)
         .onKeyPress(.space) {
             guard isEnabled, let onTap else { return .ignored }
