@@ -3,6 +3,7 @@ import SwiftUI
 public struct FabricTaskCard: View {
 
     public let title: String
+    public let ticketNumber: String?
     public let description: String?
     public let tags: [Tag]?
     public let accent: FabricAccent
@@ -34,6 +35,7 @@ public struct FabricTaskCard: View {
 
     public init(
         _ title: String,
+        ticketNumber: String? = nil,
         description: String? = nil,
         tags: [Tag]? = nil,
         accent: FabricAccent = .indigo,
@@ -46,6 +48,7 @@ public struct FabricTaskCard: View {
         availableColumns: [String] = []
     ) {
         self.title = title
+        self.ticketNumber = ticketNumber
         self.description = description
         self.tags = tags
         self.accent = accent
@@ -61,6 +64,7 @@ public struct FabricTaskCard: View {
     public var body: some View {
         FabricTaskCardBody(
             title: title,
+            ticketNumber: ticketNumber,
             description: description,
             tags: tags,
             accent: accent,
@@ -80,6 +84,7 @@ public struct FabricTaskCard: View {
 private struct FabricTaskCardBody: View {
 
     let title: String
+    let ticketNumber: String?
     let description: String?
     let tags: [FabricTaskCard.Tag]?
     let accent: FabricAccent
@@ -109,10 +114,21 @@ private struct FabricTaskCardBody: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: FabricSpacing.sm) {
-            Text(title)
-                .fabricTypography(.label)
-                .fabricInk(.primary)
-                .fixedSize(horizontal: false, vertical: true)
+            HStack(alignment: .firstTextBaseline, spacing: FabricSpacing.sm) {
+                Text(title)
+                    .fabricTypography(.label)
+                    .fabricInk(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let ticketNumber {
+                    Text(ticketNumber)
+                        .fabricTypography(.caption)
+                        .foregroundStyle(FabricColors.inkTertiary)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+            }
 
             if let description {
                 Text(description)
@@ -247,6 +263,7 @@ private struct FabricTaskCardBody: View {
 
     private var accessibilityText: String {
         var parts = [title]
+        if let ticketNumber { parts.append("Ticket \(ticketNumber)") }
         if let description { parts.append(description) }
         if let tags, !tags.isEmpty {
             parts.append("Tags: " + tags.map(\.label).joined(separator: ", "))
