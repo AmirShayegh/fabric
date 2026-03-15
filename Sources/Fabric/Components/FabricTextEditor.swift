@@ -50,29 +50,26 @@ public struct FabricTextEditor: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: FabricSpacing.xs) {
             ZStack(alignment: .topLeading) {
-                // Placeholder — visible when text is empty
-                if text.isEmpty {
-                    Text(placeholder)
-                        .font(.system(size: 17, weight: .regular))
-                        .tracking(-0.08)
-                        .foregroundStyle(FabricColors.inkTertiary)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 12)
-                        .allowsHitTesting(false)
-                        .accessibilityHidden(true)
-                }
-
                 // TextEditor
                 TextEditor(text: $text)
-                    .font(.system(size: 17, weight: .regular))
-                    .tracking(-0.08)
                     .foregroundStyle(FabricColors.inkPrimary)
                     .textEditorStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .focused($isFocused)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+
+                // Placeholder — overlaid at TextEditor's text origin
+                if text.isEmpty {
+                    Text(placeholder)
+                        .foregroundStyle(FabricColors.inkTertiary)
+                        .padding(.leading, 6)
+                        .padding(.top, 8)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
             }
+            .font(.system(size: 17, weight: .regular))
+            .tracking(-0.08)
+            .padding(8)
             .frame(minHeight: minHeight, maxHeight: maxHeight)
             .background { shape.fill(FabricColors.parchment) }
             .fabricInnerShadow(shape, .shallow)
