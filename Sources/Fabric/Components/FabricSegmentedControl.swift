@@ -78,6 +78,25 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                 segmentButton(segment)
             }
         }
+        .background {
+            // Single sliding indicator — always present, reads geometry from selected anchor
+            if segments.contains(where: { $0.value == selection }) {
+                Capsule()
+                    .fill(FabricColors.canvas)
+                    .overlay {
+                        Capsule().strokeBorder(
+                            LinearGradient(
+                                colors: [FabricColors.highlight, Color.clear],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 0.5
+                        )
+                    }
+                    .fabricShadow(.low)
+                    .matchedGeometryEffect(id: selection, in: namespace, isSource: false)
+            }
+        }
         .padding(FabricSpacing.xs)
         .frame(minHeight: 44)
         .background {
@@ -151,7 +170,19 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                 .padding(.vertical, FabricSpacing.sm)
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Capsule())
-                .background { segmentBackground(isSelected: isSelected, isHovered: isHovered) }
+                .background {
+                    // Invisible anchor — always present, registers this segment's frame
+                    Capsule()
+                        .fill(Color.clear)
+                        .matchedGeometryEffect(id: segment.value, in: namespace, isSource: true)
+                }
+                .background {
+                    // Hover fill — only for unselected segments
+                    if !isSelected && isHovered {
+                        Capsule()
+                            .fill(FabricColors.burlap.opacity(0.08))
+                    }
+                }
         }
         .buttonStyle(.plain)
         .onHover { hovering in
@@ -162,28 +193,4 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
         .accessibilityLabel(segment.label)
     }
 
-    // MARK: - Segment Background
-
-    @ViewBuilder
-    private func segmentBackground(isSelected: Bool, isHovered: Bool) -> some View {
-        if isSelected {
-            Capsule()
-                .fill(FabricColors.canvas)
-                .overlay {
-                    Capsule().strokeBorder(
-                        LinearGradient(
-                            colors: [FabricColors.highlight, Color.clear],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 0.5
-                    )
-                }
-                .fabricShadow(.low)
-                .matchedGeometryEffect(id: "indicator", in: namespace)
-        } else if isHovered {
-            Capsule()
-                .fill(FabricColors.burlap.opacity(0.08))
-        }
-    }
 }
