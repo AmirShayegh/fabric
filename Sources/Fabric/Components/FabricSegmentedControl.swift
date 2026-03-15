@@ -95,6 +95,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                     }
                     .fabricShadow(.low)
                     .matchedGeometryEffect(id: selection, in: namespace, isSource: false)
+                    .animation(reduceMotion ? nil : .spring(response: 0.30, dampingFraction: 0.90), value: selection)
             }
         }
         .padding(FabricSpacing.xs)
@@ -116,7 +117,6 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
         .onKeyPress(.leftArrow) { selectAdjacentSegment(offset: -1) }
         .onKeyPress(.rightArrow) { selectAdjacentSegment(offset: 1) }
         #endif
-        .animation(reduceMotion ? nil : FabricAnimation.press, value: selection)
         .animation(reduceMotion ? nil : FabricAnimation.hover, value: hoveredSegment)
         .opacity(isEnabled ? 1.0 : 0.5)
         .onChange(of: isEnabled) {
