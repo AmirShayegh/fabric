@@ -42,7 +42,7 @@ fabric/
 │       ├── FabricEmptyState.swift             — Centered placeholder watermark
 │       ├── FabricChip.swift                   — Interactive chip with hover + optional remove
 │       ├── FabricTaskCard.swift               — Draggable task card with tags
-│       ├── FabricKanbanColumn.swift           — Kanban column with drop target
+│       ├── FabricKanbanColumn.swift           — Kanban column with drop target, vertical scrolling
 │       ├── FabricDropPlaceholder.swift        — Dashed drop-target indicator
 │       ├── FabricTimeline.swift               — Event/milestone timeline
 │       ├── FabricStepIndicator.swift          — Multi-step progress indicator

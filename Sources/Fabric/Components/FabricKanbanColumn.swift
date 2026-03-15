@@ -45,10 +45,14 @@ public struct FabricKanbanColumn<Content: View>: View {
                 .fill(FabricColors.inkTertiary.opacity(0.15))
                 .frame(height: 0.5)
 
-            // Content
-            VStack(spacing: FabricSpacing.sm) {
-                content
+            // Content — scrolls when cards overflow the column height
+            ScrollView(.vertical) {
+                VStack(spacing: FabricSpacing.sm) {
+                    content
+                }
             }
+            .contentMargins(.vertical, FabricSpacing.xs, for: .scrollContent)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .padding(FabricSpacing.md)
         .frame(

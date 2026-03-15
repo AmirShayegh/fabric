@@ -69,7 +69,7 @@ Four accent colors drawn from natural dyes: **indigo**, **sage**, **ochre**, **m
 | `.fabricSurface()` | Tiled linen texture background modifier |
 | `FabricCard { }` | Elevated card container with texture and shadow |
 | `FabricFlowLayout` | Wrapping flow layout (SwiftUI `Layout`) |
-| `FabricKanbanColumn` | Kanban column with drop target styling |
+| `FabricKanbanColumn` | Kanban column with drop target styling, vertical scrolling |
 
 ### Controls
 | Component | Description |
