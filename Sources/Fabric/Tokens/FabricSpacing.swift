@@ -48,6 +48,7 @@ public enum FabricSpacing {
     public static let timelineDotSizeLg: CGFloat = 18
     public static let progressBarHeight: CGFloat = 4
     public static let columnMinWidth:    CGFloat = 280
+    public static let columnMaxWidth:    CGFloat = 320
     public static let statusDotSize:     CGFloat = 8
     public static let pillHeight:        CGFloat = 22
     public static let sliderHeight:      CGFloat = 52
