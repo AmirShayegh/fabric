@@ -61,6 +61,8 @@ struct ShowcaseView: View {
     @State private var sliderValue: Double = 0.35
     @State private var volumeValue: Double = 0.65
     @State private var brightnessValue: Double = 0.50
+    @State private var segmentSelection = "Day"
+    @State private var segmentAccentSelection = "Overview"
 
     // Kanban state
     @State private var todoTasks: [KanbanTask] = [
@@ -121,6 +123,9 @@ struct ShowcaseView: View {
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 radarDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                segmentedControlDemo
             }
             .padding(.horizontal, FabricSpacing.xxl)
             .padding(.vertical, FabricSpacing.xxxl)
@@ -861,6 +866,42 @@ struct ShowcaseView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+    }
+
+    // MARK: - Segmented Control Demo
+
+    private var segmentedControlDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.xl) {
+                Text("Segmented Control").fabricTitle()
+
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    Text("Default (Indigo)").fabricLabel()
+                    FabricSegmentedControl(
+                        selection: $segmentSelection,
+                        segments: ["Day", "Week", "Month"]
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    Text("Sage Accent").fabricLabel()
+                    FabricSegmentedControl(
+                        selection: $segmentAccentSelection,
+                        segments: ["Overview", "Details", "History", "Settings"],
+                        accent: .sage
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    Text("Disabled").fabricLabel()
+                    FabricSegmentedControl(
+                        selection: .constant("Active"),
+                        segments: ["Active", "Inactive"]
+                    )
+                    .disabled(true)
                 }
             }
         }
