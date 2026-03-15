@@ -91,18 +91,13 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                 )
             }
         }
-        .clipShape(trackShape)
-        .innerShadow(
-            trackShape,
-            color: FabricColors.innerShadow,
-            radius: 2, spread: 2, y: 1
-        )
+        .fabricInnerShadow(trackShape, .shallow)
         .focusable()
         #if os(macOS)
         .onKeyPress(.leftArrow) { selectAdjacentSegment(offset: -1) }
         .onKeyPress(.rightArrow) { selectAdjacentSegment(offset: 1) }
         #endif
-        .animation(reduceMotion ? nil : FabricAnimation.soft, value: selection)
+        .animation(reduceMotion ? nil : FabricAnimation.press, value: selection)
         .animation(reduceMotion ? nil : FabricAnimation.hover, value: hoveredSegment)
         .opacity(isEnabled ? 1.0 : 0.5)
         .onChange(of: isEnabled) {
@@ -122,6 +117,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
 
     #if os(macOS)
     private func selectAdjacentSegment(offset: Int) -> KeyPress.Result {
+        guard isEnabled else { return .ignored }
         guard let currentIndex = segments.firstIndex(where: { $0.value == selection }) else {
             return .ignored
         }
@@ -153,7 +149,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                 .minimumScaleFactor(0.75)
                 .padding(.horizontal, FabricSpacing.md)
                 .padding(.vertical, FabricSpacing.sm)
-                .frame(maxWidth: .infinity, minHeight: 36)
+                .frame(maxWidth: .infinity, minHeight: 44)
                 .contentShape(Capsule())
                 .background { segmentBackground(isSelected: isSelected, isHovered: isHovered) }
         }

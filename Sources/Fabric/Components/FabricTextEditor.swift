@@ -28,8 +28,8 @@ public struct FabricTextEditor: View {
         self.label = label ?? placeholder
         self.placeholder = placeholder
         self._text = text
-        self.minHeight = minHeight
-        self.maxHeight = maxHeight
+        self.minHeight = max(minHeight, 44)
+        self.maxHeight = max(maxHeight, max(minHeight, 44))
         if let error, !error.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             self.error = error
         } else {
@@ -56,7 +56,7 @@ public struct FabricTextEditor: View {
                         .font(.system(size: 17, weight: .regular))
                         .tracking(-0.08)
                         .foregroundStyle(FabricColors.inkTertiary)
-                        .padding(.horizontal, 10)
+                        .padding(.horizontal, 14)
                         .padding(.vertical, 12)
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
@@ -70,7 +70,8 @@ public struct FabricTextEditor: View {
                     .textEditorStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .focused($isFocused)
-                    .padding(4)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
             }
             .frame(minHeight: minHeight, maxHeight: maxHeight)
             .background { shape.fill(FabricColors.parchment) }
