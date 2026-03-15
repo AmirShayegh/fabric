@@ -61,6 +61,8 @@ struct ShowcaseView: View {
     @State private var sliderValue: Double = 0.35
     @State private var volumeValue: Double = 0.65
     @State private var brightnessValue: Double = 0.50
+    @State private var editorText = ""
+    @State private var editorErrorText = "Invalid content"
     @State private var segmentSelection = "Day"
     @State private var segmentAccentSelection = "Overview"
 
@@ -126,6 +128,9 @@ struct ShowcaseView: View {
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 segmentedControlDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                textEditorDemo
             }
             .padding(.horizontal, FabricSpacing.xxl)
             .padding(.vertical, FabricSpacing.xxxl)
@@ -900,6 +905,43 @@ struct ShowcaseView: View {
                     FabricSegmentedControl(
                         selection: .constant("Active"),
                         segments: ["Active", "Inactive"]
+                    )
+                    .disabled(true)
+                }
+            }
+        }
+    }
+
+    // MARK: - Text Editor Demo
+
+    private var textEditorDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.xl) {
+                Text("Text Editor").fabricTitle()
+
+                VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                    Text("Notes").fabricCaption()
+                    FabricTextEditor(
+                        placeholder: "Write your notes here…",
+                        text: $editorText
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                    Text("Error State").fabricCaption()
+                    FabricTextEditor(
+                        label: "Description",
+                        placeholder: "Describe the issue…",
+                        text: $editorErrorText,
+                        error: "Description must be at least 20 characters"
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                    Text("Disabled").fabricCaption()
+                    FabricTextEditor(
+                        placeholder: "Read-only content…",
+                        text: .constant("This editor is disabled and cannot be edited.")
                     )
                     .disabled(true)
                 }
