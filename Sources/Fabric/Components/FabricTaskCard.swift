@@ -5,6 +5,8 @@ public struct FabricTaskCard: View {
     public let title: String
     public let description: String?
     public let tags: [Tag]?
+    public let accent: FabricAccent
+    public let isSelected: Bool
     public let onTap: (() -> Void)?
 
     /// Advanced hook for apps managing drag lifecycle externally (e.g., AppKit bridging).
@@ -34,6 +36,8 @@ public struct FabricTaskCard: View {
         _ title: String,
         description: String? = nil,
         tags: [Tag]? = nil,
+        accent: FabricAccent = .indigo,
+        isSelected: Bool = false,
         isDragging: Binding<Bool> = .constant(false),
         onTap: (() -> Void)? = nil,
         onMoveUp: (() -> Void)? = nil,
@@ -44,6 +48,8 @@ public struct FabricTaskCard: View {
         self.title = title
         self.description = description
         self.tags = tags
+        self.accent = accent
+        self.isSelected = isSelected
         self._isDragging = isDragging
         self.onTap = onTap
         self.onMoveUp = onMoveUp
@@ -57,6 +63,8 @@ public struct FabricTaskCard: View {
             title: title,
             description: description,
             tags: tags,
+            accent: accent,
+            isSelected: isSelected,
             isDragging: isDragging,
             onTap: onTap,
             onMoveUp: onMoveUp,
@@ -74,6 +82,8 @@ private struct FabricTaskCardBody: View {
     let title: String
     let description: String?
     let tags: [FabricTaskCard.Tag]?
+    let accent: FabricAccent
+    let isSelected: Bool
     let isDragging: Bool
     let onTap: (() -> Void)?
     let onMoveUp: (() -> Void)?
@@ -133,6 +143,11 @@ private struct FabricTaskCardBody: View {
                 lineWidth: 0.5
             )
         }
+        .overlay {
+            if isSelected {
+                shape.strokeBorder(accent.foreground, lineWidth: 2)
+            }
+        }
         .fabricShadow(
             elevation,
             tightColor: isPressed || !isEnabled ? .clear : FabricColors.shadowTight,
@@ -185,6 +200,10 @@ private struct FabricTaskCardBody: View {
             reduceMotion ? nil : FabricAnimation.lift,
             value: isDragging
         )
+        .animation(
+            reduceMotion ? nil : FabricAnimation.hover,
+            value: isSelected
+        )
         .focusable(onTap != nil)
         #if os(macOS)
         .onKeyPress(.space) {
@@ -201,6 +220,7 @@ private struct FabricTaskCardBody: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
         .accessibilityAddTraits(onTap != nil ? .isButton : [])
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityAction { guard isEnabled else { return }; onTap?() }
         .modifier(MoveActionsModifier(
             onMoveUp: onMoveUp,
