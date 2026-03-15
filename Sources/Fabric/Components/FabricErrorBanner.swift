@@ -78,7 +78,7 @@ private struct FabricErrorBannerBody: View {
         }
         .background(FabricColors.parchment)
         .clipShape(shape)
-        .innerShadow(shape, color: FabricColors.innerShadow, radius: 2, spread: 2, y: 1)
+        .fabricInnerShadow(shape, .shallow)
         .opacity(isEnabled ? 1.0 : 0.5)
         .animation(
             reduceMotion ? nil : FabricAnimation.soft,

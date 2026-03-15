@@ -129,15 +129,14 @@ private struct FabricButtonBody: View {
         .innerShadow(
             Capsule(),
             color: FabricColors.innerShadow,
-            radius: isPressed ? 3 : 0,
-            spread: isPressed ? 4 : 0,
-            y: isPressed ? 1.5 : 0
+            radius: isPressed ? FabricElevation.Inset.recessed.radius : 0,
+            spread: isPressed ? FabricElevation.Inset.recessed.spread : 0,
+            y: isPressed ? FabricElevation.Inset.recessed.y : 0
         )
-        .shadow(
-            color: isPressed || !isEnabled ? .clear : FabricColors.shadow,
-            radius: variant == .ghost ? 0 : 8,
-            x: 0,
-            y: variant == .ghost ? 0 : 4
+        .fabricShadow(
+            .mid,
+            tightColor: .clear,
+            ambientColor: isPressed || !isEnabled || variant == .ghost ? .clear : FabricColors.shadow
         )
     }
 

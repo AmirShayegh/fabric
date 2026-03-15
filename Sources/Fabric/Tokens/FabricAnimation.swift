@@ -56,13 +56,17 @@ public enum FabricAnimation {
     /// Scale factor for a column when it is an active drop target
     public static let dropTargetScale: Double = 1.01
     /// Ambient shadow radius for a lifted/dragged card
-    public static let dragShadowRadius: Double = 20
+    @available(*, deprecated, message: "Use FabricElevation.drag")
+    public static var dragShadowRadius: Double { FabricElevation.dragAmbientRadius }
     /// Ambient shadow Y offset for a lifted/dragged card
-    public static let dragShadowY: Double = 10
+    @available(*, deprecated, message: "Use FabricElevation.drag")
+    public static var dragShadowY: Double { FabricElevation.dragAmbientY }
     /// Contact shadow radius for a lifted/dragged card
-    public static let dragContactShadowRadius: Double = 2
+    @available(*, deprecated, message: "Use FabricElevation.drag")
+    public static var dragContactShadowRadius: Double { FabricElevation.dragContactRadius }
     /// Contact shadow Y offset for a lifted/dragged card
-    public static let dragContactShadowY: Double = 3
+    @available(*, deprecated, message: "Use FabricElevation.drag")
+    public static var dragContactShadowY: Double { FabricElevation.dragContactY }
     /// Width of the custom drag preview
     public static let dragPreviewWidth: Double = 240
     /// Opacity of the custom drag preview

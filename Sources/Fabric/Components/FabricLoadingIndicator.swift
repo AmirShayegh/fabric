@@ -69,10 +69,7 @@ private struct FabricLoadingIndicatorBody: View {
                             .fill(accent.foreground)
                             .frame(width: dotSize, height: dotSize)
                             .scaleEffect(index == phase ? 1.0 : 0.6)
-                            .shadow(
-                                color: FabricColors.shadowTight,
-                                radius: 0.3, x: 0, y: 0.3
-                            )
+                            .fabricShadow(.micro)
                     }
                 }
             } animation: { _ in
@@ -84,10 +81,7 @@ private struct FabricLoadingIndicatorBody: View {
                     Circle()
                         .fill(accent.foreground)
                         .frame(width: dotSize, height: dotSize)
-                        .shadow(
-                            color: FabricColors.shadowTight,
-                            radius: 0.3, x: 0, y: 0.3
-                        )
+                        .fabricShadow(.micro)
                 }
             }
         }

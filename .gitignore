@@ -1,0 +1,17 @@
+# Build
+.build/
+.swiftpm/
+DerivedData/
+
+# Xcode user data
+xcuserdata/
+*.xcuserdatad
+
+# Claude / tooling
+.claude/
+.agents/
+reviews.db
+skills-lock.json
+
+# OS
+.DS_Store

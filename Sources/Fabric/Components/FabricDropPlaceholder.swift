@@ -22,11 +22,7 @@ public struct FabricDropPlaceholder: View {
         shape
             .fill(accent.fill)
             .frame(height: height)
-            .innerShadow(
-                shape,
-                color: FabricColors.innerShadow,
-                radius: 3, spread: 3, y: 1.5
-            )
+            .fabricInnerShadow(shape, .recessed)
             .overlay {
                 shape.strokeBorder(
                     accent.foreground.opacity(0.25),

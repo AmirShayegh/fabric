@@ -184,18 +184,13 @@ private struct FabricTimelineConnector: View {
                             lineWidth: 0.5
                         )
                 }
-                .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
-                .shadow(color: FabricColors.shadow, radius: 4, x: 0, y: 2)
+                .fabricShadow(.low)
         } else {
             // Event — recessed into fabric
             Circle()
                 .fill(FabricColors.burlap)
                 .frame(width: dotSize, height: dotSize)
-                .innerShadow(
-                    Circle(),
-                    color: FabricColors.innerShadow,
-                    radius: 1.5, spread: 1.5, y: 0.5
-                )
+                .fabricInnerShadow(Circle(), .subtle)
         }
     }
 }

@@ -29,7 +29,6 @@ public struct FabricCard<Content: View>: View {
                 )
             }
             // Double shadow: tight contact shadow + wide ambient
-            .shadow(color: FabricColors.shadowTight, radius: 1, x: 0, y: 1)
-            .shadow(color: FabricColors.shadow, radius: 12, x: 0, y: 6)
+            .fabricShadow(.high)
     }
 }

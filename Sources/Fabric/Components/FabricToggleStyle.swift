@@ -81,8 +81,7 @@ private struct FabricToggleBody: View {
                             lineWidth: 0.5
                         )
                 }
-                .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
-                .shadow(color: FabricColors.shadow, radius: 3, x: 0, y: 2)
+                .fabricShadow(.low)
                 .offset(x: knobOffset)
         }
         .frame(width: trackW, height: trackH)

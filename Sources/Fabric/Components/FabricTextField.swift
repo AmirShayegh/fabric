@@ -20,6 +20,7 @@ public struct FabricTextField: View {
     @Binding public var text: String
     public let leadingIcon: String?
     public let trailing: TrailingAction?
+    public let error: String?
 
     @FocusState private var isFocused: Bool
     @Environment(\.isEnabled) private var isEnabled
@@ -30,13 +31,20 @@ public struct FabricTextField: View {
         placeholder: String,
         text: Binding<String>,
         leadingIcon: String? = nil,
-        trailing: TrailingAction? = nil
+        trailing: TrailingAction? = nil,
+        error: String? = nil
     ) {
         self.label = label ?? placeholder
         self.placeholder = placeholder
         self._text = text
         self.leadingIcon = leadingIcon
         self.trailing = trailing
+        // Normalize empty/whitespace-only strings to nil
+        if let error, !error.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            self.error = error
+        } else {
+            self.error = nil
+        }
     }
 
     private var focusRingColor: Color {
@@ -47,48 +55,81 @@ public struct FabricTextField: View {
         #endif
     }
 
+    private var hasError: Bool { error != nil }
+
     public var body: some View {
-        HStack(spacing: FabricSpacing.sm) {
-            if let leadingIcon {
-                Image(systemName: leadingIcon)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(FabricColors.inkTertiary)
-            }
-
-            TextField(placeholder, text: $text)
-                .textFieldStyle(.plain)
-                .font(.system(size: 17, weight: .regular))
-                .tracking(-0.08)
-                .foregroundStyle(FabricColors.inkPrimary)
-                .focused($isFocused)
-
-            if let trailing {
-                Button {
-                    trailing.action()
-                } label: {
-                    Image(systemName: trailing.icon)
+        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+            HStack(spacing: FabricSpacing.sm) {
+                if let leadingIcon {
+                    Image(systemName: leadingIcon)
                         .font(.system(size: 15, weight: .regular))
                         .foregroundStyle(FabricColors.inkTertiary)
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(trailing.accessibilityLabel)
+
+                TextField(placeholder, text: $text)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 17, weight: .regular))
+                    .tracking(-0.08)
+                    .foregroundStyle(FabricColors.inkPrimary)
+                    .focused($isFocused)
+
+                if let trailing {
+                    Button {
+                        trailing.action()
+                    } label: {
+                        Image(systemName: trailing.icon)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundStyle(FabricColors.inkTertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(trailing.accessibilityLabel)
+                }
+            }
+            .padding(11)
+            .background {
+                Capsule().fill(FabricColors.parchment)
+            }
+            .fabricInnerShadow(Capsule(), .shallow)
+            .overlay {
+                // Error border — always visible when error is set
+                if hasError {
+                    Capsule().strokeBorder(
+                        FabricColors.madder,
+                        lineWidth: 1.5
+                    )
+                }
+            }
+            .overlay {
+                // Focus ring — layered on top of error border when both active
+                if isFocused {
+                    Capsule().strokeBorder(
+                        focusRingColor,
+                        lineWidth: 2.5
+                    )
+                } else if !hasError {
+                    // Default subtle border when no error and not focused
+                    Capsule().strokeBorder(
+                        FabricColors.inkTertiary.opacity(0.15),
+                        lineWidth: 0.5
+                    )
+                }
+            }
+            .opacity(isEnabled ? 1.0 : 0.5)
+            .animation(reduceMotion ? nil : FabricAnimation.hover, value: isFocused)
+            .animation(reduceMotion ? nil : FabricAnimation.hover, value: hasError)
+
+            if let error {
+                Text(error)
+                    .fabricTypography(.caption)
+                    .foregroundStyle(FabricColors.madder)
+                    .padding(.horizontal, FabricSpacing.sm)
             }
         }
-        .padding(11)
-        .background {
-            Capsule().fill(FabricColors.parchment)
+        .onChange(of: error) { old, new in
+            if old == nil, let new {
+                AccessibilityNotification.Announcement("\(label). \(new)").post()
+            }
         }
-        .innerShadow(Capsule(), color: FabricColors.innerShadow, radius: 2, spread: 2, y: 1)
-        .overlay {
-            Capsule().strokeBorder(
-                isFocused
-                    ? focusRingColor
-                    : FabricColors.inkTertiary.opacity(0.15),
-                lineWidth: isFocused ? 2.5 : 0.5
-            )
-        }
-        .opacity(isEnabled ? 1.0 : 0.5)
-        .animation(reduceMotion ? nil : FabricAnimation.hover, value: isFocused)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(label)
     }

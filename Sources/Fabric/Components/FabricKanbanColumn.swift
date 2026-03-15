@@ -63,11 +63,7 @@ public struct FabricKanbanColumn<Content: View>: View {
             textureIntensity: isDropTarget ? 0.015 : 0.02
         )
         .clipShape(shape)
-        .innerShadow(
-            shape,
-            color: FabricColors.innerShadow,
-            radius: 3, spread: 3, y: 1.5
-        )
+        .fabricInnerShadow(shape, .recessed)
         .overlay {
             if isDropTarget {
                 shape.strokeBorder(

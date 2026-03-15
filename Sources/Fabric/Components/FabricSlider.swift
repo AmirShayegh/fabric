@@ -120,11 +120,7 @@ private struct FabricSliderBody: View {
                 Capsule()
                     .fill(FabricColors.parchment)
                     .frame(height: trackHeight)
-                    .innerShadow(
-                        Capsule(),
-                        color: FabricColors.innerShadow,
-                        radius: 1.5, spread: 1.5, y: 0.5
-                    )
+                    .fabricInnerShadow(Capsule(), .subtle)
 
                 // Fill — accent color up to knob position
                 if clampedValue > 0 {
@@ -178,8 +174,7 @@ private struct FabricSliderBody: View {
                         lineWidth: 0.5
                     )
             }
-            .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
-            .shadow(color: FabricColors.shadow, radius: isDragging ? 8 : 4, x: 0, y: isDragging ? 4 : 2)
+            .fabricShadow(isDragging ? .mid : .low)
             .scaleEffect(isDragging && !reduceMotion ? 1.08 : 1.0)
             .animation(
                 reduceMotion ? nil : FabricAnimation.press,

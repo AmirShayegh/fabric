@@ -70,7 +70,7 @@ private struct FabricRadarScannerBody: View {
                 .fill(accent.foreground)
                 .frame(width: 8, height: 8)
                 .shadow(color: accent.foreground.opacity(0.4), radius: 4)
-                .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
+                .fabricShadow(.low, ambientColor: .clear)
         }
         .aspectRatio(1, contentMode: .fit)
         .onAppear { isAnimating = true }

@@ -91,6 +91,12 @@ private struct FabricTaskCardBody: View {
         FabricSpacing.shape(radius: FabricSpacing.radiusSm)
     }
 
+    private var elevation: FabricElevation.ShadowPair {
+        if isDragging { .drag }
+        else if isHovered { .high }
+        else { .mid }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: FabricSpacing.sm) {
             Text(title)
@@ -127,24 +133,17 @@ private struct FabricTaskCardBody: View {
                 lineWidth: 0.5
             )
         }
-        .shadow(
-            color: isPressed || !isEnabled ? .clear : FabricColors.shadowTight,
-            radius: isDragging ? FabricAnimation.dragContactShadowRadius : (isHovered ? 1.5 : 1),
-            x: 0,
-            y: isDragging ? FabricAnimation.dragContactShadowY : (isHovered ? 1.5 : 1)
-        )
-        .shadow(
-            color: isPressed || !isEnabled ? .clear : FabricColors.shadow,
-            radius: isDragging ? FabricAnimation.dragShadowRadius : (isHovered ? 12 : 8),
-            x: 0,
-            y: isDragging ? FabricAnimation.dragShadowY : (isHovered ? 6 : 4)
+        .fabricShadow(
+            elevation,
+            tightColor: isPressed || !isEnabled ? .clear : FabricColors.shadowTight,
+            ambientColor: isPressed || !isEnabled ? .clear : FabricColors.shadow
         )
         .innerShadow(
             shape,
             color: FabricColors.innerShadow,
-            radius: isPressed ? 4 : 0,
-            spread: isPressed ? 5 : 0,
-            y: isPressed ? 2 : 0
+            radius: isPressed ? FabricElevation.Inset.deep.radius : 0,
+            spread: isPressed ? FabricElevation.Inset.deep.spread : 0,
+            y: isPressed ? FabricElevation.Inset.deep.y : 0
         )
         .scaleEffect(isPressed && !reduceMotion ? 0.95 : 1.0)
         .scaleEffect(isDragging && !reduceMotion ? FabricAnimation.liftScale : 1.0)

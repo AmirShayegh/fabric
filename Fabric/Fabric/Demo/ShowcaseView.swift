@@ -50,6 +50,7 @@ struct ShowcaseView: View {
     @State private var nameField = ""
     @State private var emailField = ""
     @State private var notesField = ""
+    @State private var errorField = "bad-email"
     @State private var toggleNotifications = true
     @State private var toggleAutoSave = false
     @State private var toggleDarkMode = true
@@ -328,6 +329,11 @@ struct ShowcaseView: View {
                     VStack(alignment: .leading, spacing: FabricSpacing.xs) {
                         Text("Notes").fabricCaption()
                         FabricTextField(label: "Notes", placeholder: "Optional notes...", text: $notesField)
+                    }
+
+                    VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                        Text("Error State").fabricCaption()
+                        FabricTextField(label: "Email", placeholder: "you@example.com", text: $errorField, leadingIcon: "envelope", error: "Please enter a valid email address")
                     }
                 }
 

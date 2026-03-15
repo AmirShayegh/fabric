@@ -78,7 +78,7 @@ Four accent colors drawn from natural dyes: **indigo**, **sage**, **ochre**, **m
 | `.buttonStyle(.fabricSecondary)` | Secondary — textured surface, lighter weight |
 | `.buttonStyle(.fabricGhost)` | Ghost — transparent, minimal |
 | `.toggleStyle(.fabric)` | Custom capsule toggle with cloth-press feel |
-| `FabricTextField` | Recessed text field with leading icon, trailing action |
+| `FabricTextField` | Recessed text field with leading icon, trailing action, error state |
 | `FabricSlider` | Draggable slider with pill knob, optional ticks and icons |
 | `FabricChip` | Interactive chip with hover, optional remove button |
 
@@ -128,6 +128,31 @@ Text("Custom")
     .fabricTypography(.heading)
     .fabricInk(.secondary)
 ```
+
+## Validation
+
+```swift
+FabricTextField(
+    placeholder: "Email",
+    text: $email,
+    leadingIcon: "envelope",
+    error: emailError  // nil = no error, String = shows madder border + message
+)
+```
+
+## Elevation Tokens
+
+Shadow geometry is systematized into named levels via `FabricElevation`:
+
+```swift
+// Apply pebble double-shadow (tight + ambient)
+.fabricShadow(.high)
+
+// Apply inner shadow for recessed elements
+.fabricInnerShadow(shape, .recessed)
+```
+
+Five outer levels: `micro`, `low`, `mid`, `high`, `drag`. Four inner levels: `subtle`, `shallow`, `recessed`, `deep`.
 
 ## Accent Colors
 

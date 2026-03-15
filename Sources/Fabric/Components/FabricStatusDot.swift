@@ -14,7 +14,7 @@ public struct FabricStatusDot: View {
         Circle()
             .fill(accent?.foreground ?? FabricColors.inkTertiary)
             .frame(width: FabricSpacing.statusDotSize, height: FabricSpacing.statusDotSize)
-            .shadow(color: FabricColors.shadowTight, radius: 0.3, x: 0, y: 0.3)
+            .fabricShadow(.micro)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(label ?? "")
             .accessibilityHidden(label == nil)

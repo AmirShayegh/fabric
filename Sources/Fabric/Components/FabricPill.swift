@@ -32,7 +32,7 @@ public struct FabricPill: View {
                     lineWidth: 0.5
                 )
             }
-            .shadow(color: FabricColors.shadowTight, radius: 0.5, x: 0, y: 0.5)
+            .fabricShadow(.low, ambientColor: .clear)
             .opacity(isEnabled ? 1.0 : 0.5)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(text)
