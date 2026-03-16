@@ -66,6 +66,25 @@ struct ShowcaseView: View {
     @State private var segmentSelection = "Day"
     @State private var segmentAccentSelection = "Overview"
 
+    // New component demos
+    @State private var searchText = ""
+    @State private var filterSafe = true
+    @State private var filterWarning = false
+    @State private var filterThreat = false
+    @State private var breadcrumbItems: [FabricBreadcrumb.Item] = [
+        .init(label: "Home"),
+        .init(label: "Documents"),
+        .init(label: "Projects"),
+    ]
+    @State private var disclosureExpanded = false
+    @State private var disclosureExpanded2 = true
+    @State private var checkA = true
+    @State private var checkB = false
+    @State private var checkC = false
+    @State private var scoreValue: Double = 0.72
+    @State private var tabSelection = "Overview"
+    @State private var tabSelection2 = "System"
+
     // Kanban state
     @State private var todoTasks: [KanbanTask] = [
         KanbanTask("Design navigation", tag: "Design", accent: "indigo"),
@@ -131,6 +150,30 @@ struct ShowcaseView: View {
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 textEditorDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                searchFieldDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                filterPillDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                breadcrumbDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                disclosureGroupDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                checkboxDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                scoreGaugeDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                tabBarDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                messageBubbleDemo
             }
             .padding(.horizontal, FabricSpacing.xxl)
             .padding(.vertical, FabricSpacing.xxxl)
@@ -1002,6 +1045,273 @@ struct ShowcaseView: View {
                             .foregroundStyle(FabricColors.ochre)
                     }
                     .frame(width: 80, height: 80)
+                }
+            }
+        }
+    }
+
+    // MARK: - Search Field Demo
+
+    private var searchFieldDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Search Field").fabricTitle()
+
+                FabricSearchField(placeholder: "Search components\u{2026}", text: $searchText)
+
+                FabricSearchField(placeholder: "Disabled search", text: .constant(""))
+                    .disabled(true)
+            }
+        }
+    }
+
+    // MARK: - Filter Pill Demo
+
+    private var filterPillDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Filter Pills").fabricTitle()
+
+                Text("Risk Levels").fabricCaption()
+                HStack(spacing: FabricSpacing.sm) {
+                    FabricFilterPill("Safe", icon: "checkmark.shield", accent: .sage, isSelected: filterSafe) {
+                        filterSafe.toggle()
+                    }
+                    FabricFilterPill("Warning", icon: "exclamationmark.triangle", accent: .ochre, isSelected: filterWarning) {
+                        filterWarning.toggle()
+                    }
+                    FabricFilterPill("Threat", icon: "xmark.shield", accent: .madder, isSelected: filterThreat) {
+                        filterThreat.toggle()
+                    }
+                }
+
+                Text("Disabled").fabricCaption()
+                HStack(spacing: FabricSpacing.sm) {
+                    FabricFilterPill("Locked", accent: .indigo, isSelected: true) { }
+                        .disabled(true)
+                    FabricFilterPill("Locked", accent: .indigo, isSelected: false) { }
+                        .disabled(true)
+                }
+            }
+        }
+    }
+
+    // MARK: - Breadcrumb Demo
+
+    private var breadcrumbDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Breadcrumb").fabricTitle()
+
+                FabricBreadcrumb(items: breadcrumbItems) { item in
+                    if let index = breadcrumbItems.firstIndex(where: { $0.id == item.id }) {
+                        breadcrumbItems = Array(breadcrumbItems.prefix(through: index))
+                    }
+                }
+
+                HStack(spacing: FabricSpacing.sm) {
+                    Button("Add Level") {
+                        breadcrumbItems.append(.init(label: "Folder \(breadcrumbItems.count + 1)"))
+                    }
+                    .buttonStyle(.fabricSecondary)
+
+                    Button("Reset") {
+                        breadcrumbItems = [.init(label: "Home")]
+                    }
+                    .buttonStyle(.fabricGhost)
+                }
+            }
+        }
+    }
+
+    // MARK: - Disclosure Group Demo
+
+    private var disclosureGroupDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Disclosure Group").fabricTitle()
+
+                FabricDisclosureGroup("Build Settings", count: 5, accent: .indigo, isExpanded: $disclosureExpanded) {
+                    VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                        Text("Optimization Level: -O2").fabricBody()
+                        Text("Architecture: arm64").fabricBody()
+                        Text("Swift Version: 6.0").fabricBody()
+                        Text("Deployment Target: macOS 14").fabricBody()
+                        Text("Code Signing: Automatic").fabricBody()
+                    }
+                }
+
+                FabricDisclosureGroup("Warnings", count: 3, accent: .madder, isExpanded: $disclosureExpanded2) {
+                    VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                        Text("Unused variable 'config'").fabricCaption()
+                        Text("Deprecated API usage").fabricCaption()
+                        Text("Expression implicitly coerced").fabricCaption()
+                    }
+                }
+
+                FabricDisclosureGroup("Disabled Section", isExpanded: .constant(false)) {
+                    Text("Hidden content")
+                }
+                .disabled(true)
+            }
+        }
+    }
+
+    // MARK: - Checkbox Demo
+
+    private var checkboxDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Checkbox").fabricTitle()
+
+                let allChecked = checkA && checkB && checkC
+                let noneChecked = !checkA && !checkB && !checkC
+
+                Toggle("Select All", isOn: Binding(
+                    get: { allChecked },
+                    set: { newValue in checkA = newValue; checkB = newValue; checkC = newValue }
+                ))
+                .toggleStyle(.fabricCheckbox(
+                    checkState: allChecked || noneChecked ? .standard : .indeterminate
+                ))
+
+                VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                    Toggle("Enable notifications", isOn: $checkA)
+                        .toggleStyle(.fabricCheckbox)
+
+                    Toggle("Auto-save drafts", isOn: $checkB)
+                        .toggleStyle(.fabricCheckbox(accent: .sage))
+
+                    Toggle("Send analytics", isOn: $checkC)
+                        .toggleStyle(.fabricCheckbox(accent: .ochre))
+                }
+                .padding(.leading, FabricSpacing.lg)
+
+                Toggle("Disabled checkbox", isOn: .constant(true))
+                    .toggleStyle(.fabricCheckbox)
+                    .disabled(true)
+            }
+        }
+    }
+
+    // MARK: - Score Gauge Demo
+
+    private var scoreGaugeDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Score Gauge").fabricTitle()
+
+                HStack(spacing: FabricSpacing.xl) {
+                    FabricScoreGauge(value: scoreValue) {
+                        VStack(spacing: 2) {
+                            Text("\(Int(scoreValue * 100))").fabricMonoLarge()
+                            Text("Score").fabricCaption()
+                        }
+                    }
+                    .frame(width: 100, height: 100)
+
+                    FabricScoreGauge(value: 0.25) {
+                        VStack(spacing: 2) {
+                            Text("25").fabricMonoLarge()
+                            Text("Low").fabricCaption()
+                        }
+                    }
+                    .frame(width: 100, height: 100)
+
+                    FabricScoreGauge(value: 0.55) {
+                        VStack(spacing: 2) {
+                            Text("55").fabricMonoLarge()
+                            Text("Mid").fabricCaption()
+                        }
+                    }
+                    .frame(width: 100, height: 100)
+
+                    FabricScoreGauge(value: 0.92, lineWidth: 10) {
+                        VStack(spacing: 2) {
+                            Text("92").fabricMonoLarge()
+                            Text("High").fabricCaption()
+                        }
+                    }
+                    .frame(width: 100, height: 100)
+                }
+
+                FabricSlider(value: $scoreValue, label: "Score", accent: .indigo)
+            }
+        }
+    }
+
+    // MARK: - Tab Bar Demo
+
+    private var tabBarDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Tab Bar").fabricTitle()
+
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    Text("Default").fabricCaption()
+                    FabricTabBar(
+                        selection: $tabSelection,
+                        tabs: ["Overview", "Details", "History"]
+                    )
+                    Text("Selected: \(tabSelection)").fabricCaption()
+                }
+
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    Text("Sage Accent").fabricCaption()
+                    FabricTabBar(
+                        selection: $tabSelection2,
+                        tabs: ["System", "Network", "Storage", "Memory"],
+                        accent: .sage
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                    Text("Disabled").fabricCaption()
+                    FabricTabBar(
+                        selection: .constant("Active"),
+                        tabs: ["Active", "Archived"]
+                    )
+                    .disabled(true)
+                }
+            }
+        }
+    }
+
+    // MARK: - Message Bubble Demo
+
+    private var messageBubbleDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Message Bubbles").fabricTitle()
+
+                VStack(spacing: FabricSpacing.md) {
+                    FabricMessageBubble(
+                        role: .user,
+                        avatar: .initials("AS"),
+                        timestamp: "2:34 PM"
+                    ) {
+                        Text("Can you analyze the system health and show me what needs attention?")
+                            .fabricBody()
+                    }
+
+                    FabricMessageBubble(
+                        role: .assistant,
+                        avatar: .icon("sparkles"),
+                        timestamp: "2:34 PM"
+                    ) {
+                        Text("I've scanned your system. Here's what I found: 3 large cache directories totaling 4.2 GB, and 2 unused Xcode simulators. Would you like me to clean them up?")
+                            .fabricBody()
+                    }
+
+                    FabricMessageBubble(
+                        role: .assistant,
+                        avatar: .icon("sparkles"),
+                        isStreaming: true
+                    ) {
+                        Text("Analyzing disk usage patterns")
+                            .fabricBody()
+                            .foregroundStyle(FabricColors.inkSecondary)
+                    }
                 }
             }
         }

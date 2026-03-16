@@ -53,4 +53,6 @@ public enum FabricSpacing {
     public static let pillHeight:        CGFloat = 22
     public static let sliderHeight:      CGFloat = 52
     public static let sliderIconWidth:   CGFloat = 32
+    public static let checkboxSize:      CGFloat = 20
+    public static let avatarSizeSm:      CGFloat = 32
 }

@@ -44,6 +44,8 @@ public enum FabricAnimation {
     public static let lift = Animation.spring(response: 0.30, dampingFraction: 0.75)
     /// Spring for reorder shifts — cards sliding to make room
     public static let reorder = Animation.spring(response: 0.35, dampingFraction: 0.70)
+    /// Snappy spring for sliding indicators (tab underline, segmented control capsule)
+    public static let slide = Animation.spring(response: 0.18, dampingFraction: 0.88)
 
     // MARK: - Drag & Drop Constants
 
