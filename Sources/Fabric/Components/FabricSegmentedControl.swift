@@ -113,6 +113,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
         }
         .fabricInnerShadow(trackShape, .shallow)
         .focusable()
+        .focusEffectDisabled()
         #if os(macOS)
         .onKeyPress(.leftArrow) { selectAdjacentSegment(offset: -1) }
         .onKeyPress(.rightArrow) { selectAdjacentSegment(offset: 1) }

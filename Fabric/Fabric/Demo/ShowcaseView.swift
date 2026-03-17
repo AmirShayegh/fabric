@@ -104,6 +104,7 @@ struct ShowcaseView: View {
     /// Tracks which card is the active drop target by identity (not index).
     /// Live indices are computed from task arrays inside handlers.
     @State private var dropTarget: (column: String, taskID: String)? = nil
+    @State private var selectedTimelineItem: String? = nil
 
     private let allColumnNames = ["To Do", "In Progress", "Done"]
 
@@ -686,32 +687,89 @@ struct ShowcaseView: View {
             VStack(alignment: .leading, spacing: FabricSpacing.lg) {
                 Text("Timeline").fabricTitle()
 
-                FabricTimeline(items: [
-                    .init(
-                        timestamp: "Jan 15",
-                        title: "Project kickoff",
-                        style: .milestone(accent: .sage)
-                    ),
-                    .init(
-                        timestamp: "Jan 22",
-                        title: "Design explorations complete",
-                        description: "Settled on warm textile direction"
-                    ),
-                    .init(
-                        timestamp: "Feb 3",
-                        title: "Component library started"
-                    ),
-                    .init(
-                        timestamp: "Feb 14",
-                        title: "Design review",
-                        description: "Stakeholder sign-off on all tokens",
-                        style: .milestone(accent: .indigo)
-                    ),
-                    .init(
-                        timestamp: "Mar 1",
-                        title: "Development sprint begins"
-                    ),
-                ])
+                HStack(alignment: .top, spacing: FabricSpacing.xl) {
+                    // Interactive timeline
+                    VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                        Text("Interactive").fabricCaption()
+
+                        FabricTimeline(
+                            items: [
+                                .init(
+                                    id: "kickoff",
+                                    timestamp: "Jan 15",
+                                    title: "Project kickoff",
+                                    style: .milestone(accent: .sage)
+                                ),
+                                .init(
+                                    id: "design",
+                                    timestamp: "Jan 22",
+                                    title: "Design explorations complete",
+                                    description: "Settled on warm textile direction"
+                                ),
+                                .init(
+                                    id: "components",
+                                    timestamp: "Feb 3",
+                                    title: "Component library started"
+                                ),
+                                .init(
+                                    id: "review",
+                                    timestamp: "Feb 14",
+                                    title: "Design review",
+                                    description: "Stakeholder sign-off on all tokens",
+                                    style: .milestone(accent: .indigo)
+                                ),
+                                .init(
+                                    id: "dev",
+                                    timestamp: "Mar 1",
+                                    title: "Development sprint begins"
+                                ),
+                            ],
+                            selection: $selectedTimelineItem
+                        )
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    // Narrow interactive (multiline wrapping demo)
+                    VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                        Text("Narrow").fabricCaption()
+
+                        FabricTimeline(
+                            items: [
+                                .init(
+                                    id: "kickoff",
+                                    timestamp: "Jan 15",
+                                    title: "Project kickoff",
+                                    style: .milestone(accent: .sage)
+                                ),
+                                .init(
+                                    id: "design",
+                                    timestamp: "Jan 22",
+                                    title: "Design explorations complete",
+                                    description: "Settled on warm textile direction"
+                                ),
+                                .init(
+                                    id: "components",
+                                    timestamp: "Feb 3",
+                                    title: "Component library started"
+                                ),
+                                .init(
+                                    id: "review",
+                                    timestamp: "Feb 14",
+                                    title: "Design review",
+                                    description: "Stakeholder sign-off on all tokens",
+                                    style: .milestone(accent: .indigo)
+                                ),
+                                .init(
+                                    id: "dev",
+                                    timestamp: "Mar 1",
+                                    title: "Development sprint begins"
+                                ),
+                            ],
+                            selection: $selectedTimelineItem
+                        )
+                    }
+                    .frame(maxWidth: 200)
+                }
                 .padding(.horizontal, FabricSpacing.lg)
             }
         }

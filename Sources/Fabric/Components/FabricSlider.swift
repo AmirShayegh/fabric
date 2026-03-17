@@ -83,6 +83,7 @@ private struct FabricSliderBody: View {
         .frame(height: FabricSpacing.sliderHeight)
         .opacity(isEnabled ? 1.0 : 0.5)
         .focusable()
+        .focusEffectDisabled()
         #if os(macOS)
         .onKeyPress(.leftArrow) {
             guard isEnabled else { return .ignored }

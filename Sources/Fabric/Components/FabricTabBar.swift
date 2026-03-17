@@ -100,6 +100,7 @@ private struct FabricTabBarBody<Selection: Hashable>: View {
             }
         }
         .focusable()
+        .focusEffectDisabled()
         #if os(macOS)
         .onKeyPress(.leftArrow) { selectAdjacentTab(offset: -1) }
         .onKeyPress(.rightArrow) { selectAdjacentTab(offset: 1) }
