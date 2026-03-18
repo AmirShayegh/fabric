@@ -432,7 +432,7 @@ private struct FabricTimelineBody: View {
                 column
             }
             .buttonStyle(.plain)
-            .contentShape(Rectangle().inset(by: -FabricSpacing.xxxl))
+            .contentShape(Rectangle().size(width: 200, height: nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - nodeFrameSize) / 2))
             .onHover { hovering in
                 guard isEnabled else { return }
                 hoveredItemID = hovering ? item.id : nil
