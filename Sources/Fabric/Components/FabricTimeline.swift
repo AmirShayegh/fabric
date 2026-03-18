@@ -437,6 +437,7 @@ private struct FabricTimelineBody: View {
                 selection = isSelected ? nil : item.id
             } label: {
                 column
+                    .padding(.bottom, FabricSpacing.xxxl)
             }
             .buttonStyle(.plain)
             .contentShape(Rectangle())
