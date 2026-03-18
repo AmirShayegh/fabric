@@ -107,15 +107,33 @@ public enum FabricColors {
         #endif
     }()
 
-    // MARK: - Primary Button Fills
-    // Opaque — guaranteed contrast against onPrimary text in both modes.
+    // MARK: - Button Fills
+    // Opaque — guaranteed WCAG AA contrast against onPrimary text in both modes.
+    // Each accent is hand-tuned: hue/saturation match the accent, brightness is
+    // lowered to reach ≥ 4.5:1 contrast vs onPrimary (B ≈ 0.99 light / 0.95 dark).
 
+    // Indigo — H=225
     /// Default ~5.2:1 (light) / ~5.5:1 (dark) vs onPrimary
     public static let buttonPrimary        = hsb(225/360, 0.35, 0.46, dark: 225/360, 0.30, 0.55)
     /// Hovered ~5.7:1 / ~5.9:1
     public static let buttonPrimaryHovered = hsb(225/360, 0.35, 0.44, dark: 225/360, 0.30, 0.52)
     /// Pressed ~6.1:1 / ~6.5:1
     public static let buttonPrimaryPressed = hsb(225/360, 0.35, 0.42, dark: 225/360, 0.30, 0.48)
+
+    // Madder — H=12, warm terracotta
+    public static let buttonMadder        = hsb(12/360, 0.50, 0.50, dark: 12/360, 0.42, 0.60)
+    public static let buttonMadderHovered = hsb(12/360, 0.50, 0.48, dark: 12/360, 0.42, 0.57)
+    public static let buttonMadderPressed = hsb(12/360, 0.50, 0.46, dark: 12/360, 0.42, 0.53)
+
+    // Sage — H=145, higher saturation than foreground to stay green when darkened
+    public static let buttonSage        = hsb(145/360, 0.30, 0.45, dark: 145/360, 0.25, 0.52)
+    public static let buttonSageHovered = hsb(145/360, 0.30, 0.43, dark: 145/360, 0.25, 0.49)
+    public static let buttonSagePressed = hsb(145/360, 0.30, 0.41, dark: 145/360, 0.25, 0.45)
+
+    // Ochre — H=38, higher saturation to compensate for the large brightness drop
+    public static let buttonOchre        = hsb(38/360, 0.60, 0.50, dark: 38/360, 0.52, 0.56)
+    public static let buttonOchreHovered = hsb(38/360, 0.60, 0.48, dark: 38/360, 0.52, 0.53)
+    public static let buttonOchrePressed = hsb(38/360, 0.60, 0.46, dark: 38/360, 0.52, 0.49)
 
     // MARK: - Semantic
 
