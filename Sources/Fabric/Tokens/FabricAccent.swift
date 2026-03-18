@@ -23,4 +23,35 @@ public enum FabricAccent: CaseIterable {
         case .ochre:  FabricColors.ochre.opacity(0.12)
         }
     }
+
+    /// Opaque button fill — darker than `foreground` to guarantee WCAG AA
+    /// contrast against `onPrimary` text on both light and dark backgrounds.
+    public var buttonFill: Color {
+        switch self {
+        case .indigo: FabricColors.buttonPrimary
+        case .madder: FabricColors.buttonMadder
+        case .sage:   FabricColors.buttonSage
+        case .ochre:  FabricColors.buttonOchre
+        }
+    }
+
+    /// Hovered button fill — slightly darker than `buttonFill`.
+    public var buttonFillHovered: Color {
+        switch self {
+        case .indigo: FabricColors.buttonPrimaryHovered
+        case .madder: FabricColors.buttonMadderHovered
+        case .sage:   FabricColors.buttonSageHovered
+        case .ochre:  FabricColors.buttonOchreHovered
+        }
+    }
+
+    /// Pressed button fill — darkest interactive state.
+    public var buttonFillPressed: Color {
+        switch self {
+        case .indigo: FabricColors.buttonPrimaryPressed
+        case .madder: FabricColors.buttonMadderPressed
+        case .sage:   FabricColors.buttonSagePressed
+        case .ochre:  FabricColors.buttonOchrePressed
+        }
+    }
 }

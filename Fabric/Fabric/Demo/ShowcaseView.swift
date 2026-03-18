@@ -413,9 +413,12 @@ struct ShowcaseView: View {
                         .toggleStyle(.fabric)
 
                     Toggle("Auto-save drafts", isOn: $toggleAutoSave)
-                        .toggleStyle(.fabric)
+                        .toggleStyle(.fabric(accent: .sage))
 
-                    Toggle("Disabled control", isOn: $toggleDarkMode)
+                    Toggle("Dark mode", isOn: $toggleDarkMode)
+                        .toggleStyle(.fabric(accent: .ochre))
+
+                    Toggle("Disabled control", isOn: .constant(true))
                         .toggleStyle(.fabric)
                         .disabled(true)
                 }
@@ -436,6 +439,16 @@ struct ShowcaseView: View {
                             .buttonStyle(.fabricSecondary)
                         Button("Ghost") { }
                             .buttonStyle(.fabricGhost)
+                    }
+
+                    Text("Accent Colors").fabricCaption()
+                    HStack(spacing: FabricSpacing.md) {
+                        Button("Sage") { }
+                            .buttonStyle(.fabric(accent: .sage))
+                        Button("Ochre") { }
+                            .buttonStyle(.fabric(accent: .ochre))
+                        Button("Madder") { }
+                            .buttonStyle(.fabric(accent: .madder))
                     }
 
                     Text("Disabled").fabricCaption()
@@ -694,13 +707,13 @@ struct ShowcaseView: View {
                     FabricTimeline(
                         items: [
                             .init(id: "v-kickoff", timestamp: "Jan 15", title: "Kickoff",
-                                  style: .milestone(accent: .sage)),
+                                  kind: .milestone(accent: .sage)),
                             .init(id: "v-design", timestamp: "Jan 22", title: "Design",
                                   description: "Settled on warm textile direction"),
                             .init(id: "v-components", timestamp: "Feb 3", title: "Components",
                                   description: "Core library with design tokens"),
                             .init(id: "v-review", timestamp: "Feb 14", title: "Review",
-                                  style: .milestone(accent: .indigo)),
+                                  kind: .milestone(accent: .indigo)),
                             .init(id: "v-dev", timestamp: "Mar 1", title: "Dev Sprint"),
                         ],
                         selection: $selectedTimelineItem,
@@ -733,10 +746,10 @@ struct ShowcaseView: View {
                             .init(id: "h-qa", timestamp: "Week 4", title: "Quality Assurance",
                                   description: "Manual and automated testing pass"),
                             .init(id: "h-staging", timestamp: "Week 5", title: "Staging Deploy",
-                                  style: .milestone(accent: .ochre)),
+                                  kind: .milestone(accent: .ochre)),
                             .init(id: "h-release", timestamp: "Week 6", title: "Production Release",
                                   description: "Production deploy with monitoring",
-                                  style: .milestone(accent: .sage)),
+                                  kind: .milestone(accent: .sage)),
                         ],
                         selection: $selectedTimelineItem,
                         currentItemID: "h-qa",
@@ -758,7 +771,7 @@ struct ShowcaseView: View {
                             .init(id: "ob-team", timestamp: "Step 3", title: "Join Your Team",
                                   description: "Accept invite or create a new workspace"),
                             .init(id: "ob-done", timestamp: "Step 4", title: "Ready to Go",
-                                  style: .milestone(accent: .sage)),
+                                  kind: .milestone(accent: .sage)),
                         ],
                         selection: $selectedTimelineItem,
                         currentItemID: "ob-profile",

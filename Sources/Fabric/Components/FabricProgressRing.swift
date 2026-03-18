@@ -5,17 +5,20 @@ public struct FabricProgressRing<Label: View>: View {
     public let value: Double
     public let lineWidth: CGFloat
     public let accent: FabricAccent
+    public let accessibilityLabel: String
     @ViewBuilder public let label: Label
 
     public init(
         value: Double,
         lineWidth: CGFloat = 6,
         accent: FabricAccent = .indigo,
+        accessibilityLabel: String = "Progress",
         @ViewBuilder label: () -> Label
     ) {
         self.value = value
         self.lineWidth = lineWidth
         self.accent = accent
+        self.accessibilityLabel = accessibilityLabel
         self.label = label()
     }
 
@@ -48,7 +51,7 @@ public struct FabricProgressRing<Label: View>: View {
             value: clampedValue
         )
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Progress")
+        .accessibilityLabel(accessibilityLabel)
         .accessibilityValue("\(Int(clampedValue * 100)) percent")
     }
 }

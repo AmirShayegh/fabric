@@ -66,6 +66,7 @@ private struct FabricTabBarBody<Selection: Hashable>: View {
 
     @Namespace private var namespace
     @State private var hoveredTab: Selection?
+    @State private var keyboardNavigated = false
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -110,6 +111,12 @@ private struct FabricTabBarBody<Selection: Hashable>: View {
             if !isEnabled { hoveredTab = nil }
         }
         .animation(reduceMotion ? nil : FabricAnimation.hover, value: hoveredTab)
+        .onChange(of: selection) {
+            if keyboardNavigated {
+                AccessibilityNotification.Announcement(selectedLabel).post()
+                keyboardNavigated = false
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityValue(selectedLabel)
     }
@@ -130,6 +137,7 @@ private struct FabricTabBarBody<Selection: Hashable>: View {
         }
         let newIndex = currentIndex + offset
         guard tabs.indices.contains(newIndex) else { return .ignored }
+        keyboardNavigated = true
         selection = tabs[newIndex].value
         return .handled
     }
