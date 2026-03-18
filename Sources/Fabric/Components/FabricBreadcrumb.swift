@@ -65,7 +65,7 @@ private struct FabricBreadcrumbBody: View {
                                 .lineLimit(1)
                                 .frame(minHeight: 44)
                                 .contentShape(Rectangle())
-                                .accessibilityAddTraits(.isSelected)
+                                .accessibilityValue("Current page")
                                 .id(item.id)
                         } else {
                             Button {

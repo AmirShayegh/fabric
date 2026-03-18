@@ -518,5 +518,6 @@ private struct FabricTimelinePulseRing: View {
                     isAnimating = true
                 }
             }
+            .accessibilityHidden(true)
     }
 }

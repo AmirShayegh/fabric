@@ -253,6 +253,7 @@ private struct PulseRing: View {
                     isAnimating = true
                 }
             }
+            .accessibilityHidden(true)
     }
 }
 
