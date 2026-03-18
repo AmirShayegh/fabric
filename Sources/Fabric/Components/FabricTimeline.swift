@@ -281,61 +281,43 @@ private struct FabricTimelineBody: View {
         let state = nodeState(at: index)
         let itemAcc = itemAccent(for: item)
 
-        let content = VStack(spacing: 0) {
+        let content = VStack(alignment: .dotCenter, spacing: 0) {
             // Top connector line
             if index > 0 {
                 Capsule()
                     .fill(connectorFill(beforeIndex: index, startPoint: .top, endPoint: .bottom))
-                    .frame(width: connectorThickness, height: FabricSpacing.lg)
+                    .frame(width: connectorThickness, height: 100)
                     .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
             }
 
-            // Node + timestamp row
-            HStack(spacing: FabricSpacing.sm) {
-                timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
-
-                Text(item.timestamp)
-                    .fabricTypography(.caption)
-                    .foregroundStyle(labelColor(state: state))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .alignmentGuide(.dotCenter) { [nodeFrameSize] _ in nodeFrameSize / 2 }
-            .padding(.vertical, FabricSpacing.xs)
-
-            // Bottom connector line
-            if index < items.count - 1 {
-                Capsule()
-                    .fill(connectorFill(
-                        beforeIndex: index + 1,
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ))
-                    .frame(width: connectorThickness, height: FabricSpacing.lg)
-                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
-            }
-
-            // Title
-            Text(item.title)
-                .fabricTypography(.label)
-                .foregroundStyle(
-                    isSelected ? itemAcc.foreground : FabricColors.inkPrimary
-                )
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.75)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, FabricSpacing.xs)
+            // Node with labels as overlay (labels don't affect alignment)
+            timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
                 .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
+                .overlay(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                        Text(item.timestamp)
+                            .fabricTypography(.caption)
+                            .foregroundStyle(labelColor(state: state))
 
-            // Description — shown only when selected
-            if isSelected, let description = item.description {
-                Text(description)
-                    .fabricTypography(.body)
-                    .foregroundStyle(FabricColors.inkSecondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, FabricSpacing.xs)
-                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
-            }
+                        Text(item.title)
+                            .fabricTypography(.label)
+                            .foregroundStyle(
+                                isSelected ? itemAcc.foreground : FabricColors.inkPrimary
+                            )
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+
+                        if let description = item.description {
+                            Text(description)
+                                .fabricTypography(.body)
+                                .foregroundStyle(FabricColors.inkSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .fixedSize()
+                    .offset(x: nodeFrameSize + FabricSpacing.sm)
+                }
+                .padding(.vertical, FabricSpacing.xs)
         }
         .padding(.vertical, FabricSpacing.xs)
 
@@ -379,13 +361,15 @@ private struct FabricTimelineBody: View {
                                 .frame(height: connectorThickness)
                                 .padding(.horizontal, FabricSpacing.xs)
                                 .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
-                                .frame(minWidth: FabricSpacing.xl)
+                                .frame(width: 200)
                         }
 
                         horizontalItemColumn(item: item, index: index)
                     }
                 }
-                .padding(FabricSpacing.sm)
+                .padding(.top, FabricSpacing.sm)
+                .padding(.horizontal, FabricSpacing.sm)
+                .padding(.bottom, FabricSpacing.xxxl)
             }
 
             // Description panel — shown when a title is selected
@@ -410,23 +394,34 @@ private struct FabricTimelineBody: View {
         let state = nodeState(at: index)
         let itemAcc = itemAccent(for: item)
 
-        let column = VStack(spacing: FabricSpacing.xs) {
-            timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
+        let isFirst = index == 0
+        let isLast = index == items.count - 1
+        let labelAlignment: Alignment = isFirst ? .topLeading : isLast ? .topTrailing : .top
 
-            Text(item.timestamp)
-                .fabricTypography(.caption)
-                .foregroundStyle(labelColor(state: state))
-                .minimumScaleFactor(0.75)
+        let column = timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
+            .overlay(alignment: labelAlignment) {
+                VStack(
+                    alignment: isFirst ? .leading : isLast ? .trailing : .center,
+                    spacing: FabricSpacing.xs
+                ) {
+                    Text(item.timestamp)
+                        .fabricTypography(.caption)
+                        .foregroundStyle(labelColor(state: state))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
 
-            Text(item.title)
-                .fabricTypography(.label)
-                .foregroundStyle(
-                    isSelected ? itemAcc.foreground : FabricColors.inkPrimary
-                )
-                .minimumScaleFactor(0.75)
-                .multilineTextAlignment(.center)
-        }
-        .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
+                    Text(item.title)
+                        .fabricTypography(.label)
+                        .foregroundStyle(
+                            isSelected ? itemAcc.foreground : FabricColors.inkPrimary
+                        )
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                }
+                .fixedSize()
+                .offset(y: nodeFrameSize + FabricSpacing.sm)
+            }
+            .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
 
         if isInteractive {
             Button {

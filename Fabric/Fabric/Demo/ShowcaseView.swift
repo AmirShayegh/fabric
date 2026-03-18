@@ -687,85 +687,82 @@ struct ShowcaseView: View {
             VStack(alignment: .leading, spacing: FabricSpacing.lg) {
                 Text("Timeline").fabricTitle()
 
-                // Vertical timeline
+                // Vertical — project phases
                 VStack(alignment: .leading, spacing: FabricSpacing.sm) {
-                    Text("Vertical").fabricCaption()
+                    Text("Vertical — Project Phases").fabricCaption()
 
                     FabricTimeline(
                         items: [
-                            .init(
-                                id: "kickoff",
-                                timestamp: "Jan 15",
-                                title: "Kickoff",
-                                style: .milestone(accent: .sage)
-                            ),
-                            .init(
-                                id: "design",
-                                timestamp: "Jan 22",
-                                title: "Design",
-                                description: "Settled on warm textile direction"
-                            ),
-                            .init(
-                                id: "components",
-                                timestamp: "Feb 3",
-                                title: "Components",
-                                description: "Core library with design tokens"
-                            ),
-                            .init(
-                                id: "review",
-                                timestamp: "Feb 14",
-                                title: "Review",
-                                style: .milestone(accent: .indigo)
-                            ),
-                            .init(
-                                id: "dev",
-                                timestamp: "Mar 1",
-                                title: "Dev sprint"
-                            ),
+                            .init(id: "v-kickoff", timestamp: "Jan 15", title: "Kickoff",
+                                  style: .milestone(accent: .sage)),
+                            .init(id: "v-design", timestamp: "Jan 22", title: "Design",
+                                  description: "Settled on warm textile direction"),
+                            .init(id: "v-components", timestamp: "Feb 3", title: "Components",
+                                  description: "Core library with design tokens"),
+                            .init(id: "v-review", timestamp: "Feb 14", title: "Review",
+                                  style: .milestone(accent: .indigo)),
+                            .init(id: "v-dev", timestamp: "Mar 1", title: "Dev Sprint"),
                         ],
                         selection: $selectedTimelineItem,
-                        currentItemID: "components"
+                        currentItemID: "v-components"
                     )
                 }
                 .padding(.horizontal, FabricSpacing.lg)
 
-                // Horizontal timeline
+                // Vertical — non-interactive
                 VStack(alignment: .leading, spacing: FabricSpacing.sm) {
-                    Text("Horizontal").fabricCaption()
+                    Text("Vertical — Non-interactive").fabricCaption()
+
+                    FabricTimeline(items: [
+                        .init(timestamp: "Q1", title: "Planning"),
+                        .init(timestamp: "Q2", title: "Build"),
+                        .init(timestamp: "Q3", title: "Launch"),
+                    ])
+                }
+                .padding(.horizontal, FabricSpacing.lg)
+
+                // Horizontal — release pipeline
+                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                    Text("Horizontal — Release Pipeline").fabricCaption()
 
                     FabricTimeline(
                         items: [
-                            .init(
-                                id: "h-kickoff",
-                                timestamp: "Jan 15",
-                                title: "Kickoff"
-                            ),
-                            .init(
-                                id: "h-design",
-                                timestamp: "Jan 22",
-                                title: "Design",
-                                description: "Settled on warm textile direction with implied cloth feel"
-                            ),
-                            .init(
-                                id: "h-components",
-                                timestamp: "Feb 3",
-                                title: "Components",
-                                description: "Core library development with design tokens"
-                            ),
-                            .init(
-                                id: "h-review",
-                                timestamp: "Feb 14",
-                                title: "Review",
-                                style: .milestone(accent: .indigo)
-                            ),
-                            .init(
-                                id: "h-dev",
-                                timestamp: "Mar 1",
-                                title: "Dev sprint"
-                            ),
+                            .init(id: "h-spec", timestamp: "Week 1", title: "Spec"),
+                            .init(id: "h-impl", timestamp: "Week 2–3", title: "Implementation",
+                                  description: "Core feature development across all modules"),
+                            .init(id: "h-qa", timestamp: "Week 4", title: "QA",
+                                  description: "Manual and automated testing pass"),
+                            .init(id: "h-staging", timestamp: "Week 5", title: "Staging",
+                                  style: .milestone(accent: .ochre)),
+                            .init(id: "h-release", timestamp: "Week 6", title: "Release",
+                                  description: "Production deploy with monitoring",
+                                  style: .milestone(accent: .sage)),
                         ],
                         selection: $selectedTimelineItem,
-                        currentItemID: "h-components",
+                        currentItemID: "h-qa",
+                        accent: .ochre,
+                        axis: .horizontal
+                    )
+                }
+                .padding(.horizontal, FabricSpacing.lg)
+
+                // Horizontal — onboarding flow
+                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                    Text("Horizontal — Onboarding").fabricCaption()
+
+                    FabricTimeline(
+                        items: [
+                            .init(id: "ob-signup", timestamp: "Step 1", title: "Sign Up"),
+                            .init(id: "ob-profile", timestamp: "Step 2", title: "Profile Setup",
+                                  description: "Add your name, avatar, and preferences"),
+                            .init(id: "ob-team", timestamp: "Step 3", title: "Join Team",
+                                  description: "Accept invite or create a new workspace"),
+                            .init(id: "ob-done", timestamp: "Step 4", title: "All Set",
+                                  style: .milestone(accent: .sage)),
+                        ],
+                        selection: $selectedTimelineItem,
+                        currentItemID: "ob-profile",
+                        accent: .indigo,
                         axis: .horizontal
                     )
                 }
