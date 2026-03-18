@@ -370,7 +370,7 @@ private struct FabricTimelineBody: View {
                         }
                     }
                     .padding(.top, FabricSpacing.sm)
-                    .padding(.horizontal, FabricSpacing.sm)
+                    .padding(.horizontal, 100)
                     .padding(.bottom, FabricSpacing.xxxl)
                 }
                 .onAppear {
@@ -402,16 +402,9 @@ private struct FabricTimelineBody: View {
         let state = nodeState(at: index)
         let itemAcc = itemAccent(for: item)
 
-        let isFirst = index == 0
-        let isLast = index == items.count - 1
-        let labelAlignment: Alignment = isFirst ? .topLeading : isLast ? .topTrailing : .top
-
         let column = timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
-            .overlay(alignment: labelAlignment) {
-                VStack(
-                    alignment: isFirst ? .leading : isLast ? .trailing : .center,
-                    spacing: FabricSpacing.xs
-                ) {
+            .overlay(alignment: .top) {
+                VStack(spacing: FabricSpacing.xs) {
                     Text(item.timestamp)
                         .fabricTypography(.caption)
                         .foregroundStyle(labelColor(state: state))
@@ -426,7 +419,7 @@ private struct FabricTimelineBody: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 }
-                .frame(maxWidth: 200)
+                .frame(width: 200)
                 .offset(y: nodeFrameSize + FabricSpacing.sm)
             }
             .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
@@ -437,10 +430,9 @@ private struct FabricTimelineBody: View {
                 selection = isSelected ? nil : item.id
             } label: {
                 column
-                    .padding(.bottom, FabricSpacing.xxxl)
             }
             .buttonStyle(.plain)
-            .contentShape(Rectangle())
+            .contentShape(Rectangle().inset(by: -FabricSpacing.xxxl))
             .onHover { hovering in
                 guard isEnabled else { return }
                 hoveredItemID = hovering ? item.id : nil

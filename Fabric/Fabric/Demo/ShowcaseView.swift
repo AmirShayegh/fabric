@@ -727,14 +727,14 @@ struct ShowcaseView: View {
 
                     FabricTimeline(
                         items: [
-                            .init(id: "h-spec", timestamp: "Week 1", title: "Spec"),
-                            .init(id: "h-impl", timestamp: "Week 2–3", title: "Implementation",
+                            .init(id: "h-spec", timestamp: "Week 1", title: "Requirements Gathering"),
+                            .init(id: "h-impl", timestamp: "Week 2–3", title: "Feature Development",
                                   description: "Core feature development across all modules"),
-                            .init(id: "h-qa", timestamp: "Week 4", title: "QA",
+                            .init(id: "h-qa", timestamp: "Week 4", title: "Quality Assurance",
                                   description: "Manual and automated testing pass"),
-                            .init(id: "h-staging", timestamp: "Week 5", title: "Staging",
+                            .init(id: "h-staging", timestamp: "Week 5", title: "Staging Deploy",
                                   style: .milestone(accent: .ochre)),
-                            .init(id: "h-release", timestamp: "Week 6", title: "Release",
+                            .init(id: "h-release", timestamp: "Week 6", title: "Production Release",
                                   description: "Production deploy with monitoring",
                                   style: .milestone(accent: .sage)),
                         ],
@@ -752,12 +752,12 @@ struct ShowcaseView: View {
 
                     FabricTimeline(
                         items: [
-                            .init(id: "ob-signup", timestamp: "Step 1", title: "Sign Up"),
-                            .init(id: "ob-profile", timestamp: "Step 2", title: "Profile Setup",
+                            .init(id: "ob-signup", timestamp: "Step 1", title: "Create Account"),
+                            .init(id: "ob-profile", timestamp: "Step 2", title: "Complete Profile",
                                   description: "Add your name, avatar, and preferences"),
-                            .init(id: "ob-team", timestamp: "Step 3", title: "Join Team",
+                            .init(id: "ob-team", timestamp: "Step 3", title: "Join Your Team",
                                   description: "Accept invite or create a new workspace"),
-                            .init(id: "ob-done", timestamp: "Step 4", title: "All Set",
+                            .init(id: "ob-done", timestamp: "Step 4", title: "Ready to Go",
                                   style: .milestone(accent: .sage)),
                         ],
                         selection: $selectedTimelineItem,
