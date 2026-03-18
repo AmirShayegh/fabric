@@ -2,24 +2,24 @@ import SwiftUI
 
 public struct FabricLoadingIndicator: View {
 
-    public enum Style { case dots, ring }
+    public enum Variant { case dots, ring }
 
-    public let style: Style
+    public let variant: Variant
     public let accent: FabricAccent
     public let label: String?
 
     public init(
-        _ style: Style = .dots,
+        _ variant: Variant = .dots,
         accent: FabricAccent = .indigo,
         label: String? = nil
     ) {
-        self.style = style
+        self.variant = variant
         self.accent = accent
         self.label = label
     }
 
     public var body: some View {
-        FabricLoadingIndicatorBody(style: style, accent: accent, label: label)
+        FabricLoadingIndicatorBody(variant: variant, accent: accent, label: label)
     }
 }
 
@@ -27,7 +27,7 @@ public struct FabricLoadingIndicator: View {
 
 private struct FabricLoadingIndicatorBody: View {
 
-    let style: FabricLoadingIndicator.Style
+    let variant: FabricLoadingIndicator.Variant
     let accent: FabricAccent
     let label: String?
 
@@ -37,7 +37,7 @@ private struct FabricLoadingIndicatorBody: View {
     var body: some View {
         VStack(spacing: FabricSpacing.sm) {
             Group {
-                switch style {
+                switch variant {
                 case .dots: dotsView
                 case .ring: ringView
                 }

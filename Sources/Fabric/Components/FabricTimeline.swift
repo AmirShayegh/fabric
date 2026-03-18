@@ -8,9 +8,9 @@ public struct FabricTimelineItem: Identifiable {
     public let timestamp: String
     public let title: String
     public let description: String?
-    public let style: Style
+    public let kind: Kind
 
-    public enum Style {
+    public enum Kind {
         case event
         case milestone(accent: FabricAccent)
     }
@@ -20,13 +20,13 @@ public struct FabricTimelineItem: Identifiable {
         timestamp: String,
         title: String,
         description: String? = nil,
-        style: Style = .event
+        kind: Kind = .event
     ) {
         self.id = id
         self.timestamp = timestamp
         self.title = title
         self.description = description
-        self.style = style
+        self.kind = kind
     }
 }
 
@@ -450,7 +450,7 @@ private struct FabricTimelineBody: View {
     // MARK: - Shared Helpers
 
     private func itemAccent(for item: FabricTimelineItem) -> FabricAccent {
-        if case .milestone(let a) = item.style { a }
+        if case .milestone(let a) = item.kind { a }
         else { accent }
     }
 
@@ -463,7 +463,7 @@ private struct FabricTimelineBody: View {
             case .future: break
             }
         }
-        let isMilestone: Bool = if case .milestone = item.style { true } else { false }
+        let isMilestone: Bool = if case .milestone = item.kind { true } else { false }
         if isMilestone { parts.append("Milestone") }
         parts.append(item.timestamp)
         parts.append(item.title)
