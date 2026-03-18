@@ -30,7 +30,7 @@ public struct FabricTimelineItem: Identifiable {
     }
 }
 
-// MARK: - Custom Alignment (vertical mode: connector ↔ dot ↔ content)
+// MARK: - Custom Alignment (vertical mode: connector ↔ node ↔ content)
 
 extension HorizontalAlignment {
     fileprivate struct DotCenter: AlignmentID {
@@ -120,13 +120,12 @@ private struct FabricTimelineBody: View {
     @State private var hoveredItemID: String? = nil
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.displayScale) private var displayScale
 
     private let nodeSize: Double = 22
     private let nodeFrameSize: Double = 28
     private let activeRingSize: Double = 26
     private let borderWidth: Double = 2.5
-    private let connectorHeight: Double = 3
+    private let connectorThickness: Double = 3
 
     var body: some View {
         Group {
@@ -169,144 +168,10 @@ private struct FabricTimelineBody: View {
         return .future
     }
 
-    // MARK: - Vertical Layout
-
-    private var verticalLayout: some View {
-        VStack(alignment: .dotCenter, spacing: 0) {
-            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                verticalItemRow(item: item, index: index)
-            }
-        }
-    }
+    // MARK: - Shared Node (step indicator style)
 
     @ViewBuilder
-    private func verticalItemRow(item: FabricTimelineItem, index: Int) -> some View {
-        let isSelected = selection == item.id
-        let isHovered = hoveredItemID == item.id && !isSelected
-
-        let content = VStack(spacing: 0) {
-            FabricTimelineConnector(
-                item: item,
-                isFirst: index == 0,
-                isSelected: isSelected,
-                timestampColor: timestampColor(for: item, isSelected: isSelected)
-            )
-
-            FabricTimelineContentBlock(
-                item: item,
-                isSelected: isSelected,
-                isHovered: isHovered,
-                accent: itemAccent(for: item),
-                displayScale: displayScale
-            )
-            .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
-        }
-
-        if isInteractive {
-            Button {
-                guard isEnabled else { return }
-                selection = isSelected ? nil : item.id
-            } label: {
-                content
-            }
-            .buttonStyle(.plain)
-            .contentShape(Rectangle())
-            .onHover { hovering in
-                guard isEnabled else { return }
-                hoveredItemID = hovering ? item.id : nil
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(accessibilityText(for: item))
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-            .accessibilityHint(isSelected ? "Deselect" : "Select")
-        } else {
-            content
-        }
-    }
-
-    // MARK: - Horizontal Layout
-
-    private var horizontalLayout: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .dotCenterH, spacing: 0) {
-                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                    if index > 0 {
-                        horizontalConnector(beforeIndex: index)
-                            .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
-                            .frame(maxWidth: .infinity)
-                    }
-
-                    horizontalItemColumn(item: item, index: index)
-                }
-            }
-
-            // Description panel — shown when a title is selected
-            if let selectedItem = items.first(where: { $0.id == selection }),
-               let description = selectedItem.description {
-                Text(description)
-                    .fabricTypography(.body)
-                    .foregroundStyle(FabricColors.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, FabricSpacing.md)
-            }
-        }
-    }
-
-    // MARK: - Horizontal Item Column
-
-    @ViewBuilder
-    private func horizontalItemColumn(item: FabricTimelineItem, index: Int) -> some View {
-        let isSelected = selection == item.id
-        let isHovered = hoveredItemID == item.id && !isSelected
-        let state = nodeState(at: index)
-
-        let column = VStack(spacing: FabricSpacing.xs) {
-            horizontalNode(state: state, accent: itemAccent(for: item), isHovered: isHovered)
-
-            Text(item.timestamp)
-                .fabricTypography(.caption)
-                .foregroundStyle(horizontalLabelColor(state: state))
-                .lineLimit(1)
-
-            Text(item.title)
-                .fabricTypography(.label)
-                .foregroundStyle(
-                    isSelected ? itemAccent(for: item).foreground : FabricColors.inkPrimary
-                )
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-        }
-        .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
-
-        if isInteractive {
-            Button {
-                guard isEnabled else { return }
-                selection = isSelected ? nil : item.id
-            } label: {
-                column
-            }
-            .buttonStyle(.plain)
-            .contentShape(Rectangle())
-            .onHover { hovering in
-                guard isEnabled else { return }
-                hoveredItemID = hovering ? item.id : nil
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(accessibilityText(for: item))
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-            .accessibilityHint(isSelected ? "Deselect" : "Select")
-        } else {
-            column
-        }
-    }
-
-    // MARK: - Horizontal Node (step indicator style)
-
-    @ViewBuilder
-    private func horizontalNode(state: NodeState, accent: FabricAccent, isHovered: Bool) -> some View {
+    private func timelineNode(state: NodeState, accent: FabricAccent, isHovered: Bool) -> some View {
         switch state {
         case .completed:
             ZStack {
@@ -361,40 +226,228 @@ private struct FabricTimelineBody: View {
         }
     }
 
-    // MARK: - Horizontal Connector (step indicator style)
+    // MARK: - Shared Connector Fill
 
-    private func horizontalConnector(beforeIndex index: Int) -> some View {
+    private func connectorFill(
+        beforeIndex index: Int,
+        startPoint: UnitPoint,
+        endPoint: UnitPoint
+    ) -> AnyShapeStyle {
         let currentIndex = currentItemID.flatMap { id in
             items.firstIndex(where: { $0.id == id })
         }
         let filled = currentIndex.map { index <= $0 } ?? false
         let transition = currentIndex.map { index == $0 + 1 } ?? false
 
-        return Capsule()
-            .fill(
-                transition
-                    ? AnyShapeStyle(
-                        LinearGradient(
-                            colors: [accent.foreground, accent.foreground.opacity(0.25)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                      )
-                    : filled
-                        ? AnyShapeStyle(accent.foreground)
-                        : AnyShapeStyle(FabricColors.connector)
+        if transition {
+            return AnyShapeStyle(
+                LinearGradient(
+                    colors: [accent.foreground, accent.foreground.opacity(0.25)],
+                    startPoint: startPoint,
+                    endPoint: endPoint
+                )
             )
-            .frame(height: connectorHeight)
-            .padding(.horizontal, FabricSpacing.xs)
+        } else if filled {
+            return AnyShapeStyle(accent.foreground)
+        } else {
+            return AnyShapeStyle(FabricColors.connector)
+        }
     }
 
-    // MARK: - Horizontal Label Color
+    // MARK: - Shared Label Color
 
-    private func horizontalLabelColor(state: NodeState) -> Color {
+    private func labelColor(state: NodeState) -> Color {
         switch state {
         case .completed: FabricColors.inkSecondary
         case .current: accent.foreground
         case .future: FabricColors.inkTertiary
+        }
+    }
+
+    // MARK: - Vertical Layout
+
+    private var verticalLayout: some View {
+        VStack(alignment: .dotCenter, spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                verticalItemRow(item: item, index: index)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func verticalItemRow(item: FabricTimelineItem, index: Int) -> some View {
+        let isSelected = selection == item.id
+        let isHovered = hoveredItemID == item.id && !isSelected
+        let state = nodeState(at: index)
+        let itemAcc = itemAccent(for: item)
+
+        let content = VStack(spacing: 0) {
+            // Top connector line
+            if index > 0 {
+                Capsule()
+                    .fill(connectorFill(beforeIndex: index, startPoint: .top, endPoint: .bottom))
+                    .frame(width: connectorThickness, height: FabricSpacing.lg)
+                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
+            }
+
+            // Node + timestamp row
+            HStack(spacing: FabricSpacing.sm) {
+                timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
+
+                Text(item.timestamp)
+                    .fabricTypography(.caption)
+                    .foregroundStyle(labelColor(state: state))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .alignmentGuide(.dotCenter) { [nodeFrameSize] _ in nodeFrameSize / 2 }
+            .padding(.vertical, FabricSpacing.xs)
+
+            // Bottom connector line
+            if index < items.count - 1 {
+                Capsule()
+                    .fill(connectorFill(
+                        beforeIndex: index + 1,
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ))
+                    .frame(width: connectorThickness, height: FabricSpacing.lg)
+                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
+            }
+
+            // Title
+            Text(item.title)
+                .fabricTypography(.label)
+                .foregroundStyle(
+                    isSelected ? itemAcc.foreground : FabricColors.inkPrimary
+                )
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.75)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, FabricSpacing.xs)
+                .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
+
+            // Description — shown only when selected
+            if isSelected, let description = item.description {
+                Text(description)
+                    .fabricTypography(.body)
+                    .foregroundStyle(FabricColors.inkSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, FabricSpacing.xs)
+                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
+            }
+        }
+        .padding(.vertical, FabricSpacing.xs)
+
+        if isInteractive {
+            Button {
+                guard isEnabled else { return }
+                selection = isSelected ? nil : item.id
+            } label: {
+                content
+            }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
+            .onHover { hovering in
+                guard isEnabled else { return }
+                hoveredItemID = hovering ? item.id : nil
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityText(for: item))
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .accessibilityHint(isSelected ? "Deselect" : "Select")
+        } else {
+            content
+        }
+    }
+
+    // MARK: - Horizontal Layout
+
+    private var horizontalLayout: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .dotCenterH, spacing: 0) {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                        if index > 0 {
+                            Capsule()
+                                .fill(connectorFill(
+                                    beforeIndex: index,
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ))
+                                .frame(height: connectorThickness)
+                                .padding(.horizontal, FabricSpacing.xs)
+                                .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
+                                .frame(minWidth: FabricSpacing.xl)
+                        }
+
+                        horizontalItemColumn(item: item, index: index)
+                    }
+                }
+                .padding(FabricSpacing.sm)
+            }
+
+            // Description panel — shown when a title is selected
+            if let selectedItem = items.first(where: { $0.id == selection }),
+               let description = selectedItem.description {
+                Text(description)
+                    .fabricTypography(.body)
+                    .foregroundStyle(FabricColors.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, FabricSpacing.md)
+            }
+        }
+    }
+
+    // MARK: - Horizontal Item Column
+
+    @ViewBuilder
+    private func horizontalItemColumn(item: FabricTimelineItem, index: Int) -> some View {
+        let isSelected = selection == item.id
+        let isHovered = hoveredItemID == item.id && !isSelected
+        let state = nodeState(at: index)
+        let itemAcc = itemAccent(for: item)
+
+        let column = VStack(spacing: FabricSpacing.xs) {
+            timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
+
+            Text(item.timestamp)
+                .fabricTypography(.caption)
+                .foregroundStyle(labelColor(state: state))
+                .minimumScaleFactor(0.75)
+
+            Text(item.title)
+                .fabricTypography(.label)
+                .foregroundStyle(
+                    isSelected ? itemAcc.foreground : FabricColors.inkPrimary
+                )
+                .minimumScaleFactor(0.75)
+                .multilineTextAlignment(.center)
+        }
+        .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
+
+        if isInteractive {
+            Button {
+                guard isEnabled else { return }
+                selection = isSelected ? nil : item.id
+            } label: {
+                column
+            }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
+            .onHover { hovering in
+                guard isEnabled else { return }
+                hoveredItemID = hovering ? item.id : nil
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityText(for: item))
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .accessibilityHint(isSelected ? "Deselect" : "Select")
+        } else {
+            column
         }
     }
 
@@ -405,18 +458,15 @@ private struct FabricTimelineBody: View {
         else { accent }
     }
 
-    private func timestampColor(for item: FabricTimelineItem, isSelected: Bool) -> Color {
-        if case .milestone(let a) = item.style {
-            a.foreground
-        } else if isSelected {
-            FabricColors.inkPrimary
-        } else {
-            FabricColors.inkTertiary
-        }
-    }
-
     private func accessibilityText(for item: FabricTimelineItem) -> String {
         var parts = [String]()
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
+            switch nodeState(at: index) {
+            case .completed: parts.append("Completed")
+            case .current: parts.append("Current")
+            case .future: break
+            }
+        }
         let isMilestone: Bool = if case .milestone = item.style { true } else { false }
         if isMilestone { parts.append("Milestone") }
         parts.append(item.timestamp)
@@ -449,7 +499,7 @@ private struct FabricTimelineBody: View {
     #endif
 }
 
-// MARK: - Pulse Ring (horizontal mode)
+// MARK: - Pulse Ring
 
 private struct FabricTimelinePulseRing: View {
     let accent: FabricAccent
@@ -472,202 +522,5 @@ private struct FabricTimelinePulseRing: View {
                     isAnimating = true
                 }
             }
-    }
-}
-
-// MARK: - Shared Dot View (vertical mode)
-
-private struct FabricTimelineDot: View {
-
-    let accent: FabricAccent?
-    let isSelected: Bool
-    let dotSize: Double
-
-    var body: some View {
-        if let accent {
-            Circle()
-                .fill(accent.foreground)
-                .frame(width: dotSize, height: dotSize)
-                .overlay {
-                    Circle()
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [FabricColors.highlight, Color.clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 0.5
-                        )
-                }
-                .fabricShadow(.low)
-        } else if isSelected {
-            Circle()
-                .fill(FabricColors.burlap)
-                .frame(width: dotSize, height: dotSize)
-                .overlay {
-                    Circle()
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [FabricColors.highlight, Color.clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 0.5
-                        )
-                }
-                .fabricShadow(.micro)
-        } else {
-            Circle()
-                .fill(FabricColors.burlap)
-                .frame(width: dotSize, height: dotSize)
-                .fabricInnerShadow(Circle(), .subtle)
-        }
-    }
-}
-
-// MARK: - Content Block (vertical mode)
-
-private struct FabricTimelineContentBlock: View {
-
-    let item: FabricTimelineItem
-    let isSelected: Bool
-    let isHovered: Bool
-    let accent: FabricAccent
-    let displayScale: Double
-
-    private var isMilestone: Bool {
-        if case .milestone = item.style { true }
-        else { false }
-    }
-
-    private var shape: RoundedRectangle {
-        FabricSpacing.shape(radius: FabricSpacing.radiusSm)
-    }
-
-    var body: some View {
-        VStack(spacing: FabricSpacing.xs) {
-            Text(item.title)
-                .fabricTypography(isMilestone ? .heading : .label)
-                .fabricInk(.primary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-
-            if let description = item.description {
-                Text(description)
-                    .fabricTypography(.body)
-                    .foregroundStyle(FabricColors.inkSecondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(.horizontal, FabricSpacing.md)
-        .padding(.vertical, FabricSpacing.sm)
-        .frame(maxWidth: .infinity)
-        .background { backgroundView }
-        .clipShape(shape)
-        .overlay {
-            shape.strokeBorder(
-                isSelected ? accent.foreground : Color.clear,
-                lineWidth: 2
-            )
-        }
-        .overlay {
-            shape.strokeBorder(
-                LinearGradient(
-                    colors: isSelected
-                        ? [FabricColors.highlight, Color.clear]
-                        : [Color.clear, Color.clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                ),
-                lineWidth: 0.5
-            )
-        }
-        .fabricShadow(
-            .low,
-            tightColor: isSelected ? FabricColors.shadowTight : .clear,
-            ambientColor: isSelected ? FabricColors.shadow : .clear
-        )
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
-        .accessibilityAddTraits(isMilestone ? .isHeader : [])
-    }
-
-    @ViewBuilder
-    private var backgroundView: some View {
-        if isSelected {
-            ZStack {
-                shape.fill(FabricColors.canvas)
-                shape.foregroundStyle(
-                    TextureGenerator.linenPaint(displayScale: displayScale, intensity: 0.025)
-                )
-            }
-        } else if isHovered {
-            shape.fill(FabricColors.burlap.opacity(0.08))
-        }
-    }
-
-    private var accessibilityText: String {
-        var parts = [String]()
-        if isMilestone { parts.append("Milestone") }
-        parts.append(item.timestamp)
-        parts.append(item.title)
-        if let desc = item.description { parts.append(desc) }
-        return parts.joined(separator: ". ")
-    }
-}
-
-// MARK: - Connector (vertical mode only)
-
-private struct FabricTimelineConnector: View {
-
-    let item: FabricTimelineItem
-    let isFirst: Bool
-    let isSelected: Bool
-    let timestampColor: Color
-
-    private var isMilestone: Bool {
-        if case .milestone = item.style { true }
-        else { false }
-    }
-
-    private var accent: FabricAccent? {
-        if case .milestone(let a) = item.style { a }
-        else { nil }
-    }
-
-    private var dotSize: Double {
-        isMilestone ? FabricSpacing.timelineDotSizeLg : FabricSpacing.timelineDotSize
-    }
-
-    var body: some View {
-        VStack(alignment: .dotCenter, spacing: 0) {
-            if !isFirst {
-                connectorLine
-                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
-            }
-
-            HStack(spacing: FabricSpacing.sm) {
-                FabricTimelineDot(accent: accent, isSelected: isSelected, dotSize: dotSize)
-
-                Text(item.timestamp)
-                    .fabricTypography(.caption)
-                    .foregroundStyle(timestampColor)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .help(item.timestamp)
-            }
-            .alignmentGuide(.dotCenter) { [dotSize] _ in dotSize / 2 }
-
-            connectorLine
-                .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
-        }
-        .padding(.vertical, FabricSpacing.sm)
-        .accessibilityHidden(true)
-    }
-
-    private var connectorLine: some View {
-        Rectangle()
-            .fill(FabricColors.connector)
-            .frame(width: FabricSpacing.connectorWidth, height: FabricSpacing.lg)
     }
 }
