@@ -31,6 +31,7 @@ public struct FabricStatCard: View {
                 Text(label)
                     .fabricCaption()
                     .lineLimit(1)
+                    .minimumScaleFactor(0.75)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {

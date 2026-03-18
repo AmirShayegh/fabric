@@ -16,6 +16,8 @@ public struct FabricBadge: View {
         Text(text)
             .fabricTypography(.caption)
             .foregroundStyle(accent?.foreground ?? FabricColors.inkSecondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
             .padding(.horizontal, FabricSpacing.sm)
             .frame(height: FabricSpacing.badgeHeight)
             .background {

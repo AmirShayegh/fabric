@@ -15,6 +15,7 @@ public struct FabricScoreGauge<Label: View>: View {
     public let value: Double
     public let thresholds: [Threshold]
     public let lineWidth: Double
+    public let accessibilityLabel: String
     @ViewBuilder public let label: Label
 
     public static var defaultThresholds: [Threshold] {
@@ -29,11 +30,13 @@ public struct FabricScoreGauge<Label: View>: View {
         value: Double,
         thresholds: [Threshold]? = nil,
         lineWidth: Double = 8,
+        accessibilityLabel: String = "Score",
         @ViewBuilder label: () -> Label
     ) {
         self.value = value
         self.thresholds = (thresholds ?? Self.defaultThresholds).sorted { $0.upTo < $1.upTo }
         self.lineWidth = lineWidth
+        self.accessibilityLabel = accessibilityLabel
         self.label = label()
     }
 
@@ -72,7 +75,7 @@ public struct FabricScoreGauge<Label: View>: View {
             value: clampedValue
         )
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Score")
+        .accessibilityLabel(accessibilityLabel)
         .accessibilityValue("\(Int(clampedValue * 100)) percent")
     }
 }

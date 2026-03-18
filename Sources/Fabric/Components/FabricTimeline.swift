@@ -117,15 +117,17 @@ private struct FabricTimelineBody: View {
     let currentItemID: String?
     let isInteractive: Bool
 
+    private enum Metrics {
+        static let nodeSize: Double = 22
+        static let nodeFrameSize: Double = 28
+        static let activeRingSize: Double = 26
+        static let borderWidth: Double = 2.5
+        static let connectorThickness: Double = 3
+    }
+
     @State private var hoveredItemID: String? = nil
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private let nodeSize: Double = 22
-    private let nodeFrameSize: Double = 28
-    private let activeRingSize: Double = 26
-    private let borderWidth: Double = 2.5
-    private let connectorThickness: Double = 3
 
     var body: some View {
         Group {
@@ -177,7 +179,7 @@ private struct FabricTimelineBody: View {
             ZStack {
                 Circle()
                     .fill(accent.foreground)
-                    .frame(width: nodeSize, height: nodeSize)
+                    .frame(width: Metrics.nodeSize, height: Metrics.nodeSize)
 
                 Image(systemName: "checkmark")
                     .font(.system(size: 10, weight: .bold))
@@ -185,9 +187,9 @@ private struct FabricTimelineBody: View {
 
                 Circle()
                     .stroke(accent.foreground.opacity(0.15), lineWidth: 3)
-                    .frame(width: nodeFrameSize, height: nodeFrameSize)
+                    .frame(width: Metrics.nodeFrameSize, height: Metrics.nodeFrameSize)
             }
-            .frame(width: nodeFrameSize, height: nodeFrameSize)
+            .frame(width: Metrics.nodeFrameSize, height: Metrics.nodeFrameSize)
             .scaleEffect(isHovered ? 1.15 : 1.0)
             .animation(reduceMotion ? nil : FabricAnimation.hover, value: isHovered)
 
@@ -203,24 +205,24 @@ private struct FabricTimelineBody: View {
 
                 Circle()
                     .fill(accent.foreground.opacity(0.10))
-                    .frame(width: activeRingSize, height: activeRingSize)
+                    .frame(width: Metrics.activeRingSize, height: Metrics.activeRingSize)
 
                 Circle()
-                    .strokeBorder(accent.foreground, lineWidth: borderWidth)
-                    .frame(width: activeRingSize, height: activeRingSize)
+                    .strokeBorder(accent.foreground, lineWidth: Metrics.borderWidth)
+                    .frame(width: Metrics.activeRingSize, height: Metrics.activeRingSize)
             }
-            .frame(width: nodeFrameSize, height: nodeFrameSize)
+            .frame(width: Metrics.nodeFrameSize, height: Metrics.nodeFrameSize)
             .scaleEffect(isHovered ? 1.1 : 1.0)
             .animation(reduceMotion ? nil : FabricAnimation.hover, value: isHovered)
 
         case .future:
             ZStack {
                 Circle()
-                    .strokeBorder(FabricColors.connector, lineWidth: borderWidth)
-                    .frame(width: nodeSize, height: nodeSize)
+                    .strokeBorder(FabricColors.connector, lineWidth: Metrics.borderWidth)
+                    .frame(width: Metrics.nodeSize, height: Metrics.nodeSize)
             }
             .opacity(0.7)
-            .frame(width: nodeFrameSize, height: nodeFrameSize)
+            .frame(width: Metrics.nodeFrameSize, height: Metrics.nodeFrameSize)
             .scaleEffect(isHovered ? 1.15 : 1.0)
             .animation(reduceMotion ? nil : FabricAnimation.hover, value: isHovered)
         }
@@ -286,7 +288,7 @@ private struct FabricTimelineBody: View {
             if index > 0 {
                 Capsule()
                     .fill(connectorFill(beforeIndex: index, startPoint: .top, endPoint: .bottom))
-                    .frame(width: connectorThickness, height: 100)
+                    .frame(width: Metrics.connectorThickness, height: 100)
                     .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
             }
 
@@ -315,7 +317,7 @@ private struct FabricTimelineBody: View {
                         }
                     }
                     .fixedSize()
-                    .offset(x: nodeFrameSize + FabricSpacing.sm)
+                    .offset(x: Metrics.nodeFrameSize + FabricSpacing.sm)
                 }
                 .padding(.vertical, FabricSpacing.xs)
         }
@@ -359,7 +361,7 @@ private struct FabricTimelineBody: View {
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     ))
-                                    .frame(height: connectorThickness)
+                                    .frame(height: Metrics.connectorThickness)
                                     .padding(.horizontal, FabricSpacing.xs)
                                     .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
                                     .frame(width: 200)
@@ -420,9 +422,9 @@ private struct FabricTimelineBody: View {
                         .minimumScaleFactor(0.5)
                 }
                 .frame(width: 200)
-                .offset(y: nodeFrameSize + FabricSpacing.sm)
+                .offset(y: Metrics.nodeFrameSize + FabricSpacing.sm)
             }
-            .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
+            .alignmentGuide(.dotCenterH) { _ in Metrics.nodeFrameSize / 2 }
 
         if isInteractive {
             Button {
@@ -432,7 +434,7 @@ private struct FabricTimelineBody: View {
                 column
             }
             .buttonStyle(.plain)
-            .contentShape(Rectangle().size(width: 200, height: nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - nodeFrameSize) / 2))
+            .contentShape(Rectangle().size(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - Metrics.nodeFrameSize) / 2))
             .onHover { hovering in
                 guard isEnabled else { return }
                 hoveredItemID = hovering ? item.id : nil

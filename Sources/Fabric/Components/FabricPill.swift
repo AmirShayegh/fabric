@@ -16,6 +16,8 @@ public struct FabricPill: View {
         Text(text)
             .fabricTypography(.caption)
             .foregroundStyle(accent?.foreground ?? FabricColors.inkSecondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
             .padding(.horizontal, FabricSpacing.sm)
             .frame(height: FabricSpacing.pillHeight)
             .background {
