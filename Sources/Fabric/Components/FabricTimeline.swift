@@ -426,7 +426,7 @@ private struct FabricTimelineBody: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                 }
-                .fixedSize()
+                .frame(maxWidth: 200)
                 .offset(y: nodeFrameSize + FabricSpacing.sm)
             }
             .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
