@@ -348,28 +348,36 @@ private struct FabricTimelineBody: View {
 
     private var horizontalLayout: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .dotCenterH, spacing: 0) {
-                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                        if index > 0 {
-                            Capsule()
-                                .fill(connectorFill(
-                                    beforeIndex: index,
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ))
-                                .frame(height: connectorThickness)
-                                .padding(.horizontal, FabricSpacing.xs)
-                                .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
-                                .frame(width: 200)
-                        }
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .dotCenterH, spacing: 0) {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                            if index > 0 {
+                                Capsule()
+                                    .fill(connectorFill(
+                                        beforeIndex: index,
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    ))
+                                    .frame(height: connectorThickness)
+                                    .padding(.horizontal, FabricSpacing.xs)
+                                    .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
+                                    .frame(width: 200)
+                            }
 
-                        horizontalItemColumn(item: item, index: index)
+                            horizontalItemColumn(item: item, index: index)
+                                .id(item.id)
+                        }
+                    }
+                    .padding(.top, FabricSpacing.sm)
+                    .padding(.horizontal, FabricSpacing.sm)
+                    .padding(.bottom, FabricSpacing.xxxl)
+                }
+                .onAppear {
+                    if let currentID = currentItemID {
+                        proxy.scrollTo(currentID, anchor: .center)
                     }
                 }
-                .padding(.top, FabricSpacing.sm)
-                .padding(.horizontal, FabricSpacing.sm)
-                .padding(.bottom, FabricSpacing.xxxl)
             }
 
             // Description panel — shown when a title is selected
