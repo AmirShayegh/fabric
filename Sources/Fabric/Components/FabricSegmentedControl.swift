@@ -66,6 +66,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
 
     @Namespace private var namespace
     @State private var hoveredSegment: Selection? = nil
+    @State private var keyboardNavigated = false
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.displayScale) private var displayScale
@@ -123,6 +124,12 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
         .onChange(of: isEnabled) {
             if !isEnabled { hoveredSegment = nil }
         }
+        .onChange(of: selection) {
+            if keyboardNavigated {
+                AccessibilityNotification.Announcement(selectedLabel).post()
+                keyboardNavigated = false
+            }
+        }
         .accessibilityElement(children: .contain)
         .accessibilityValue(selectedLabel)
     }
@@ -143,6 +150,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
         }
         let newIndex = currentIndex + offset
         guard segments.indices.contains(newIndex) else { return .ignored }
+        keyboardNavigated = true
         selection = segments[newIndex].value
         return .handled
     }
