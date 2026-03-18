@@ -6,6 +6,7 @@ public struct FabricKanbanColumn<Content: View>: View {
     public let count: Int?
     public let isDropTarget: Bool
     public let columnWidth: CGFloat?
+    public let accent: FabricAccent
     @ViewBuilder public let content: Content
 
     @Environment(\.isEnabled) private var isEnabled
@@ -20,12 +21,14 @@ public struct FabricKanbanColumn<Content: View>: View {
         count: Int? = nil,
         isDropTarget: Bool = false,
         columnWidth: CGFloat? = nil,
+        accent: FabricAccent = .indigo,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.count = count
         self.isDropTarget = isDropTarget
         self.columnWidth = columnWidth
+        self.accent = accent
         self.content = content()
     }
 
@@ -62,7 +65,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         )
         .fabricSurface(
             isDropTarget
-                ? FabricColors.indigo.opacity(0.04)
+                ? accent.foreground.opacity(0.04)
                 : FabricColors.parchment,
             textureIntensity: isDropTarget ? 0.015 : 0.02
         )
@@ -71,7 +74,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         .overlay {
             if isDropTarget {
                 shape.strokeBorder(
-                    FabricColors.indigo.opacity(0.50),
+                    accent.foreground.opacity(0.50),
                     lineWidth: 2.0
                 )
             }

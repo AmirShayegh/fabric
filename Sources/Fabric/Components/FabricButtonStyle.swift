@@ -5,13 +5,15 @@ public struct FabricButtonStyle: ButtonStyle {
     public enum Variant { case primary, secondary, ghost }
 
     public let variant: Variant
+    public let accent: FabricAccent
 
-    public init(variant: Variant = .primary) {
+    public init(variant: Variant = .primary, accent: FabricAccent = .indigo) {
         self.variant = variant
+        self.accent = accent
     }
 
     public func makeBody(configuration: Configuration) -> some View {
-        FabricButtonBody(variant: variant, configuration: configuration)
+        FabricButtonBody(variant: variant, accent: accent, configuration: configuration)
     }
 }
 
@@ -65,6 +67,7 @@ private enum ButtonMetrics {
 private struct FabricButtonBody: View {
 
     let variant: FabricButtonStyle.Variant
+    let accent: FabricAccent
     let configuration: ButtonStyleConfiguration
 
     @State private var isHovered = false
@@ -153,9 +156,9 @@ private struct FabricButtonBody: View {
     private func backgroundColor(isPressed: Bool) -> Color {
         switch variant {
         case .primary:
-            if isPressed { FabricColors.buttonPrimaryPressed }
-            else if isHovered { FabricColors.buttonPrimaryHovered }
-            else { FabricColors.buttonPrimary }
+            if isPressed { accent.buttonFillPressed }
+            else if isHovered { accent.buttonFillHovered }
+            else { accent.buttonFill }
         case .secondary:
             if isPressed { FabricColors.canvas.opacity(0.80) }
             else if isHovered { FabricColors.canvas.opacity(0.95) }
@@ -174,4 +177,7 @@ extension ButtonStyle where Self == FabricButtonStyle {
     public static var fabric:          FabricButtonStyle { .init(variant: .primary) }
     public static var fabricSecondary: FabricButtonStyle { .init(variant: .secondary) }
     public static var fabricGhost:     FabricButtonStyle { .init(variant: .ghost) }
+
+    /// Primary button with a custom accent color.
+    public static func fabric(accent: FabricAccent) -> FabricButtonStyle { .init(variant: .primary, accent: accent) }
 }
