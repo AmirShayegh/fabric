@@ -771,6 +771,50 @@ struct ShowcaseView: View {
                     .frame(maxWidth: 200)
                 }
                 .padding(.horizontal, FabricSpacing.lg)
+
+                // Horizontal timeline
+                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                    Text("Horizontal").fabricCaption()
+                        .padding(.horizontal, FabricSpacing.lg)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        FabricTimeline(
+                            items: [
+                                .init(
+                                    id: "h-kickoff",
+                                    timestamp: "Jan 15",
+                                    title: "Project kickoff",
+                                    style: .milestone(accent: .sage)
+                                ),
+                                .init(
+                                    id: "h-design",
+                                    timestamp: "Jan 22",
+                                    title: "Design complete",
+                                    description: "Warm textile direction"
+                                ),
+                                .init(
+                                    id: "h-components",
+                                    timestamp: "Feb 3",
+                                    title: "Components started"
+                                ),
+                                .init(
+                                    id: "h-review",
+                                    timestamp: "Feb 14",
+                                    title: "Design review",
+                                    style: .milestone(accent: .indigo)
+                                ),
+                                .init(
+                                    id: "h-dev",
+                                    timestamp: "Mar 1",
+                                    title: "Dev sprint"
+                                ),
+                            ],
+                            selection: $selectedTimelineItem,
+                            axis: .horizontal
+                        )
+                        .padding(FabricSpacing.sm)
+                    }
+                }
             }
         }
     }
