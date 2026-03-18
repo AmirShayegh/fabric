@@ -44,7 +44,7 @@ fabric/
 │       ├── FabricTaskCard.swift               — Draggable task card with tags
 │       ├── FabricKanbanColumn.swift           — Kanban column with drop target, vertical scrolling
 │       ├── FabricDropPlaceholder.swift        — Dashed drop-target indicator
-│       ├── FabricTimeline.swift               — Event/milestone timeline
+│       ├── FabricTimeline.swift               — Timeline (vertical + horizontal)
 │       ├── FabricStepIndicator.swift          — Multi-step progress indicator
 │       ├── FabricProgressBar.swift            — Horizontal progress bar
 │       ├── FabricProgressRing.swift           — Circular progress ring
@@ -120,6 +120,12 @@ All rounded shapes use `RoundedRectangle(cornerRadius:style:.continuous)` via `F
 - **Focus ring** uses `Color(nsColor: .keyboardFocusIndicatorColor)` for system compliance.
 - **Toggle tap target** is the full label+track row, not just the track.
 - **TextField error state** uses `FabricColors.madder` border + caption text below; when focused, the focus ring is layered above the error border so both remain visible. Error announcement gated on nil→non-nil transition to avoid noisy VoiceOver during live typing. Empty strings are normalized to nil.
+- **FabricTimeline** supports two axes:
+  - **Vertical** (default): items stacked top-to-bottom with connector lines, dot+timestamp per item, and a content block (title + description) with optional selection visuals (pebble treatment). Milestones have accent-colored dots.
+  - **Horizontal**: step-indicator-style layout with completed (checkmark) / current (pulsing) / future (outlined) nodes connected by Capsule connectors. Labels (timestamp) and titles below each node. Clicking a title shows its description in a full-width panel below the timeline.
+  - **Selection**: optional `Binding<String?>` for selected item ID. Vertical mode shows accent border + shadow on selected content block. Horizontal mode highlights the title and reveals the description panel.
+  - **Progression**: `currentItemID: String?` (horizontal only) — items before it show checkmarks, the item at that ID pulses, items after are outlined. Connectors fill with accent color up to the current step.
+  - **Keyboard**: up/down arrows (vertical), left/right arrows (horizontal) navigate selection. `.focusEffectDisabled()` suppresses the system focus ring.
 
 ## SwiftUI Pro Agent Skill
 
