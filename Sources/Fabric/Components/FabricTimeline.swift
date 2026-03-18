@@ -41,7 +41,7 @@ extension HorizontalAlignment {
     fileprivate static let dotCenter = HorizontalAlignment(DotCenter.self)
 }
 
-// MARK: - Custom Alignment (horizontal mode: dots ↔ connectors)
+// MARK: - Custom Alignment (horizontal mode: nodes ↔ connectors)
 
 extension VerticalAlignment {
     fileprivate struct DotCenterH: AlignmentID {
@@ -65,6 +65,7 @@ public struct FabricTimeline: View {
     @Binding public var selection: String?
     public let accent: FabricAccent
     public let axis: Axis
+    public let currentItemID: String?
     private let isInteractive: Bool
 
     /// Non-interactive timeline (backward compatible).
@@ -73,6 +74,7 @@ public struct FabricTimeline: View {
         self._selection = .constant(nil)
         self.accent = .indigo
         self.axis = axis
+        self.currentItemID = nil
         self.isInteractive = false
     }
 
@@ -80,6 +82,7 @@ public struct FabricTimeline: View {
     public init(
         items: [FabricTimelineItem],
         selection: Binding<String?>,
+        currentItemID: String? = nil,
         accent: FabricAccent = .indigo,
         axis: Axis = .vertical
     ) {
@@ -87,6 +90,7 @@ public struct FabricTimeline: View {
         self._selection = selection
         self.accent = accent
         self.axis = axis
+        self.currentItemID = currentItemID
         self.isInteractive = true
     }
 
@@ -96,6 +100,7 @@ public struct FabricTimeline: View {
             selection: $selection,
             accent: accent,
             axis: axis,
+            currentItemID: currentItemID,
             isInteractive: isInteractive
         )
     }
@@ -109,12 +114,19 @@ private struct FabricTimelineBody: View {
     @Binding var selection: String?
     let accent: FabricAccent
     let axis: FabricTimeline.Axis
+    let currentItemID: String?
     let isInteractive: Bool
 
     @State private var hoveredItemID: String? = nil
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.displayScale) private var displayScale
+
+    private let nodeSize: Double = 22
+    private let nodeFrameSize: Double = 28
+    private let activeRingSize: Double = 26
+    private let borderWidth: Double = 2.5
+    private let connectorHeight: Double = 3
 
     var body: some View {
         Group {
@@ -139,6 +151,22 @@ private struct FabricTimelineBody: View {
         .animation(reduceMotion ? nil : FabricAnimation.hover, value: hoveredItemID)
         .animation(reduceMotion ? nil : FabricAnimation.press, value: selection)
         .accessibilityElement(children: .contain)
+    }
+
+    // MARK: - Node State
+
+    private enum NodeState {
+        case completed, current, future
+    }
+
+    private func nodeState(at index: Int) -> NodeState {
+        guard let currentID = currentItemID,
+              let currentIndex = items.firstIndex(where: { $0.id == currentID }) else {
+            return .future
+        }
+        if index < currentIndex { return .completed }
+        if index == currentIndex { return .current }
+        return .future
     }
 
     // MARK: - Vertical Layout
@@ -200,63 +228,57 @@ private struct FabricTimelineBody: View {
     // MARK: - Horizontal Layout
 
     private var horizontalLayout: some View {
-        HStack(alignment: .dotCenterH, spacing: 0) {
-            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                if index > 0 {
-                    Capsule()
-                        .fill(FabricColors.connector)
-                        .frame(height: 3)
-                        .padding(.horizontal, FabricSpacing.xs)
-                        .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
-                        .frame(maxWidth: .infinity)
-                }
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .dotCenterH, spacing: 0) {
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    if index > 0 {
+                        horizontalConnector(beforeIndex: index)
+                            .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
+                            .frame(maxWidth: .infinity)
+                    }
 
-                horizontalItemColumn(item: item, index: index)
+                    horizontalItemColumn(item: item, index: index)
+                }
+            }
+
+            // Description panel — shown when a title is selected
+            if let selectedItem = items.first(where: { $0.id == selection }),
+               let description = selectedItem.description {
+                Text(description)
+                    .fabricTypography(.body)
+                    .foregroundStyle(FabricColors.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, FabricSpacing.md)
             }
         }
     }
+
+    // MARK: - Horizontal Item Column
 
     @ViewBuilder
     private func horizontalItemColumn(item: FabricTimelineItem, index: Int) -> some View {
         let isSelected = selection == item.id
         let isHovered = hoveredItemID == item.id && !isSelected
-        let isAbove = index.isMultiple(of: 2)
-        let accent: FabricAccent? = if case .milestone(let a) = item.style { a } else { nil }
-        let dotSize = accent != nil
-            ? FabricSpacing.timelineDotSizeLg
-            : FabricSpacing.timelineDotSize
+        let state = nodeState(at: index)
 
         let column = VStack(spacing: FabricSpacing.xs) {
-            if isAbove {
-                FabricTimelineContentBlock(
-                    item: item,
-                    isSelected: isSelected,
-                    isHovered: isHovered,
-                    accent: itemAccent(for: item),
-                    displayScale: displayScale
+            horizontalNode(state: state, accent: itemAccent(for: item), isHovered: isHovered)
+
+            Text(item.timestamp)
+                .fabricTypography(.caption)
+                .foregroundStyle(horizontalLabelColor(state: state))
+                .lineLimit(1)
+
+            Text(item.title)
+                .fabricTypography(.label)
+                .foregroundStyle(
+                    isSelected ? itemAccent(for: item).foreground : FabricColors.inkPrimary
                 )
-                Text(item.timestamp)
-                    .fabricTypography(.caption)
-                    .foregroundStyle(timestampColor(for: item, isSelected: isSelected))
-                FabricTimelineDot(accent: accent, isSelected: isSelected, dotSize: dotSize)
-            } else {
-                FabricTimelineDot(accent: accent, isSelected: isSelected, dotSize: dotSize)
-                Text(item.timestamp)
-                    .fabricTypography(.caption)
-                    .foregroundStyle(timestampColor(for: item, isSelected: isSelected))
-                FabricTimelineContentBlock(
-                    item: item,
-                    isSelected: isSelected,
-                    isHovered: isHovered,
-                    accent: itemAccent(for: item),
-                    displayScale: displayScale
-                )
-            }
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
         }
-        .frame(minWidth: 120, maxWidth: 180)
-        .alignmentGuide(.dotCenterH) { [dotSize] d in
-            isAbove ? d.height - dotSize / 2 : dotSize / 2
-        }
+        .alignmentGuide(.dotCenterH) { _ in nodeFrameSize / 2 }
 
         if isInteractive {
             Button {
@@ -278,6 +300,101 @@ private struct FabricTimelineBody: View {
             .accessibilityHint(isSelected ? "Deselect" : "Select")
         } else {
             column
+        }
+    }
+
+    // MARK: - Horizontal Node (step indicator style)
+
+    @ViewBuilder
+    private func horizontalNode(state: NodeState, accent: FabricAccent, isHovered: Bool) -> some View {
+        switch state {
+        case .completed:
+            ZStack {
+                Circle()
+                    .fill(accent.foreground)
+                    .frame(width: nodeSize, height: nodeSize)
+
+                Image(systemName: "checkmark")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(FabricColors.onPrimary)
+
+                Circle()
+                    .stroke(accent.foreground.opacity(0.15), lineWidth: 3)
+                    .frame(width: nodeFrameSize, height: nodeFrameSize)
+            }
+            .frame(width: nodeFrameSize, height: nodeFrameSize)
+            .scaleEffect(isHovered ? 1.15 : 1.0)
+            .animation(reduceMotion ? nil : FabricAnimation.hover, value: isHovered)
+
+        case .current:
+            ZStack {
+                if !reduceMotion {
+                    FabricTimelinePulseRing(accent: accent, delay: 0)
+                    FabricTimelinePulseRing(
+                        accent: accent,
+                        delay: FabricAnimation.pulseStagger
+                    )
+                }
+
+                Circle()
+                    .fill(accent.foreground.opacity(0.10))
+                    .frame(width: activeRingSize, height: activeRingSize)
+
+                Circle()
+                    .strokeBorder(accent.foreground, lineWidth: borderWidth)
+                    .frame(width: activeRingSize, height: activeRingSize)
+            }
+            .frame(width: nodeFrameSize, height: nodeFrameSize)
+            .scaleEffect(isHovered ? 1.1 : 1.0)
+            .animation(reduceMotion ? nil : FabricAnimation.hover, value: isHovered)
+
+        case .future:
+            ZStack {
+                Circle()
+                    .strokeBorder(FabricColors.connector, lineWidth: borderWidth)
+                    .frame(width: nodeSize, height: nodeSize)
+            }
+            .opacity(0.7)
+            .frame(width: nodeFrameSize, height: nodeFrameSize)
+            .scaleEffect(isHovered ? 1.15 : 1.0)
+            .animation(reduceMotion ? nil : FabricAnimation.hover, value: isHovered)
+        }
+    }
+
+    // MARK: - Horizontal Connector (step indicator style)
+
+    private func horizontalConnector(beforeIndex index: Int) -> some View {
+        let currentIndex = currentItemID.flatMap { id in
+            items.firstIndex(where: { $0.id == id })
+        }
+        let filled = currentIndex.map { index <= $0 } ?? false
+        let transition = currentIndex.map { index == $0 + 1 } ?? false
+
+        return Capsule()
+            .fill(
+                transition
+                    ? AnyShapeStyle(
+                        LinearGradient(
+                            colors: [accent.foreground, accent.foreground.opacity(0.25)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                      )
+                    : filled
+                        ? AnyShapeStyle(accent.foreground)
+                        : AnyShapeStyle(FabricColors.connector)
+            )
+            .frame(height: connectorHeight)
+            .padding(.horizontal, FabricSpacing.xs)
+    }
+
+    // MARK: - Horizontal Label Color
+
+    private func horizontalLabelColor(state: NodeState) -> Color {
+        switch state {
+        case .completed: FabricColors.inkSecondary
+        case .current: accent.foreground
+        case .future: FabricColors.inkTertiary
         }
     }
 
@@ -332,7 +449,33 @@ private struct FabricTimelineBody: View {
     #endif
 }
 
-// MARK: - Shared Dot View
+// MARK: - Pulse Ring (horizontal mode)
+
+private struct FabricTimelinePulseRing: View {
+    let accent: FabricAccent
+    let delay: Double
+
+    @State private var isAnimating = false
+
+    var body: some View {
+        Circle()
+            .stroke(accent.foreground, lineWidth: 1.5)
+            .frame(width: 26, height: 26)
+            .scaleEffect(isAnimating ? 1.8 : 0.9)
+            .opacity(isAnimating ? 0 : 0.5)
+            .onAppear {
+                withAnimation(
+                    .easeOut(duration: FabricAnimation.pulseDuration)
+                    .repeatForever(autoreverses: false)
+                    .delay(delay)
+                ) {
+                    isAnimating = true
+                }
+            }
+    }
+}
+
+// MARK: - Shared Dot View (vertical mode)
 
 private struct FabricTimelineDot: View {
 
@@ -342,7 +485,6 @@ private struct FabricTimelineDot: View {
 
     var body: some View {
         if let accent {
-            // Milestone — elevated pebble
             Circle()
                 .fill(accent.foreground)
                 .frame(width: dotSize, height: dotSize)
@@ -359,7 +501,6 @@ private struct FabricTimelineDot: View {
                 }
                 .fabricShadow(.low)
         } else if isSelected {
-            // Event + selected — small pebble (elevated from fabric)
             Circle()
                 .fill(FabricColors.burlap)
                 .frame(width: dotSize, height: dotSize)
@@ -376,7 +517,6 @@ private struct FabricTimelineDot: View {
                 }
                 .fabricShadow(.micro)
         } else {
-            // Event — recessed into fabric
             Circle()
                 .fill(FabricColors.burlap)
                 .frame(width: dotSize, height: dotSize)
@@ -385,7 +525,7 @@ private struct FabricTimelineDot: View {
     }
 }
 
-// MARK: - Content Block
+// MARK: - Content Block (vertical mode)
 
 private struct FabricTimelineContentBlock: View {
 
@@ -453,8 +593,6 @@ private struct FabricTimelineContentBlock: View {
         .accessibilityAddTraits(isMilestone ? .isHeader : [])
     }
 
-    // MARK: - Background
-
     @ViewBuilder
     private var backgroundView: some View {
         if isSelected {
@@ -468,8 +606,6 @@ private struct FabricTimelineContentBlock: View {
             shape.fill(FabricColors.burlap.opacity(0.08))
         }
     }
-
-    // MARK: - Accessibility
 
     private var accessibilityText: String {
         var parts = [String]()
@@ -528,8 +664,6 @@ private struct FabricTimelineConnector: View {
         .padding(.vertical, FabricSpacing.sm)
         .accessibilityHidden(true)
     }
-
-    // MARK: - Line Segment
 
     private var connectorLine: some View {
         Rectangle()
