@@ -6,20 +6,20 @@ public struct FabricFilterPill: View {
     public let icon: String?
     public let accent: FabricAccent
     public let isSelected: Bool
-    public let action: () -> Void
+    public let onToggle: () -> Void
 
     public init(
         _ label: String,
         icon: String? = nil,
         accent: FabricAccent = .indigo,
         isSelected: Bool,
-        action: @escaping () -> Void
+        onToggle: @escaping () -> Void
     ) {
         self.label = label
         self.icon = icon
         self.accent = accent
         self.isSelected = isSelected
-        self.action = action
+        self.onToggle = onToggle
     }
 
     public var body: some View {
@@ -28,7 +28,7 @@ public struct FabricFilterPill: View {
             icon: icon,
             accent: accent,
             isSelected: isSelected,
-            action: action
+            onToggle: onToggle
         )
     }
 }
@@ -41,7 +41,7 @@ private struct FabricFilterPillBody: View {
     let icon: String?
     let accent: FabricAccent
     let isSelected: Bool
-    let action: () -> Void
+    let onToggle: () -> Void
 
     @State private var isHovered = false
     @Environment(\.isEnabled) private var isEnabled
@@ -49,7 +49,7 @@ private struct FabricFilterPillBody: View {
 
     var body: some View {
         Button {
-            action()
+            onToggle()
         } label: {
             HStack(spacing: FabricSpacing.xs) {
                 if let icon {

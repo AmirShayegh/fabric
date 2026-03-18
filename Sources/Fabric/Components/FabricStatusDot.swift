@@ -10,14 +10,19 @@ public struct FabricStatusDot: View {
         self.label = label
     }
 
+    private var effectiveLabel: String? {
+        guard let label, !label.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+        return label
+    }
+
     public var body: some View {
         Circle()
             .fill(accent?.foreground ?? FabricColors.inkTertiary)
             .frame(width: FabricSpacing.statusDotSize, height: FabricSpacing.statusDotSize)
             .fabricShadow(.micro)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(label ?? "")
-            .accessibilityHidden(label == nil)
-            .accessibilityAddTraits(label != nil ? .isStaticText : [])
+            .accessibilityLabel(effectiveLabel ?? "")
+            .accessibilityHidden(effectiveLabel == nil)
+            .accessibilityAddTraits(effectiveLabel != nil ? .isStaticText : [])
     }
 }

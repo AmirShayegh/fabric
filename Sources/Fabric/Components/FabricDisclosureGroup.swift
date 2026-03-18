@@ -100,6 +100,7 @@ private struct FabricDisclosureGroupBody<Content: View>: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(FabricColors.inkTertiary)
                     .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    .accessibilityHidden(true)
             }
             .padding(.horizontal, FabricSpacing.md)
             .padding(.vertical, FabricSpacing.sm)

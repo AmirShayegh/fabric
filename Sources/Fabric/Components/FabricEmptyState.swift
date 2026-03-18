@@ -28,10 +28,11 @@ public struct FabricEmptyState: View {
     }
 
     public var body: some View {
-        VStack(spacing: FabricSpacing.md) {
+        let content = VStack(spacing: FabricSpacing.md) {
             Image(systemName: systemImage)
                 .font(.system(size: 36, weight: .light))
                 .foregroundStyle(FabricColors.inkTertiary)
+                .accessibilityHidden(true)
 
             Text(title)
                 .fabricTypography(.heading)
@@ -63,8 +64,15 @@ public struct FabricEmptyState: View {
                 }
             }
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityText)
+
+        if action != nil {
+            content
+                .accessibilityElement(children: .contain)
+        } else {
+            content
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(accessibilityText)
+        }
     }
 
     private var accessibilityText: String {

@@ -2,10 +2,14 @@ import SwiftUI
 
 public struct FabricToggleStyle: ToggleStyle {
 
-    public init() {}
+    public let accent: FabricAccent
+
+    public init(accent: FabricAccent = .indigo) {
+        self.accent = accent
+    }
 
     public func makeBody(configuration: Configuration) -> some View {
-        FabricToggleBody(configuration: configuration)
+        FabricToggleBody(configuration: configuration, accent: accent)
     }
 }
 
@@ -14,6 +18,7 @@ public struct FabricToggleStyle: ToggleStyle {
 private struct FabricToggleBody: View {
 
     let configuration: ToggleStyleConfiguration
+    let accent: FabricAccent
 
     @State private var isHovered = false
     @Environment(\.isEnabled) private var isEnabled
@@ -90,7 +95,7 @@ private struct FabricToggleBody: View {
 
     private func trackFill(isOn: Bool) -> Color {
         if isOn {
-            isHovered ? FabricColors.indigo.opacity(0.55) : FabricColors.indigo.opacity(0.42)
+            isHovered ? accent.foreground.opacity(0.55) : accent.foreground.opacity(0.42)
         } else {
             isHovered ? FabricColors.burlap.opacity(0.42) : FabricColors.burlap.opacity(0.28)
         }
@@ -99,4 +104,5 @@ private struct FabricToggleBody: View {
 
 extension ToggleStyle where Self == FabricToggleStyle {
     public static var fabric: FabricToggleStyle { .init() }
+    public static func fabric(accent: FabricAccent) -> FabricToggleStyle { .init(accent: accent) }
 }

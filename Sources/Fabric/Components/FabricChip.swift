@@ -51,6 +51,7 @@ private struct FabricChipBody: View {
             Text(label)
                 .fabricTypography(.caption)
                 .foregroundStyle(accent.foreground)
+                .accessibilityHidden(isRemovable)
 
             if isRemovable {
                 Button {
