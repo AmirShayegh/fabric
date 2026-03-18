@@ -413,9 +413,12 @@ struct ShowcaseView: View {
                         .toggleStyle(.fabric)
 
                     Toggle("Auto-save drafts", isOn: $toggleAutoSave)
-                        .toggleStyle(.fabric)
+                        .toggleStyle(.fabric(accent: .sage))
 
-                    Toggle("Disabled control", isOn: $toggleDarkMode)
+                    Toggle("Dark mode", isOn: $toggleDarkMode)
+                        .toggleStyle(.fabric(accent: .ochre))
+
+                    Toggle("Disabled control", isOn: .constant(true))
                         .toggleStyle(.fabric)
                         .disabled(true)
                 }
@@ -436,6 +439,16 @@ struct ShowcaseView: View {
                             .buttonStyle(.fabricSecondary)
                         Button("Ghost") { }
                             .buttonStyle(.fabricGhost)
+                    }
+
+                    Text("Accent Colors").fabricCaption()
+                    HStack(spacing: FabricSpacing.md) {
+                        Button("Sage") { }
+                            .buttonStyle(.fabric(accent: .sage))
+                        Button("Ochre") { }
+                            .buttonStyle(.fabric(accent: .ochre))
+                        Button("Madder") { }
+                            .buttonStyle(.fabric(accent: .madder))
                     }
 
                     Text("Disabled").fabricCaption()
