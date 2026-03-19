@@ -2,12 +2,55 @@ import SwiftUI
 
 public struct FabricTaskCard: View {
 
+    // MARK: - Layout Variant
+
+    /// Card layout style.
+    public enum Layout {
+        /// Original: title + ticket number top, description middle, flow tags bottom.
+        case classic
+        /// Compact: ticket ID + pills top, title middle, status indicators bottom.
+        case compact
+    }
+
+    // MARK: - Status Indicator
+
+    /// An icon-based indicator shown at bottom-leading of compact cards.
+    public struct StatusIndicator: Equatable {
+        public let icon: String
+        public let label: String
+        public let accent: FabricAccent
+
+        public init(icon: String, label: String, accent: FabricAccent) {
+            self.icon = icon
+            self.label = label
+            self.accent = accent
+        }
+
+        /// Standard blocked indicator — terracotta lock icon.
+        public static func blocked(_ label: String = "Blocked") -> StatusIndicator {
+            StatusIndicator(icon: "lock.fill", label: label, accent: .madder)
+        }
+    }
+
+    // MARK: - Avatar Content
+
+    /// Decorative avatar shown at bottom-trailing of compact cards.
+    public enum AvatarContent: Equatable {
+        case initials(String)
+        case icon(String)
+    }
+
+    // MARK: - Properties
+
     public let title: String
     public let ticketNumber: String?
     public let description: String?
     public let tags: [Tag]?
     public let accent: FabricAccent
     public let isSelected: Bool
+    public let layout: Layout
+    public let statusIndicator: StatusIndicator?
+    public let avatar: AvatarContent?
     public let onTap: (() -> Void)?
 
     /// Advanced hook for apps managing drag lifecycle externally (e.g., AppKit bridging).
@@ -41,6 +84,9 @@ public struct FabricTaskCard: View {
         accent: FabricAccent = .indigo,
         isSelected: Bool = false,
         isDragging: Binding<Bool> = .constant(false),
+        layout: Layout = .classic,
+        statusIndicator: StatusIndicator? = nil,
+        avatar: AvatarContent? = nil,
         onTap: (() -> Void)? = nil,
         onMoveUp: (() -> Void)? = nil,
         onMoveDown: (() -> Void)? = nil,
@@ -54,6 +100,9 @@ public struct FabricTaskCard: View {
         self.accent = accent
         self.isSelected = isSelected
         self._isDragging = isDragging
+        self.layout = layout
+        self.statusIndicator = statusIndicator
+        self.avatar = avatar
         self.onTap = onTap
         self.onMoveUp = onMoveUp
         self.onMoveDown = onMoveDown
@@ -70,6 +119,9 @@ public struct FabricTaskCard: View {
             accent: accent,
             isSelected: isSelected,
             isDragging: isDragging,
+            layout: layout,
+            statusIndicator: statusIndicator,
+            avatar: avatar,
             onTap: onTap,
             onMoveUp: onMoveUp,
             onMoveDown: onMoveDown,
@@ -90,6 +142,9 @@ private struct FabricTaskCardBody: View {
     let accent: FabricAccent
     let isSelected: Bool
     let isDragging: Bool
+    let layout: FabricTaskCard.Layout
+    let statusIndicator: FabricTaskCard.StatusIndicator?
+    let avatar: FabricTaskCard.AvatarContent?
     let onTap: (() -> Void)?
     let onMoveUp: (() -> Void)?
     let onMoveDown: (() -> Void)?
@@ -113,38 +168,7 @@ private struct FabricTaskCardBody: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: FabricSpacing.sm) {
-            HStack(alignment: .firstTextBaseline, spacing: FabricSpacing.sm) {
-                Text(title)
-                    .fabricTypography(.label)
-                    .fabricInk(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                if let ticketNumber {
-                    Text(ticketNumber)
-                        .fabricTypography(.caption)
-                        .foregroundStyle(FabricColors.inkTertiary)
-                        .lineLimit(1)
-                        .fixedSize()
-                }
-            }
-
-            if let description {
-                Text(description)
-                    .fabricTypography(.caption)
-                    .foregroundStyle(FabricColors.inkSecondary)
-                    .lineLimit(2)
-            }
-
-            if let tags, !tags.isEmpty {
-                FabricFlowLayout(spacing: FabricSpacing.xs) {
-                    ForEach(tags) { tag in
-                        FabricPill(tag.label, accent: tag.accent)
-                    }
-                }
-            }
-        }
+        cardContent
         .padding(FabricSpacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background { backgroundView }
@@ -247,6 +271,126 @@ private struct FabricTaskCardBody: View {
         ))
     }
 
+    // MARK: - Card Content
+
+    @ViewBuilder
+    private var cardContent: some View {
+        switch layout {
+        case .classic: classicContent
+        case .compact: compactContent
+        }
+    }
+
+    private var classicContent: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+            HStack(alignment: .firstTextBaseline, spacing: FabricSpacing.sm) {
+                Text(title)
+                    .fabricTypography(.label)
+                    .fabricInk(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let ticketNumber {
+                    Text(ticketNumber)
+                        .fabricTypography(.caption)
+                        .foregroundStyle(FabricColors.inkTertiary)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+            }
+
+            if let description {
+                Text(description)
+                    .fabricTypography(.caption)
+                    .foregroundStyle(FabricColors.inkSecondary)
+                    .lineLimit(2)
+            }
+
+            if let tags, !tags.isEmpty {
+                FabricFlowLayout(spacing: FabricSpacing.xs) {
+                    ForEach(tags) { tag in
+                        FabricPill(tag.label, accent: tag.accent)
+                    }
+                }
+            }
+        }
+    }
+
+    private var compactContent: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+            // Row 1: Ticket ID (leading) + Pills (trailing)
+            HStack(alignment: .firstTextBaseline, spacing: FabricSpacing.sm) {
+                if let ticketNumber {
+                    Text(ticketNumber)
+                        .fabricTypography(.monoSmall)
+                        .foregroundStyle(FabricColors.inkTertiary)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+
+                Spacer(minLength: 0)
+
+                if let tags, !tags.isEmpty {
+                    HStack(spacing: FabricSpacing.xs) {
+                        ForEach(Array(tags.prefix(3))) { tag in
+                            FabricPill(tag.label, accent: tag.accent)
+                        }
+                    }
+                    .fixedSize()
+                }
+            }
+
+            // Row 2: Title
+            Text(title)
+                .fabricTypography(.label)
+                .fabricInk(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Row 3: Status indicator (leading) + Avatar (trailing)
+            if statusIndicator != nil || avatar != nil {
+                HStack {
+                    if let indicator = statusIndicator {
+                        Image(systemName: indicator.icon)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(indicator.accent.foreground)
+                            .accessibilityLabel(indicator.label)
+                    }
+
+                    Spacer(minLength: 0)
+
+                    if let avatar {
+                        avatarCircle(avatar)
+                    }
+                }
+            }
+        }
+    }
+
+    private func avatarCircle(_ content: FabricTaskCard.AvatarContent) -> some View {
+        ZStack {
+            Circle()
+                .fill(FabricColors.burlap)
+
+            switch content {
+            case .initials(let text):
+                Text(text)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(FabricColors.inkPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            case .icon(let name):
+                Image(systemName: name)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(FabricColors.inkPrimary)
+            }
+        }
+        .frame(width: FabricSpacing.avatarSizeXs, height: FabricSpacing.avatarSizeXs)
+        .fabricShadow(.micro)
+        .accessibilityHidden(true)
+    }
+
     // MARK: - Background
 
     @ViewBuilder
@@ -267,6 +411,9 @@ private struct FabricTaskCardBody: View {
         if let description { parts.append(description) }
         if let tags, !tags.isEmpty {
             parts.append("Tags: " + tags.map(\.label).joined(separator: ", "))
+        }
+        if let statusIndicator {
+            parts.append(statusIndicator.label)
         }
         return parts.joined(separator: ". ")
     }
