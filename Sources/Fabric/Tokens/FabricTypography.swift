@@ -12,7 +12,8 @@ public enum FabricTextStyle {
     case monoSmall  // Small monospaced (identifiers, short codes)
     case monoCaption // Monospaced caption (fractions, dates, metadata)
     case mono       // Monospaced body text (inline code, general mono)
-    case monoLarge  // Large monospaced data display (stat values)
+    case monoLarge    // Large monospaced data display (stat values)
+    case sectionLabel // Tiny uppercase section headers (inspector panels)
 
     public var font: Font {
         switch self {
@@ -25,31 +26,34 @@ public enum FabricTextStyle {
         case .monoSmall:   return .system(size: 11, weight: .medium, design: .monospaced)
         case .monoCaption: return .system(size: 13, weight: .regular, design: .monospaced)
         case .mono:        return .system(size: 15, weight: .regular, design: .monospaced)
-        case .monoLarge:   return .system(size: 28, weight: .semibold, design: .monospaced)
+        case .monoLarge:    return .system(size: 28, weight: .semibold, design: .monospaced)
+        case .sectionLabel: return .system(size: 10, weight: .bold, design: .default)
         }
     }
 
     public var tracking: CGFloat {
         switch self {
-        case .display:     return 0.8
-        case .title:       return 0.5
-        case .heading:     return 0.2
-        case .body:        return 0.1
-        case .label:       return 0.4
-        case .caption:     return 0.2
-        case .monoSmall:   return 0.2
-        case .monoCaption: return 0.2
-        case .mono:        return 0.1
-        case .monoLarge:   return 0.0
+        case .display:      return 0.8
+        case .title:        return 0.5
+        case .heading:      return 0.2
+        case .body:         return 0.1
+        case .label:        return 0.4
+        case .caption:      return 0.2
+        case .monoSmall:    return 0.2
+        case .monoCaption:  return 0.2
+        case .mono:         return 0.1
+        case .monoLarge:    return 0.0
+        case .sectionLabel: return 1.5
         }
     }
 
     public var lineSpacing: CGFloat {
         switch self {
-        case .display: return 6
-        case .title:   return 4
-        case .body, .mono: return 5
-        default:       return 2
+        case .display:      return 6
+        case .title:        return 4
+        case .body, .mono:  return 5
+        case .sectionLabel: return 2
+        default:            return 2
         }
     }
 }
@@ -161,5 +165,11 @@ extension View {
 
     public func fabricMonoLarge() -> some View {
         fabricTypography(.monoLarge).fabricInk(.primary)
+    }
+
+    public func fabricSectionLabel() -> some View {
+        fabricTypography(.sectionLabel)
+            .foregroundStyle(FabricColors.inkTertiary)
+            .textCase(.uppercase)
     }
 }

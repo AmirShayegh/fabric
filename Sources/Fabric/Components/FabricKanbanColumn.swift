@@ -7,6 +7,7 @@ public struct FabricKanbanColumn<Content: View>: View {
     public let isDropTarget: Bool
     public let columnWidth: CGFloat?
     public let accent: FabricAccent
+    public let onAdd: (() -> Void)?
     @ViewBuilder public let content: Content
 
     @Environment(\.isEnabled) private var isEnabled
@@ -22,6 +23,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         isDropTarget: Bool = false,
         columnWidth: CGFloat? = nil,
         accent: FabricAccent = .indigo,
+        onAdd: (() -> Void)? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
@@ -29,6 +31,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         self.isDropTarget = isDropTarget
         self.columnWidth = columnWidth
         self.accent = accent
+        self.onAdd = onAdd
         self.content = content()
     }
 
@@ -37,6 +40,15 @@ public struct FabricKanbanColumn<Content: View>: View {
             // Header
             HStack {
                 Text(title).fabricHeading()
+                if let onAdd {
+                    Button(action: onAdd) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(FabricColors.inkTertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Add to \(title)")
+                }
                 Spacer()
                 if let count {
                     FabricBadge("\(count)")

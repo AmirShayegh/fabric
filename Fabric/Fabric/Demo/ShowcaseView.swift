@@ -8,8 +8,10 @@ struct KanbanTask: Identifiable, Codable, Equatable, Transferable {
     let id: String
     let title: String
     let description: String?
+    let ticketNumber: String
     let tagLabel: String
     let tagAccentName: String
+    let isBlocked: Bool
 
     static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: .json)
@@ -31,15 +33,19 @@ struct KanbanTask: Identifiable, Codable, Equatable, Transferable {
 
     init(
         _ title: String,
+        ticketNumber: String,
         description: String? = nil,
         tag: String,
-        accent: String
+        accent: String,
+        isBlocked: Bool = false
     ) {
         self.id = UUID().uuidString
         self.title = title
+        self.ticketNumber = ticketNumber
         self.description = description
         self.tagLabel = tag
         self.tagAccentName = accent
+        self.isBlocked = isBlocked
     }
 }
 
@@ -87,16 +93,22 @@ struct ShowcaseView: View {
 
     // Kanban state
     @State private var todoTasks: [KanbanTask] = [
-        KanbanTask("Design navigation", tag: "Design", accent: "indigo"),
-        KanbanTask("API endpoints", tag: "Dev", accent: "sage"),
-        KanbanTask("Write tests", tag: "Dev", accent: "sage"),
+        KanbanTask("Design system refresh: core palette", ticketNumber: "T-042", tag: "feature", accent: "indigo", isBlocked: true),
+        KanbanTask("Add keyboard shortcuts for kanban navigation", ticketNumber: "T-048", tag: "feature", accent: "indigo"),
+        KanbanTask("Memory leak in dashboard render", ticketNumber: "ISS-007", tag: "high", accent: "madder"),
+        KanbanTask("API integration: Stripe Connect", ticketNumber: "T-045", tag: "task", accent: "ochre"),
+        KanbanTask("Write snapshot tests for card variants", ticketNumber: "T-051", tag: "chore", accent: "sage"),
     ]
     @State private var inProgressTasks: [KanbanTask] = [
-        KanbanTask("Color system", tag: "Design", accent: "indigo"),
-        KanbanTask("Database schema", description: "Finalize table structure", tag: "Dev", accent: "sage"),
+        KanbanTask("Color system: dark mode tokens", ticketNumber: "T-043", tag: "feature", accent: "indigo"),
+        KanbanTask("Update documentation: auth flow", ticketNumber: "T-046", tag: "chore", accent: "sage"),
+        KanbanTask("Slow file watcher on large projects", ticketNumber: "ISS-012", tag: "medium", accent: "ochre", isBlocked: true),
     ]
     @State private var doneTasks: [KanbanTask] = [
-        KanbanTask("Project brief", tag: "Planning", accent: "ochre"),
+        KanbanTask("Project brief and roadmap", ticketNumber: "T-039", tag: "chore", accent: "sage"),
+        KanbanTask("Setup CI pipeline", ticketNumber: "T-036", tag: "task", accent: "ochre"),
+        KanbanTask("Multi-window foundation", ticketNumber: "T-064", tag: "feature", accent: "indigo"),
+        KanbanTask("Terminal embedding: PTY subprocess", ticketNumber: "T-028", tag: "feature", accent: "indigo"),
     ]
     @State private var todoTargeted = false
     @State private var inProgressTargeted = false
@@ -121,6 +133,12 @@ struct ShowcaseView: View {
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 kanbanDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                compactCardDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                inspectorPrimitivesDemo
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 timelineDemo
@@ -507,7 +525,9 @@ struct ShowcaseView: View {
 
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: FabricSpacing.md) {
-                    kanbanColumn("To Do", tasks: $todoTasks, isTargeted: $todoTargeted)
+                    kanbanColumn("To Do", tasks: $todoTasks, isTargeted: $todoTargeted, onAdd: {
+                        todoTasks.append(KanbanTask("New task", ticketNumber: "T-\(Int.random(in: 50...99))", tag: "task", accent: "ochre"))
+                    })
                     kanbanColumn("In Progress", tasks: $inProgressTasks, isTargeted: $inProgressTargeted)
                     kanbanColumn("Done", tasks: $doneTasks, isTargeted: $doneTargeted)
                 }
@@ -515,12 +535,133 @@ struct ShowcaseView: View {
         }
     }
 
+    // MARK: - Compact Card Demo
+
+    private var compactCardDemo: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+            Text("Compact Cards").fabricTitle()
+            Text("Ticket ID top-left, pills top-right, status indicators bottom")
+                .fabricCaption()
+
+            HStack(alignment: .top, spacing: FabricSpacing.md) {
+                // Ticket with blocked indicator
+                FabricTaskCard(
+                    "Design System Refresh: Core Palette",
+                    ticketNumber: "T-042",
+                    tags: [
+                        .init("feature", accent: .indigo),
+                        .init("P6", accent: .indigo),
+                    ],
+                    layout: .compact,
+                    statusIndicator: .blocked(),
+                    avatar: .initials("JD")
+                )
+                .frame(maxWidth: 240)
+
+                // Issue card with severity badge
+                FabricTaskCard(
+                    "Memory Leak in Dashboard Render",
+                    ticketNumber: "ISS-007",
+                    tags: [
+                        .init("high-severity", accent: .madder),
+                    ],
+                    accent: .madder,
+                    layout: .compact
+                )
+                .frame(maxWidth: 240)
+
+                // Task card (no blocked, with avatar)
+                FabricTaskCard(
+                    "Update Documentation: Auth Flow",
+                    ticketNumber: "T-043",
+                    tags: [
+                        .init("chore", accent: .sage),
+                        .init("P6", accent: .indigo),
+                    ],
+                    layout: .compact,
+                    avatar: .icon("person.fill")
+                )
+                .frame(maxWidth: 240)
+
+                // Selected compact card
+                FabricTaskCard(
+                    "API Integration: Stripe Connect",
+                    ticketNumber: "T-045",
+                    tags: [
+                        .init("task", accent: .ochre),
+                        .init("P6", accent: .indigo),
+                    ],
+                    isSelected: true,
+                    layout: .compact,
+                    avatar: .initials("SK")
+                )
+                .frame(maxWidth: 240)
+            }
+        }
+    }
+
+    // MARK: - Inspector Primitives Demo
+
+    private var inspectorPrimitivesDemo: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+            Text("Inspector Primitives").fabricTitle()
+            Text("Section labels, linked item rows, and activity entries for inspector panels")
+                .fabricCaption()
+
+            HStack(alignment: .top, spacing: FabricSpacing.xl) {
+                // Section labels + linked items
+                VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                    VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                        Text("Related Issues").fabricSectionLabel()
+                        FabricLinkedItemRow("IPC Bridge implementation", id: "T-061", accent: .indigo) {}
+                        FabricLinkedItemRow("Memory leak in render", id: "ISS-012", accent: .madder) {}
+                        FabricLinkedItemRow("Window resizing hooks", id: "T-072", accent: .sage) {}
+                    }
+
+                    VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                        Text("Blocked By").fabricSectionLabel()
+                        FabricLinkedItemRow("Auth flow refactor", id: "T-039")
+                    }
+                }
+                .frame(maxWidth: 280)
+
+                // Activity feed
+                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                    Text("Activity").fabricSectionLabel()
+                    VStack(spacing: FabricSpacing.md) {
+                        FabricActivityEntry(
+                            "Claude edited window_manager.rs",
+                            timestamp: "2m ago",
+                            accent: .indigo
+                        )
+                        FabricActivityEntry(
+                            "Status changed to In Progress",
+                            timestamp: "1h ago",
+                            accent: .sage
+                        )
+                        FabricActivityEntry(
+                            "Blocked by ISS-012 added",
+                            timestamp: "3h ago",
+                            accent: .madder
+                        )
+                        FabricActivityEntry(
+                            "Ticket created",
+                            timestamp: "Mar 12"
+                        )
+                    }
+                }
+                .frame(maxWidth: 280)
+            }
+        }
+    }
+
     private func kanbanColumn(
         _ columnId: String,
         tasks: Binding<[KanbanTask]>,
-        isTargeted: Binding<Bool>
+        isTargeted: Binding<Bool>,
+        onAdd: (() -> Void)? = nil
     ) -> some View {
-        FabricKanbanColumn(columnId, count: tasks.wrappedValue.count, isDropTarget: isTargeted.wrappedValue) {
+        FabricKanbanColumn(columnId, count: tasks.wrappedValue.count, isDropTarget: isTargeted.wrappedValue, columnWidth: 280, onAdd: onAdd) {
             ForEach(tasks.wrappedValue) { task in
                 VStack(spacing: FabricSpacing.sm) {
                     // Placeholder scoped with its own animation
@@ -531,8 +672,10 @@ struct ShowcaseView: View {
 
                     FabricTaskCard(
                         task.title,
-                        description: task.description,
+                        ticketNumber: task.ticketNumber,
                         tags: task.fabricTags,
+                        layout: .compact,
+                        statusIndicator: task.isBlocked ? .blocked() : nil,
                         // Always pass closures — they guard live index internally
                         onMoveUp: {
                             guard let idx = tasks.wrappedValue.firstIndex(where: { $0.id == task.id }),
@@ -556,8 +699,9 @@ struct ShowcaseView: View {
                     .draggable(task) {
                         FabricTaskCard(
                             task.title,
-                            description: task.description,
-                            tags: task.fabricTags
+                            ticketNumber: task.ticketNumber,
+                            tags: task.fabricTags,
+                            layout: .compact
                         )
                         .frame(width: FabricAnimation.dragPreviewWidth)
                         .opacity(FabricAnimation.dragPreviewOpacity)
