@@ -455,9 +455,10 @@ private struct FabricTimelineBody: View {
                 selection = isSelected ? nil : item.id
             } label: {
                 column
+                    .frame(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg, alignment: .top)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .contentShape(Rectangle().size(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - Metrics.nodeFrameSize) / 2))
             .onHover { hovering in
                 guard isEnabled else { return }
                 hoveredItemID = hovering ? item.id : nil
