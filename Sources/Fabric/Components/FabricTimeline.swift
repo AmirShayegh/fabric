@@ -452,24 +452,27 @@ private struct FabricTimelineBody: View {
             .alignmentGuide(.dotCenterH) { _ in Metrics.nodeFrameSize / 2 }
 
         if isInteractive {
-            Button {
-                guard isEnabled else { return }
-                print("[TIMELINE] tap item=\(item.id) isSelected=\(isSelected) → setting \(isSelected ? "nil" : item.id)")
-                selection = isSelected ? nil : item.id
-            } label: {
-                column
-            }
-            .buttonStyle(.plain)
-            .contentShape(Rectangle().size(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - Metrics.nodeFrameSize) / 2))
-            .onHover { hovering in
-                guard isEnabled else { return }
-                hoveredItemID = hovering ? item.id : nil
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(accessibilityText(for: item))
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAddTraits(isSelected ? .isSelected : [])
-            .accessibilityHint(isSelected ? "Deselect" : "Select")
+            column
+                .background(alignment: .top) {
+                    // Expand hit area to cover node + labels without affecting layout
+                    Color.clear
+                        .frame(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg)
+                        .offset(x: -(200 - Metrics.nodeFrameSize) / 2)
+                }
+                .contentShape(Rectangle().size(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - Metrics.nodeFrameSize) / 2))
+                .onTapGesture {
+                    guard isEnabled else { return }
+                    selection = isSelected ? nil : item.id
+                }
+                .onHover { hovering in
+                    guard isEnabled else { return }
+                    hoveredItemID = hovering ? item.id : nil
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(accessibilityText(for: item))
+                .accessibilityAddTraits(.isButton)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+                .accessibilityHint(isSelected ? "Deselect" : "Select")
         } else {
             column
         }
