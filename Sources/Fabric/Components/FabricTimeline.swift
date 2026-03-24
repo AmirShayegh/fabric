@@ -380,17 +380,29 @@ private struct FabricTimelineBody: View {
                     }
                     .padding(.top, FabricSpacing.sm)
                     .padding(.bottom, FabricSpacing.xxxl)
+                    .padding(.horizontal, 100)
                 }
-                .safeAreaPadding(.horizontal, 600)
                 .mask(
                     GeometryReader { geo in
                         let fadeWidth = max(geo.size.width / 5, 40)
+                        let firstID = items.first?.id
+                        let lastID = items.last?.id
+                        let hideLeadingFade = firstID == selection || firstID == currentItemID
+                        let hideTrailingFade = lastID == selection || lastID == currentItemID
                         HStack(spacing: 0) {
-                            LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
-                                .frame(width: fadeWidth)
+                            if hideLeadingFade {
+                                Color.black.frame(width: fadeWidth)
+                            } else {
+                                LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
+                                    .frame(width: fadeWidth)
+                            }
                             Color.black
-                            LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
-                                .frame(width: fadeWidth)
+                            if hideTrailingFade {
+                                Color.black.frame(width: fadeWidth)
+                            } else {
+                                LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
+                                    .frame(width: fadeWidth)
+                            }
                         }
                     }
                 )
