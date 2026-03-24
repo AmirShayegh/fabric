@@ -385,11 +385,12 @@ private struct FabricTimelineBody: View {
                 )
                 .mask(
                     HStack(spacing: 0) {
+                        let fadeWidth = max(viewportWidth / 10, 40)
                         LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
-                            .frame(width: 80)
+                            .frame(width: fadeWidth)
                         Color.black
                         LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
-                            .frame(width: 80)
+                            .frame(width: fadeWidth)
                     }
                 )
                 .onAppear {
