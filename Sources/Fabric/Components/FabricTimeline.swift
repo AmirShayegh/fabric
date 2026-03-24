@@ -127,7 +127,6 @@ private struct FabricTimelineBody: View {
 
     @State private var hoveredItemID: String? = nil
     @State private var viewportWidth: CGFloat = 0
-    @State private var scrolledID: String?
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -352,57 +351,60 @@ private struct FabricTimelineBody: View {
 
     private var horizontalLayout: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .dotCenterH, spacing: 0) {
-                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                        if index > 0 {
-                            Capsule()
-                                .fill(connectorFill(
-                                    beforeIndex: index,
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                ))
-                                .frame(height: Metrics.connectorThickness)
-                                .padding(.horizontal, FabricSpacing.xs)
-                                .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
-                                .frame(width: 200)
-                        }
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .dotCenterH, spacing: 0) {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                            if index > 0 {
+                                Capsule()
+                                    .fill(connectorFill(
+                                        beforeIndex: index,
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    ))
+                                    .frame(height: Metrics.connectorThickness)
+                                    .padding(.horizontal, FabricSpacing.xs)
+                                    .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
+                                    .frame(width: 200)
+                            }
 
-                        horizontalItemColumn(item: item, index: index)
-                            .id(item.id)
+                            horizontalItemColumn(item: item, index: index)
+                                .id(item.id)
+                        }
+                    }
+                    .padding(.top, FabricSpacing.sm)
+                    .padding(.horizontal, max(viewportWidth / 2, 100))
+                    .padding(.bottom, FabricSpacing.xxxl)
+                }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear { viewportWidth = geo.size.width }
+                            .onChange(of: geo.size.width) { _, w in viewportWidth = w }
+                    }
+                )
+                .mask(
+                    HStack(spacing: 0) {
+                        let fadeWidth = max(viewportWidth / 10, 40)
+                        LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
+                            .frame(width: fadeWidth)
+                        Color.black
+                        LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
+                            .frame(width: fadeWidth)
+                    }
+                )
+                .onAppear {
+                    DispatchQueue.main.async {
+                        if let currentID = currentItemID {
+                            proxy.scrollTo(currentID, anchor: .center)
+                        }
                     }
                 }
-                .scrollTargetLayout()
-                .padding(.top, FabricSpacing.sm)
-                .padding(.horizontal, max(viewportWidth / 2, 100))
-                .padding(.bottom, FabricSpacing.xxxl)
-            }
-            .scrollPosition(id: $scrolledID, anchor: .center)
-            .scrollTargetBehavior(.viewAligned)
-            .background(
-                GeometryReader { geo in
-                    Color.clear
-                        .onAppear { viewportWidth = geo.size.width }
-                        .onChange(of: geo.size.width) { _, w in viewportWidth = w }
-                }
-            )
-            .mask(
-                HStack(spacing: 0) {
-                    let fadeWidth = max(viewportWidth / 10, 40)
-                    LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
-                        .frame(width: fadeWidth)
-                    Color.black
-                    LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
-                        .frame(width: fadeWidth)
-                }
-            )
-            .onAppear {
-                scrolledID = currentItemID
-            }
-            .onChange(of: selection) { _, newValue in
-                if let id = newValue {
-                    withAnimation(.smooth(duration: 0.35)) {
-                        scrolledID = id
+                .onChange(of: selection) { _, newValue in
+                    if let id = newValue {
+                        withAnimation(.smooth(duration: 0.35)) {
+                            proxy.scrollTo(id, anchor: .center)
+                        }
                     }
                 }
             }
