@@ -352,6 +352,7 @@ private struct FabricTimelineBody: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
+                    let _ = print("[TIMELINE-CONTENT] selection=\(selection ?? "nil") padding=100")
                     HStack(alignment: .dotCenterH, spacing: 0) {
                         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                             if index > 0 {
@@ -372,9 +373,10 @@ private struct FabricTimelineBody: View {
                         }
                     }
                     .padding(.top, FabricSpacing.sm)
-                    .padding(.horizontal, 600)
+                    .padding(.horizontal, 100)
                     .padding(.bottom, FabricSpacing.xxxl)
                 }
+                .background(GeometryReader { g in Color.clear.onAppear { print("[TIMELINE-SCROLL] width=\(g.size.width)") }.onChange(of: g.size.width) { _, w in print("[TIMELINE-SCROLL] width=\(w)") } })
                 .mask(
                     HStack(spacing: 0) {
                         LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
