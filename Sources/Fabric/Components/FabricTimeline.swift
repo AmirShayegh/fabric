@@ -126,7 +126,6 @@ private struct FabricTimelineBody: View {
     }
 
     @State private var hoveredItemID: String? = nil
-    @State private var viewportWidth: CGFloat = 0
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -373,24 +372,16 @@ private struct FabricTimelineBody: View {
                         }
                     }
                     .padding(.top, FabricSpacing.sm)
-                    .padding(.horizontal, max(viewportWidth / 2, 100))
                     .padding(.bottom, FabricSpacing.xxxl)
                 }
-                .background(
-                    GeometryReader { geo in
-                        Color.clear
-                            .onAppear { viewportWidth = geo.size.width }
-                            .onChange(of: geo.size.width) { _, w in viewportWidth = w }
-                    }
-                )
+                .contentMargins(.horizontal, 600, for: .scrollContent)
                 .mask(
                     HStack(spacing: 0) {
-                        let fadeWidth = max(viewportWidth / 10, 40)
                         LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
-                            .frame(width: fadeWidth)
+                            .frame(width: 100)
                         Color.black
                         LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
-                            .frame(width: fadeWidth)
+                            .frame(width: 100)
                     }
                 )
                 .onAppear {
@@ -402,9 +393,7 @@ private struct FabricTimelineBody: View {
                 }
                 .onChange(of: selection) { _, newValue in
                     if let id = newValue {
-                        withAnimation(.smooth(duration: 0.35)) {
-                            proxy.scrollTo(id, anchor: .center)
-                        }
+                        proxy.scrollTo(id, anchor: .center)
                     }
                 }
             }
