@@ -66,6 +66,7 @@ public struct FabricTimeline: View {
     public let accent: FabricAccent
     public let axis: Axis
     public let currentItemID: String?
+    public let descriptionAlignment: HorizontalAlignment
     private let isInteractive: Bool
 
     /// Non-interactive timeline (backward compatible).
@@ -75,6 +76,7 @@ public struct FabricTimeline: View {
         self.accent = .indigo
         self.axis = axis
         self.currentItemID = nil
+        self.descriptionAlignment = .leading
         self.isInteractive = false
     }
 
@@ -84,13 +86,15 @@ public struct FabricTimeline: View {
         selection: Binding<String?>,
         currentItemID: String? = nil,
         accent: FabricAccent = .indigo,
-        axis: Axis = .vertical
+        axis: Axis = .vertical,
+        descriptionAlignment: HorizontalAlignment = .leading
     ) {
         self.items = items
         self._selection = selection
         self.accent = accent
         self.axis = axis
         self.currentItemID = currentItemID
+        self.descriptionAlignment = descriptionAlignment
         self.isInteractive = true
     }
 
@@ -101,7 +105,8 @@ public struct FabricTimeline: View {
             accent: accent,
             axis: axis,
             currentItemID: currentItemID,
-            isInteractive: isInteractive
+            isInteractive: isInteractive,
+            descriptionAlignment: descriptionAlignment
         )
     }
 }
@@ -116,6 +121,7 @@ private struct FabricTimelineBody: View {
     let axis: FabricTimeline.Axis
     let currentItemID: String?
     let isInteractive: Bool
+    let descriptionAlignment: HorizontalAlignment
 
     private enum Metrics {
         static let nodeSize: Double = 22
@@ -406,8 +412,9 @@ private struct FabricTimelineBody: View {
                 Text(description)
                     .fabricTypography(.body)
                     .foregroundStyle(FabricColors.inkSecondary)
+                    .multilineTextAlignment(descriptionAlignment == .center ? .center : .leading)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: Alignment(horizontal: descriptionAlignment, vertical: .center))
                     .padding(.top, FabricSpacing.md)
             }
         }
