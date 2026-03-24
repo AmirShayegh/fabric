@@ -448,22 +448,13 @@ private struct FabricTimelineBody: View {
         if isInteractive {
             Button {
                 guard isEnabled else { return }
+                print("[TIMELINE] tap item=\(item.id) isSelected=\(isSelected) → setting \(isSelected ? "nil" : item.id)")
                 selection = isSelected ? nil : item.id
             } label: {
                 column
             }
             .buttonStyle(.plain)
-            .overlay(alignment: .top) {
-                // Invisible hit area covering node + labels (200×104pt)
-                Color.clear
-                    .frame(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg)
-                    .contentShape(Rectangle())
-                    .offset(x: -(200 - Metrics.nodeFrameSize) / 2)
-                    .onTapGesture {
-                        guard isEnabled else { return }
-                        selection = isSelected ? nil : item.id
-                    }
-            }
+            .contentShape(Rectangle().size(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - Metrics.nodeFrameSize) / 2))
             .onHover { hovering in
                 guard isEnabled else { return }
                 hoveredItemID = hovering ? item.id : nil
