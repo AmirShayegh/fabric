@@ -372,9 +372,9 @@ private struct FabricTimelineBody: View {
                         }
                     }
                     .padding(.top, FabricSpacing.sm)
+                    .padding(.horizontal, 600)
                     .padding(.bottom, FabricSpacing.xxxl)
                 }
-                .contentMargins(.horizontal, 600, for: .scrollContent)
                 .mask(
                     HStack(spacing: 0) {
                         LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
