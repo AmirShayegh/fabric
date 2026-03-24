@@ -7,6 +7,7 @@ public struct FabricKanbanColumn<Content: View>: View {
     public let isDropTarget: Bool
     public let columnWidth: CGFloat?
     public let accent: FabricAccent
+    public let showShadow: Bool
     public let onAdd: (() -> Void)?
     @ViewBuilder public let content: Content
 
@@ -23,6 +24,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         isDropTarget: Bool = false,
         columnWidth: CGFloat? = nil,
         accent: FabricAccent = .indigo,
+        showShadow: Bool = false,
         onAdd: (() -> Void)? = nil,
         @ViewBuilder content: () -> Content
     ) {
@@ -31,6 +33,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         self.isDropTarget = isDropTarget
         self.columnWidth = columnWidth
         self.accent = accent
+        self.showShadow = showShadow
         self.onAdd = onAdd
         self.content = content()
     }
@@ -83,6 +86,11 @@ public struct FabricKanbanColumn<Content: View>: View {
         )
         .clipShape(shape)
         .fabricInnerShadow(shape, .recessed)
+        .fabricShadow(
+            .low,
+            tightColor: showShadow ? FabricColors.shadowTight : .clear,
+            ambientColor: showShadow ? FabricColors.shadow : .clear
+        )
         .overlay {
             if isDropTarget {
                 shape.strokeBorder(
