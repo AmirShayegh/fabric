@@ -455,10 +455,19 @@ private struct FabricTimelineBody: View {
                 selection = isSelected ? nil : item.id
             } label: {
                 column
-                    .frame(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg, alignment: .top)
-                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .overlay(alignment: .top) {
+                // Invisible hit area covering node + labels (200×104pt)
+                Color.clear
+                    .frame(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg)
+                    .contentShape(Rectangle())
+                    .offset(x: -(200 - Metrics.nodeFrameSize) / 2)
+                    .onTapGesture {
+                        guard isEnabled else { return }
+                        selection = isSelected ? nil : item.id
+                    }
+            }
             .onHover { hovering in
                 guard isEnabled else { return }
                 hoveredItemID = hovering ? item.id : nil
