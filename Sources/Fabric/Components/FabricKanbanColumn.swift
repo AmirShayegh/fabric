@@ -40,6 +40,7 @@ public struct FabricKanbanColumn<Content: View>: View {
             // Header
             HStack {
                 Text(title).fabricHeading()
+                Spacer()
                 if let onAdd {
                     Button(action: onAdd) {
                         Image(systemName: "plus")
@@ -49,7 +50,6 @@ public struct FabricKanbanColumn<Content: View>: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel("Add to \(title)")
                 }
-                Spacer()
                 if let count {
                     FabricBadge("\(count)")
                 }
