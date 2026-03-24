@@ -382,14 +382,16 @@ private struct FabricTimelineBody: View {
                     .padding(.horizontal, 100)
                     .padding(.bottom, FabricSpacing.xxxl)
                 }
-                .background(GeometryReader { g in Color.clear.onAppear { print("[TIMELINE-SCROLL] width=\(g.size.width)") }.onChange(of: g.size.width) { _, w in print("[TIMELINE-SCROLL] width=\(w)") } })
                 .mask(
-                    HStack(spacing: 0) {
-                        LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
-                            .frame(width: 100)
-                        Color.black
-                        LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
-                            .frame(width: 100)
+                    GeometryReader { geo in
+                        let fadeWidth = max(geo.size.width / 8, 40)
+                        HStack(spacing: 0) {
+                            LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
+                                .frame(width: fadeWidth)
+                            Color.black
+                            LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
+                                .frame(width: fadeWidth)
+                        }
                     }
                 )
                 .onAppear {
