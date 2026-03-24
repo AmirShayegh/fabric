@@ -413,8 +413,11 @@ private struct FabricTimelineBody: View {
                 Text(description)
                     .fabricTypography(.body)
                     .foregroundStyle(FabricColors.inkSecondary)
+                    .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .containerRelativeFrame(.horizontal) { width, _ in width * 0.8 }
+                    .frame(maxWidth: .infinity)
                     .padding(.top, FabricSpacing.md)
             }
         }
