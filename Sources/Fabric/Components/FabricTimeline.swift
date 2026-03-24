@@ -126,6 +126,7 @@ private struct FabricTimelineBody: View {
     }
 
     @State private var hoveredItemID: String? = nil
+    @State private var viewportWidth: CGFloat = 0
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -372,12 +373,33 @@ private struct FabricTimelineBody: View {
                         }
                     }
                     .padding(.top, FabricSpacing.sm)
-                    .padding(.horizontal, 100)
+                    .padding(.horizontal, max(viewportWidth / 2, 100))
                     .padding(.bottom, FabricSpacing.xxxl)
                 }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear { viewportWidth = geo.size.width }
+                            .onChange(of: geo.size.width) { _, w in viewportWidth = w }
+                    }
+                )
+                .mask(
+                    HStack(spacing: 0) {
+                        LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
+                            .frame(width: 80)
+                        Color.black
+                        LinearGradient(colors: [.black, .clear], startPoint: .leading, endPoint: .trailing)
+                            .frame(width: 80)
+                    }
+                )
                 .onAppear {
                     if let currentID = currentItemID {
                         proxy.scrollTo(currentID, anchor: .center)
+                    }
+                }
+                .onChange(of: selection) { _, newValue in
+                    if let id = newValue {
+                        proxy.scrollTo(id, anchor: .center)
                     }
                 }
             }
