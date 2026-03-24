@@ -384,7 +384,7 @@ private struct FabricTimelineBody: View {
                 }
                 .mask(
                     GeometryReader { geo in
-                        let fadeWidth = max(geo.size.width / 8, 40)
+                        let fadeWidth = max(geo.size.width / 7, 40)
                         HStack(spacing: 0) {
                             LinearGradient(colors: [.clear, .black], startPoint: .leading, endPoint: .trailing)
                                 .frame(width: fadeWidth)
