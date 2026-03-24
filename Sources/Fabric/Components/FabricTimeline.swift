@@ -358,7 +358,6 @@ private struct FabricTimelineBody: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
-                    let _ = print("[TIMELINE-CONTENT] selection=\(selection ?? "nil") padding=100")
                     HStack(alignment: .dotCenterH, spacing: 0) {
                         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                             if index > 0 {
