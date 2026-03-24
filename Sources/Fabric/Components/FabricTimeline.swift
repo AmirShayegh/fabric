@@ -379,9 +379,9 @@ private struct FabricTimelineBody: View {
                         }
                     }
                     .padding(.top, FabricSpacing.sm)
-                    .padding(.horizontal, 100)
                     .padding(.bottom, FabricSpacing.xxxl)
                 }
+                .safeAreaPadding(.horizontal, 600)
                 .mask(
                     GeometryReader { geo in
                         let fadeWidth = max(geo.size.width / 5, 40)
