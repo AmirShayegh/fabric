@@ -403,7 +403,9 @@ private struct FabricTimelineBody: View {
                 }
                 .onChange(of: selection) { _, newValue in
                     if let id = newValue {
-                        proxy.scrollTo(id, anchor: .center)
+                        withAnimation(.smooth(duration: 0.35)) {
+                            proxy.scrollTo(id, anchor: .center)
+                        }
                     }
                 }
             }
