@@ -54,7 +54,7 @@ extension VerticalAlignment {
 
 // MARK: - Timeline Container
 
-public struct FabricTimeline: View {
+public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
 
     public enum Axis {
         case vertical
@@ -68,8 +68,27 @@ public struct FabricTimeline: View {
     public let currentItemID: String?
     public let descriptionAlignment: HorizontalAlignment
     private let isInteractive: Bool
+    let itemOverlay: (FabricTimelineItem) -> ItemOverlay
+    let trailingContent: Trailing
 
-    /// Non-interactive timeline (backward compatible).
+    public var body: some View {
+        FabricTimelineBody(
+            items: items,
+            selection: $selection,
+            accent: accent,
+            axis: axis,
+            currentItemID: currentItemID,
+            isInteractive: isInteractive,
+            descriptionAlignment: descriptionAlignment,
+            itemOverlay: itemOverlay,
+            trailingContent: trailingContent
+        )
+    }
+}
+
+// MARK: - Non-interactive Init (backward compatible)
+
+extension FabricTimeline where ItemOverlay == EmptyView, Trailing == EmptyView {
     public init(items: [FabricTimelineItem], axis: Axis = .vertical) {
         self.items = items
         self._selection = .constant(nil)
@@ -78,8 +97,14 @@ public struct FabricTimeline: View {
         self.currentItemID = nil
         self.descriptionAlignment = .leading
         self.isInteractive = false
+        self.itemOverlay = { _ in EmptyView() }
+        self.trailingContent = EmptyView()
     }
+}
 
+// MARK: - Interactive Inits
+
+extension FabricTimeline where ItemOverlay == EmptyView, Trailing == EmptyView {
     /// Interactive timeline with selection support.
     public init(
         items: [FabricTimelineItem],
@@ -96,44 +121,111 @@ public struct FabricTimeline: View {
         self.currentItemID = currentItemID
         self.descriptionAlignment = descriptionAlignment
         self.isInteractive = true
+        self.itemOverlay = { _ in EmptyView() }
+        self.trailingContent = EmptyView()
     }
+}
 
-    public var body: some View {
-        FabricTimelineBody(
-            items: items,
-            selection: $selection,
-            accent: accent,
-            axis: axis,
-            currentItemID: currentItemID,
-            isInteractive: isInteractive,
-            descriptionAlignment: descriptionAlignment
-        )
+extension FabricTimeline where Trailing == EmptyView {
+    /// Interactive timeline with per-item overlay (for context menus, drag sources, etc.).
+    public init(
+        items: [FabricTimelineItem],
+        selection: Binding<String?>,
+        currentItemID: String? = nil,
+        accent: FabricAccent = .indigo,
+        axis: Axis = .vertical,
+        descriptionAlignment: HorizontalAlignment = .leading,
+        @ViewBuilder itemOverlay: @escaping (FabricTimelineItem) -> ItemOverlay
+    ) {
+        self.items = items
+        self._selection = selection
+        self.accent = accent
+        self.axis = axis
+        self.currentItemID = currentItemID
+        self.descriptionAlignment = descriptionAlignment
+        self.isInteractive = true
+        self.itemOverlay = itemOverlay
+        self.trailingContent = EmptyView()
+    }
+}
+
+extension FabricTimeline where ItemOverlay == EmptyView {
+    /// Interactive timeline with trailing content (for "+" buttons, drop zones, etc.).
+    public init(
+        items: [FabricTimelineItem],
+        selection: Binding<String?>,
+        currentItemID: String? = nil,
+        accent: FabricAccent = .indigo,
+        axis: Axis = .vertical,
+        descriptionAlignment: HorizontalAlignment = .leading,
+        @ViewBuilder trailingContent: () -> Trailing
+    ) {
+        self.items = items
+        self._selection = selection
+        self.accent = accent
+        self.axis = axis
+        self.currentItemID = currentItemID
+        self.descriptionAlignment = descriptionAlignment
+        self.isInteractive = true
+        self.itemOverlay = { _ in EmptyView() }
+        self.trailingContent = trailingContent()
+    }
+}
+
+extension FabricTimeline {
+    /// Interactive timeline with per-item overlay and trailing content.
+    public init(
+        items: [FabricTimelineItem],
+        selection: Binding<String?>,
+        currentItemID: String? = nil,
+        accent: FabricAccent = .indigo,
+        axis: Axis = .vertical,
+        descriptionAlignment: HorizontalAlignment = .leading,
+        @ViewBuilder itemOverlay: @escaping (FabricTimelineItem) -> ItemOverlay,
+        @ViewBuilder trailingContent: () -> Trailing
+    ) {
+        self.items = items
+        self._selection = selection
+        self.accent = accent
+        self.axis = axis
+        self.currentItemID = currentItemID
+        self.descriptionAlignment = descriptionAlignment
+        self.isInteractive = true
+        self.itemOverlay = itemOverlay
+        self.trailingContent = trailingContent()
     }
 }
 
 // MARK: - Body (owns @State for hover tracking)
 
-private struct FabricTimelineBody: View {
+private enum FabricTimelineMetrics {
+    static let nodeSize: Double = 22
+    static let nodeFrameSize: Double = 28
+    static let activeRingSize: Double = 26
+    static let borderWidth: Double = 2.5
+    static let connectorThickness: Double = 3
+}
+
+private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
 
     let items: [FabricTimelineItem]
     @Binding var selection: String?
     let accent: FabricAccent
-    let axis: FabricTimeline.Axis
+    let axis: FabricTimeline<ItemOverlay, Trailing>.Axis
     let currentItemID: String?
     let isInteractive: Bool
     let descriptionAlignment: HorizontalAlignment
+    let itemOverlay: (FabricTimelineItem) -> ItemOverlay
+    let trailingContent: Trailing
 
-    private enum Metrics {
-        static let nodeSize: Double = 22
-        static let nodeFrameSize: Double = 28
-        static let activeRingSize: Double = 26
-        static let borderWidth: Double = 2.5
-        static let connectorThickness: Double = 3
-    }
+    private typealias Metrics = FabricTimelineMetrics
 
     @State private var hoveredItemID: String? = nil
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var hasOverlay: Bool { ItemOverlay.self != EmptyView.self }
+    private var hasTrailing: Bool { Trailing.self != EmptyView.self }
 
     var body: some View {
         Group {
@@ -279,6 +371,13 @@ private struct FabricTimelineBody: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 verticalItemRow(item: item, index: index)
             }
+            if hasTrailing {
+                Capsule()
+                    .fill(FabricColors.connector)
+                    .frame(width: Metrics.connectorThickness, height: FabricSpacing.lg)
+                    .alignmentGuide(.dotCenter) { d in d[HorizontalAlignment.center] }
+                trailingContent
+            }
         }
     }
 
@@ -338,6 +437,7 @@ private struct FabricTimelineBody: View {
             }
             .buttonStyle(.plain)
             .contentShape(Rectangle())
+            .overlay { itemOverlay(item) }
             .onHover { hovering in
                 guard isEnabled else { return }
                 hoveredItemID = hovering ? item.id : nil
@@ -375,6 +475,18 @@ private struct FabricTimelineBody: View {
 
                             horizontalItemColumn(item: item, index: index)
                                 .id(item.id)
+                        }
+
+                        if hasTrailing {
+                            Capsule()
+                                .fill(FabricColors.connector)
+                                .frame(height: Metrics.connectorThickness)
+                                .padding(.horizontal, FabricSpacing.xs)
+                                .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
+                                .frame(width: 200)
+
+                            trailingContent
+                                .alignmentGuide(.dotCenterH) { d in d[VerticalAlignment.center] }
                         }
                     }
                     .padding(.top, FabricSpacing.sm)
@@ -466,15 +578,22 @@ private struct FabricTimelineBody: View {
             }
             .alignmentGuide(.dotCenterH) { _ in Metrics.nodeFrameSize / 2 }
 
+        let hitWidth: Double = 200
+        let hitHeight = Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg
+        let hitOffsetX = -(hitWidth - Metrics.nodeFrameSize) / 2
+
         if isInteractive {
             column
                 .background(alignment: .top) {
-                    // Expand hit area to cover node + labels without affecting layout
-                    Color.clear
-                        .frame(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg)
-                        .offset(x: -(200 - Metrics.nodeFrameSize) / 2)
+                    // Full item hit region: overlay + background share exact same geometry
+                    ZStack {
+                        Color.clear
+                        itemOverlay(item)
+                    }
+                    .frame(width: hitWidth, height: hitHeight)
+                    .offset(x: hitOffsetX)
                 }
-                .contentShape(Rectangle().size(width: 200, height: Metrics.nodeFrameSize + FabricSpacing.xxxl + FabricSpacing.lg).offset(x: -(200 - Metrics.nodeFrameSize) / 2))
+                .contentShape(Rectangle().size(width: hitWidth, height: hitHeight).offset(x: hitOffsetX))
                 .onTapGesture {
                     guard isEnabled else { return }
                     selection = isSelected ? nil : item.id

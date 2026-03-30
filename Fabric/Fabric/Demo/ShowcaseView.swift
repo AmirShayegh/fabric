@@ -49,6 +49,37 @@ struct KanbanTask: Identifiable, Codable, Equatable, Transferable {
     }
 }
 
+// MARK: - Timeline Reorder Drop Delegate
+
+struct TimelineReorderDropDelegate: DropDelegate {
+    let targetID: String
+    @Binding var items: [FabricTimelineItem]
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        guard let provider = info.itemProviders(for: [.text]).first else { return false }
+        _ = provider.loadObject(ofClass: NSString.self) { reading, _ in
+            guard let sourceID = reading as? String else { return }
+            DispatchQueue.main.async {
+                guard sourceID != targetID,
+                      let srcIdx = items.firstIndex(where: { $0.id == sourceID }),
+                      let dstIdx = items.firstIndex(where: { $0.id == targetID })
+                else { return }
+                withAnimation(FabricAnimation.reorder) {
+                    items.move(
+                        fromOffsets: IndexSet(integer: srcIdx),
+                        toOffset: dstIdx > srcIdx ? dstIdx + 1 : dstIdx
+                    )
+                }
+            }
+        }
+        return true
+    }
+}
+
 // MARK: - ShowcaseView
 
 struct ShowcaseView: View {
@@ -117,6 +148,18 @@ struct ShowcaseView: View {
     /// Live indices are computed from task arrays inside handlers.
     @State private var dropTarget: (column: String, taskID: String)? = nil
     @State private var selectedTimelineItem: String? = nil
+    @State private var overlayDemoItems: [FabricTimelineItem] = [
+        .init(id: "ov-plan", timestamp: "Phase 1", title: "Planning",
+              kind: .milestone(accent: .sage)),
+        .init(id: "ov-build", timestamp: "Phase 2", title: "Development",
+              description: "Core feature build"),
+        .init(id: "ov-test", timestamp: "Phase 3", title: "Testing"),
+        .init(id: "ov-ship", timestamp: "Phase 4", title: "Shipping",
+              kind: .milestone(accent: .ochre)),
+    ]
+    @State private var overlayDemoCounter = 5
+    @State private var renamingItemID: String? = nil
+    @State private var renameText = ""
 
     private let allColumnNames = ["To Do", "In Progress", "Done"]
 
@@ -922,6 +965,99 @@ struct ShowcaseView: View {
                         accent: .indigo,
                         axis: .horizontal
                     )
+                }
+                .padding(.horizontal, FabricSpacing.lg)
+
+                // Horizontal — interactive overlay demo (add, reorder, rename, delete)
+                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                    Text("Horizontal — Item Overlay + Trailing (interactive)").fabricCaption()
+                    Text("Right-click to rename/delete. Drag to reorder. Tap + to add.")
+                        .fabricTypography(.caption)
+                        .foregroundStyle(FabricColors.inkTertiary)
+
+                    FabricTimeline(
+                        items: overlayDemoItems,
+                        selection: $selectedTimelineItem,
+                        currentItemID: overlayDemoItems.count > 1 ? overlayDemoItems[1].id : nil,
+                        accent: .indigo,
+                        axis: .horizontal,
+                        itemOverlay: { item in
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .contextMenu {
+                                    Button("Rename \(item.title)...") {
+                                        renameText = item.title
+                                        renamingItemID = item.id
+                                    }
+                                    Divider()
+                                    Button("Delete \(item.title)...", role: .destructive) {
+                                        withAnimation(FabricAnimation.press) {
+                                            overlayDemoItems.removeAll { $0.id == item.id }
+                                            if selectedTimelineItem == item.id {
+                                                selectedTimelineItem = nil
+                                            }
+                                        }
+                                    }
+                                }
+                                .onDrag {
+                                    NSItemProvider(object: item.id as NSString)
+                                } preview: {
+                                    Text(item.title)
+                                        .fabricTypography(.label)
+                                        .fabricInk(.primary)
+                                        .padding(.horizontal, FabricSpacing.md)
+                                        .padding(.vertical, FabricSpacing.sm)
+                                        .background(FabricColors.canvas)
+                                        .clipShape(Capsule())
+                                        .fabricShadow(.drag)
+                                }
+                                .onDrop(of: [.text], delegate: TimelineReorderDropDelegate(
+                                    targetID: item.id,
+                                    items: $overlayDemoItems
+                                ))
+                        },
+                        trailingContent: {
+                            Button {
+                                let n = overlayDemoCounter
+                                overlayDemoCounter += 1
+                                let newItem = FabricTimelineItem(
+                                    id: "ov-new-\(n)",
+                                    timestamp: "Phase \(n)",
+                                    title: "New Phase \(n)"
+                                )
+                                withAnimation(FabricAnimation.press) {
+                                    overlayDemoItems.append(newItem)
+                                }
+                            } label: {
+                                Image(systemName: "plus.circle")
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(FabricColors.inkTertiary)
+                            }
+                            .buttonStyle(.plain)
+                            .help("Add phase")
+                        }
+                    )
+                    .alert("Rename Phase", isPresented: Binding(
+                        get: { renamingItemID != nil },
+                        set: { if !$0 { renamingItemID = nil } }
+                    )) {
+                        TextField("Name", text: $renameText)
+                        Button("Cancel", role: .cancel) { renamingItemID = nil }
+                        Button("Rename") {
+                            guard let id = renamingItemID,
+                                  let idx = overlayDemoItems.firstIndex(where: { $0.id == id })
+                            else { return }
+                            let old = overlayDemoItems[idx]
+                            overlayDemoItems[idx] = FabricTimelineItem(
+                                id: old.id,
+                                timestamp: old.timestamp,
+                                title: renameText,
+                                description: old.description,
+                                kind: old.kind
+                            )
+                            renamingItemID = nil
+                        }
+                    }
                 }
                 .padding(.horizontal, FabricSpacing.lg)
             }
