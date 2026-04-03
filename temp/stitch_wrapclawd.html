@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Lora:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#6c608a",
+                "background-light": "#EBE0D0",
+                "background-dark": "#18171b",
+                "walnut": "#3B2317",
+                "indigo": "#4f46e5",
+                "terracotta": "#c2410c",
+                "ochre": "#b45309",
+                "sage": "#4d7c0f",
+                "linen": "#F5F0E8"
+              },
+              fontFamily: {
+                "display": ["Lora", "serif"],
+                "sans": ["Inter", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.25rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .inner-shadow {
+            box-shadow: inset 0 2px 8px rgba(59, 35, 23, 0.08);
+        }
+        .pebble-shadow {
+            box-shadow: 0 4px 6px -1px rgba(59, 35, 23, 0.1), 0 2px 4px -2px rgba(59, 35, 23, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #D7C9B8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-walnut font-sans overflow-hidden h-screen flex flex-col">
+<header class="flex items-center justify-between px-8 py-4 border-b border-walnut/10 bg-background-light/80 backdrop-blur-md">
+<div class="flex items-center gap-6">
+<h1 class="font-display text-2xl font-semibold tracking-tight">wrapclawd</h1>
+<nav class="flex items-center gap-1 bg-walnut/5 rounded-full p-1">
+<div class="flex items-center">
+<div class="flex flex-col items-center px-3 py-1 opacity-40">
+<span class="text-[10px] font-bold">P0</span>
+</div>
+<div class="w-[1px] h-3 bg-walnut/10"></div>
+<div class="flex flex-col items-center px-3 py-1 opacity-40">
+<span class="text-[10px] font-bold">P1</span>
+</div>
+<div class="w-[1px] h-3 bg-walnut/10"></div>
+<div class="flex flex-col items-center px-3 py-1 opacity-40">
+<span class="text-[10px] font-bold">P2</span>
+</div>
+<div class="w-[1px] h-3 bg-walnut/10"></div>
+<div class="flex flex-col items-center px-3 py-1 opacity-40">
+<span class="text-[10px] font-bold">P3</span>
+</div>
+<div class="w-[1px] h-3 bg-walnut/10"></div>
+<div class="flex flex-col items-center px-3 py-1 opacity-40">
+<span class="text-[10px] font-bold">P4</span>
+</div>
+<div class="w-[1px] h-3 bg-walnut/10"></div>
+<div class="flex flex-col items-center px-3 py-1 opacity-40">
+<span class="text-[10px] font-bold">P5</span>
+</div>
+<div class="w-[1px] h-3 bg-walnut/10"></div>
+<div class="flex flex-col items-center px-4 py-1 bg-indigo text-white rounded-full">
+<span class="text-[10px] font-bold">P6</span>
+</div>
+</div>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-walnut/5 rounded-xl transition-colors">
+<span class="material-symbols-outlined text-walnut">terminal</span>
+</button>
+<button class="p-2 hover:bg-walnut/5 rounded-xl transition-colors">
+<span class="material-symbols-outlined text-walnut">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 ml-2">
+<span class="text-xs font-bold text-primary">JD</span>
+</div>
+</div>
+</header>
+<main class="flex flex-1 overflow-hidden">
+<div class="w-[70%] h-full p-6 grid grid-cols-3 gap-6 overflow-x-auto">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between px-2">
+<h3 class="font-display text-lg font-medium">Open <span class="text-walnut/40 ml-1 text-sm font-sans">5</span></h3>
+<button class="material-symbols-outlined text-walnut/40 hover:text-walnut">add</button>
+</div>
+<div class="flex-1 bg-walnut/5 rounded-xl inner-shadow p-3 flex flex-col gap-3 custom-scrollbar overflow-y-auto">
+<div class="bg-linen p-4 rounded-xl pebble-shadow border border-white/50 cursor-pointer hover:scale-[1.02] transition-transform active:scale-[0.98]">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold opacity-60">T-042</span>
+<div class="flex gap-1">
+<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo/10 text-indigo border border-indigo/20">feature</span>
+<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo text-white">P6</span>
+</div>
+</div>
+<h4 class="text-sm font-semibold mb-3 leading-tight">Design System Refresh: Core Palette</h4>
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-terracotta text-sm">lock</span>
+<div class="w-6 h-6 rounded-full bg-walnut/10 border border-white"></div>
+</div>
+</div>
+<div class="bg-linen p-4 rounded-xl pebble-shadow border border-white/50">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold opacity-60">ISS-007</span>
+<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-terracotta/10 text-terracotta border border-terracotta/20">high-severity</span>
+</div>
+<h4 class="text-sm font-semibold leading-tight">Memory Leak in Dashboard Render</h4>
+</div>
+<div class="bg-linen p-4 rounded-xl pebble-shadow border border-white/50">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold opacity-60">T-045</span>
+<div class="flex gap-1">
+<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-ochre/10 text-ochre border border-ochre/20">task</span>
+<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo text-white">P6</span>
+</div>
+</div>
+<h4 class="text-sm font-semibold leading-tight">API Integration: Stripe Connect</h4>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between px-2">
+<h3 class="font-display text-lg font-medium">In Progress <span class="text-walnut/40 ml-1 text-sm font-sans">3</span></h3>
+</div>
+<div class="flex-1 bg-walnut/5 rounded-xl inner-shadow p-3 flex flex-col gap-3 custom-scrollbar overflow-y-auto">
+<div class="bg-linen p-4 rounded-xl pebble-shadow border border-indigo/30 ring-2 ring-indigo/10">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold opacity-60">T-043</span>
+<div class="flex gap-1">
+<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-sage/10 text-sage border border-sage/20">chore</span>
+<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo text-white">P6</span>
+</div>
+</div>
+<h4 class="text-sm font-semibold mb-3 leading-tight">Update Documentation: Auth flow</h4>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4 opacity-60">
+<div class="flex items-center justify-between px-2">
+<h3 class="font-display text-lg font-medium">Complete <span class="text-walnut/40 ml-1 text-sm font-sans">7</span></h3>
+</div>
+<div class="flex-1 bg-walnut/5 rounded-xl inner-shadow p-3 flex flex-col gap-3 custom-scrollbar overflow-y-auto">
+<div class="bg-linen/50 p-4 rounded-xl pebble-shadow border border-white/30 grayscale-[0.5]">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] font-bold opacity-60">T-039</span>
+<span class="material-symbols-outlined text-sage text-sm">check_circle</span>
+</div>
+<h4 class="text-sm font-semibold leading-tight line-through opacity-50">Setup Vercel Deployment</h4>
+</div>
+</div>
+</div>
+</div>
+<aside class="w-[300px] xl:w-[320px] h-full border-l border-walnut/10 bg-background-light/50 p-6 flex flex-col overflow-y-auto custom-scrollbar">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-display text-xl font-semibold">Inspector</h2>
+<button class="material-symbols-outlined text-walnut/40">close</button>
+</div>
+<div class="space-y-6 flex-1">
+<div>
+<label class="text-[10px] font-bold uppercase tracking-wider text-walnut/40 mb-1 block">Ticket ID</label>
+<p class="text-sm font-mono text-indigo font-bold">T-042</p>
+</div>
+<div>
+<label class="text-[10px] font-bold uppercase tracking-wider text-walnut/40 mb-1 block">Title</label>
+<input class="w-full bg-white/50 border border-walnut/10 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo/20 focus:border-indigo outline-none transition-all" type="text" value="Design System Refresh: Core Palette"/>
+</div>
+<div>
+<label class="text-[10px] font-bold uppercase tracking-wider text-walnut/40 mb-1 block">Description</label>
+<textarea class="w-full bg-white/50 border border-walnut/10 rounded-lg px-3 py-2 text-sm h-24 focus:ring-2 focus:ring-indigo/20 outline-none resize-none">Implement the new linen and walnut color scales across the entire dashboard interface.</textarea>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-[10px] font-bold uppercase tracking-wider text-walnut/40 mb-1 block">Status</label>
+<select class="w-full bg-white/50 border border-walnut/10 rounded-lg px-2 py-1.5 text-xs outline-none">
+<option>Open</option>
+<option>In Progress</option>
+<option>Complete</option>
+</select>
+</div>
+<div>
+<label class="text-[10px] font-bold uppercase tracking-wider text-walnut/40 mb-1 block">Phase</label>
+<select class="w-full bg-white/50 border border-walnut/10 rounded-lg px-2 py-1.5 text-xs outline-none">
+<option>P4</option>
+<option>P5</option>
+<option selected="">P6</option>
+</select>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold uppercase tracking-wider text-walnut/40 mb-2 block">Blocked By</label>
+<div class="flex flex-wrap gap-2">
+<span class="bg-terracotta/10 text-terracotta px-3 py-1 rounded-full text-[10px] font-bold border border-terracotta/20 flex items-center gap-1">
+                            ISS-007 <span class="material-symbols-outlined text-[12px]">close</span>
+</span>
+<button class="w-6 h-6 rounded-full border-2 border-dashed border-walnut/20 flex items-center justify-center text-walnut/40">+</button>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-bold uppercase tracking-wider text-walnut/40 mb-2 block">Related Issues</label>
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-xs hover:bg-walnut/5 p-2 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-sm text-walnut/40">link</span>
+<span class="font-medium">T-045 API Integration</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-walnut/10 flex flex-col gap-3">
+<button class="w-full bg-indigo text-white font-bold py-3 rounded-xl hover:bg-indigo/90 transition-colors shadow-lg shadow-indigo/20">Save Changes</button>
+<button class="w-full text-terracotta font-bold py-2 rounded-xl hover:bg-terracotta/5 transition-colors text-sm">Delete Ticket</button>
+</div>
+</aside>
+</main>
+<footer class="h-10 border-t border-walnut/10 bg-background-light flex items-center px-4 justify-between">
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 text-[11px] font-bold opacity-60 hover:opacity-100">
+<span class="material-symbols-outlined text-base">keyboard_arrow_up</span>
+                Terminal
+            </button>
+<div class="h-4 w-[1px] bg-walnut/10"></div>
+<div class="flex items-center gap-2 text-[11px] font-medium opacity-60">
+<span class="w-2 h-2 rounded-full bg-sage"></span>
+                Tab 1 • idle
+            </div>
+</div>
+<div class="text-[10px] font-bold opacity-30">v1.2.4-stable</div>
+</footer>
+</body></html>
