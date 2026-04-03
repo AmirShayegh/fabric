@@ -44,10 +44,10 @@ public struct FabricKanbanColumn<Content: View, HeaderTrailing: View>: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: FabricSpacing.sm) {
             // Header
-            HStack {
+            HStack(spacing: FabricSpacing.sm) {
                 Text(title).fabricHeading()
-                Spacer()
                 headerTrailing
+                Spacer()
                 if let onAdd {
                     Button(action: onAdd) {
                         Image(systemName: "plus")
