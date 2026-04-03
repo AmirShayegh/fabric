@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct FabricKanbanColumn<Content: View>: View {
+public struct FabricKanbanColumn<Content: View, HeaderTrailing: View>: View {
 
     public let title: String
     public let count: Int?
@@ -9,6 +9,7 @@ public struct FabricKanbanColumn<Content: View>: View {
     public let accent: FabricAccent
     public let showShadow: Bool
     public let onAdd: (() -> Void)?
+    @ViewBuilder public let headerTrailing: HeaderTrailing
     @ViewBuilder public let content: Content
 
     @Environment(\.isEnabled) private var isEnabled
@@ -26,6 +27,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         accent: FabricAccent = .indigo,
         showShadow: Bool = false,
         onAdd: (() -> Void)? = nil,
+        @ViewBuilder headerTrailing: () -> HeaderTrailing = { EmptyView() },
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
@@ -35,6 +37,7 @@ public struct FabricKanbanColumn<Content: View>: View {
         self.accent = accent
         self.showShadow = showShadow
         self.onAdd = onAdd
+        self.headerTrailing = headerTrailing()
         self.content = content()
     }
 
@@ -44,6 +47,7 @@ public struct FabricKanbanColumn<Content: View>: View {
             HStack {
                 Text(title).fabricHeading()
                 Spacer()
+                headerTrailing
                 if let onAdd {
                     Button(action: onAdd) {
                         Image(systemName: "plus")
