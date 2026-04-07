@@ -385,9 +385,28 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
                 verticalItemRow(item: item, index: index)
             }
             if hasTrailing {
+                verticalTrailingConnector
                 trailingContent
             }
         }
+    }
+
+    // MARK: - Vertical Trailing Connector
+
+    @ViewBuilder
+    private var verticalTrailingConnector: some View {
+        GeometryReader { geo in
+            let spineX: CGFloat = switch verticalStyle {
+            case .leading: Metrics.nodeFrameSize / 2
+            case .trailing: geo.size.width - Metrics.nodeFrameSize / 2
+            case .alternating: geo.size.width / 2
+            }
+            Capsule()
+                .fill(FabricColors.connector)
+                .frame(width: Metrics.connectorThickness, height: FabricSpacing.lg)
+                .position(x: spineX, y: FabricSpacing.lg / 2)
+        }
+        .frame(height: FabricSpacing.lg)
     }
 
     // MARK: - Vertical Label Content
@@ -453,7 +472,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
             }
 
             // Bottom segment: from dot center to row bottom
-            if index < items.count - 1 {
+            if index < items.count - 1 || hasTrailing {
                 let segHeight = geo.size.height - dotCenterY
                 Rectangle()
                     .fill(connectorFill(
