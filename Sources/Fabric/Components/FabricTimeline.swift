@@ -462,18 +462,21 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
             case .alternating: geo.size.width / 2
             }
             let dotCenterY = Metrics.nodeFrameSize / 2
+            let nodeRadius = Metrics.nodeSize / 2
 
-            // Top segment: from row top to dot center
+            // Top segment: from row top to circle top edge
             if index > 0 {
+                let topEnd = dotCenterY - nodeRadius
                 Rectangle()
                     .fill(connectorFill(beforeIndex: index, startPoint: .top, endPoint: .bottom))
-                    .frame(width: Metrics.connectorThickness, height: dotCenterY)
-                    .position(x: spineX, y: dotCenterY / 2)
+                    .frame(width: Metrics.connectorThickness, height: topEnd)
+                    .position(x: spineX, y: topEnd / 2)
             }
 
-            // Bottom segment: from dot center to row bottom
+            // Bottom segment: from circle bottom edge to row bottom
             if index < items.count - 1 || hasTrailing {
-                let segHeight = geo.size.height - dotCenterY
+                let bottomStart = dotCenterY + nodeRadius
+                let segHeight = geo.size.height - bottomStart
                 Rectangle()
                     .fill(connectorFill(
                         beforeIndex: index + 1,
@@ -481,7 +484,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
                         endPoint: .bottom
                     ))
                     .frame(width: Metrics.connectorThickness, height: segHeight)
-                    .position(x: spineX, y: dotCenterY + segHeight / 2)
+                    .position(x: spineX, y: bottomStart + segHeight / 2)
             }
         }
     }
