@@ -336,7 +336,6 @@ private struct FabricTaskCardBody: View {
                             FabricPill(tag.label, accent: tag.accent)
                         }
                     }
-                    .fixedSize()
                 }
             }
 
