@@ -525,28 +525,32 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
 
             case .alternating:
                 HStack(alignment: .top, spacing: FabricSpacing.sm) {
-                    if labelsOnTrailing {
-                        Color.clear.frame(maxWidth: .infinity)
-                    } else {
-                        verticalLabelContent(
-                            item: item, isSelected: isSelected,
-                            state: state, itemAcc: itemAcc, alignment: .trailing
-                        )
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    Group {
+                        if labelsOnTrailing {
+                            Color.clear
+                        } else {
+                            verticalLabelContent(
+                                item: item, isSelected: isSelected,
+                                state: state, itemAcc: itemAcc, alignment: .trailing
+                            )
+                        }
                     }
+                    .frame(maxWidth: .infinity, alignment: labelsOnTrailing ? .center : .trailing)
 
                     timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
                         .frame(width: Metrics.nodeFrameSize)
 
-                    if labelsOnTrailing {
-                        verticalLabelContent(
-                            item: item, isSelected: isSelected,
-                            state: state, itemAcc: itemAcc, alignment: .leading
-                        )
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    } else {
-                        Color.clear.frame(maxWidth: .infinity)
+                    Group {
+                        if labelsOnTrailing {
+                            verticalLabelContent(
+                                item: item, isSelected: isSelected,
+                                state: state, itemAcc: itemAcc, alignment: .leading
+                            )
+                        } else {
+                            Color.clear
+                        }
                     }
+                    .frame(maxWidth: .infinity, alignment: labelsOnTrailing ? .leading : .center)
                 }
             }
         }
