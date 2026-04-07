@@ -70,6 +70,11 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.controlSize) private var controlSize
+
+    private var isCompact: Bool {
+        controlSize == .mini || controlSize == .small
+    }
 
     private let trackShape = Capsule()
 
@@ -100,7 +105,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
             }
         }
         .padding(FabricSpacing.xs)
-        .frame(minHeight: 44)
+        .frame(minHeight: isCompact ? 0 : 44)
         .background {
             ZStack {
                 trackShape.fill(FabricColors.parchment)
@@ -177,7 +182,7 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                 .minimumScaleFactor(0.75)
                 .padding(.horizontal, FabricSpacing.md)
                 .padding(.vertical, FabricSpacing.sm)
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .frame(maxWidth: .infinity, minHeight: isCompact ? 0 : 44)
                 .contentShape(Capsule())
                 .background {
                     // Invisible anchor — always present, registers this segment's frame

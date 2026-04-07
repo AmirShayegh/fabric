@@ -921,6 +921,28 @@ struct ShowcaseView: View {
                 }
                 .padding(.horizontal, FabricSpacing.lg)
 
+                // Vertical — alternating
+                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                    Text("Vertical — Alternating").fabricCaption()
+
+                    FabricTimeline(
+                        items: [
+                            .init(id: "alt-q1", timestamp: "Q1 2026", title: "Planning",
+                                  description: "Requirements and design"),
+                            .init(id: "alt-q2", timestamp: "Q2 2026", title: "Development",
+                                  description: "Core feature implementation"),
+                            .init(id: "alt-q3", timestamp: "Q3 2026", title: "Beta Release",
+                                  kind: .milestone(accent: .ochre)),
+                            .init(id: "alt-q4", timestamp: "Q4 2026", title: "General Availability",
+                                  kind: .milestone(accent: .sage)),
+                        ],
+                        selection: $selectedTimelineItem,
+                        currentItemID: "alt-q2",
+                        verticalStyle: .alternating
+                    )
+                }
+                .padding(.horizontal, FabricSpacing.lg)
+
                 // Horizontal — release pipeline
                 VStack(alignment: .leading, spacing: FabricSpacing.sm) {
                     Text("Horizontal — Release Pipeline").fabricCaption()
