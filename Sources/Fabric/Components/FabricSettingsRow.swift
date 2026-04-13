@@ -110,9 +110,11 @@ private struct FabricSettingsRowBody: View {
                 .fabricTypography(.label)
                 .fabricInk(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .layoutPriority(-1)
 
             if let trailing {
                 trailing
+                    .fixedSize()
             } else if let value {
                 Text(value)
                     .fabricTypography(.caption)
