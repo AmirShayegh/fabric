@@ -12,6 +12,10 @@ public struct FabricKanbanColumn<Content: View, HeaderTrailing: View>: View {
     @ViewBuilder public let headerTrailing: HeaderTrailing
     @ViewBuilder public let content: Content
 
+    /// When true, body wraps content in LazyVStack (data+builder init).
+    /// When false, body wraps content in VStack (legacy @ViewBuilder init).
+    private let useLazyLayout: Bool
+
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -19,6 +23,7 @@ public struct FabricKanbanColumn<Content: View, HeaderTrailing: View>: View {
         FabricSpacing.shape(radius: FabricSpacing.radiusMd)
     }
 
+    /// Legacy @ViewBuilder initializer. Content is wrapped in an eager VStack.
     public init(
         _ title: String,
         count: Int? = nil,
@@ -39,6 +44,34 @@ public struct FabricKanbanColumn<Content: View, HeaderTrailing: View>: View {
         self.onAdd = onAdd
         self.headerTrailing = headerTrailing()
         self.content = content()
+        self.useLazyLayout = false
+    }
+
+    /// Data+builder initializer. Content is wrapped in a LazyVStack for
+    /// on-demand instantiation -- only visible cards are created (~10-15),
+    /// reducing memory from O(n) to O(visible).
+    public init<Item: Identifiable, CardView: View>(
+        _ title: String,
+        data: [Item],
+        count: Int? = nil,
+        isDropTarget: Bool = false,
+        columnWidth: CGFloat? = nil,
+        accent: FabricAccent = .indigo,
+        showShadow: Bool = false,
+        onAdd: (() -> Void)? = nil,
+        @ViewBuilder headerTrailing: () -> HeaderTrailing = { EmptyView() },
+        @ViewBuilder cardBuilder: @escaping (Item) -> CardView
+    ) where Content == ForEach<[Item], Item.ID, CardView> {
+        self.title = title
+        self.count = count
+        self.isDropTarget = isDropTarget
+        self.columnWidth = columnWidth
+        self.accent = accent
+        self.showShadow = showShadow
+        self.onAdd = onAdd
+        self.headerTrailing = headerTrailing()
+        self.content = ForEach(data) { item in cardBuilder(item) }
+        self.useLazyLayout = true
     }
 
     public var body: some View {
@@ -67,10 +100,18 @@ public struct FabricKanbanColumn<Content: View, HeaderTrailing: View>: View {
                 .fill(FabricColors.inkTertiary.opacity(0.15))
                 .frame(height: 0.5)
 
-            // Content — scrolls when cards overflow the column height
+            // Content -- scrolls when cards overflow the column height.
+            // LazyVStack (data+builder) instantiates only visible cards;
+            // VStack (legacy @ViewBuilder) instantiates all eagerly.
             ScrollView(.vertical) {
-                VStack(spacing: FabricSpacing.sm) {
-                    content
+                if useLazyLayout {
+                    LazyVStack(spacing: FabricSpacing.sm) {
+                        content
+                    }
+                } else {
+                    VStack(spacing: FabricSpacing.sm) {
+                        content
+                    }
                 }
             }
             .contentMargins(.vertical, FabricSpacing.xs, for: .scrollContent)
