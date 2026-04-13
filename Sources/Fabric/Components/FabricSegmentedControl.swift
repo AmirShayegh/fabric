@@ -105,7 +105,6 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
             }
         }
         .padding(FabricSpacing.xs)
-        .frame(minHeight: isCompact ? 0 : 44)
         .background {
             ZStack {
                 trackShape.fill(FabricColors.parchment)
@@ -181,8 +180,8 @@ private struct FabricSegmentedControlBody<Selection: Hashable>: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
                 .padding(.horizontal, FabricSpacing.md)
-                .padding(.vertical, FabricSpacing.sm)
-                .frame(maxWidth: .infinity, minHeight: isCompact ? 0 : 44)
+                .padding(.vertical, FabricSpacing.xs)
+                .frame(maxWidth: .infinity, minHeight: isCompact ? 0 : 32)
                 .contentShape(Capsule())
                 .background {
                     // Invisible anchor — always present, registers this segment's frame
