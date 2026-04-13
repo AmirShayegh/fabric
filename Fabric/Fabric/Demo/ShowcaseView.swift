@@ -184,6 +184,9 @@ struct ShowcaseView: View {
                 inspectorPrimitivesDemo
                     .padding(.bottom, FabricSpacing.xxxl)
 
+                settingsRowDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
                 timelineDemo
                     .padding(.bottom, FabricSpacing.xxxl)
 
@@ -694,6 +697,60 @@ struct ShowcaseView: View {
                     }
                 }
                 .frame(maxWidth: 280)
+            }
+        }
+    }
+
+    // MARK: - Settings Row Demo
+
+    private var settingsRowDemo: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+            Text("Settings Rows").fabricTitle()
+            Text("Label-value rows for settings panels, configuration views, and inspector detail sections")
+                .fabricCaption()
+
+            HStack(alignment: .top, spacing: FabricSpacing.xl) {
+                // Read-only info rows
+                FabricCard {
+                    VStack(spacing: 0) {
+                        FabricSettingsRow("Status", value: "Connected", icon: "wifi", accent: .sage)
+                        FabricSettingsRow("Transport", value: "LAN", icon: "network")
+                        FabricSettingsRow("Host", value: "MacBook Pro", icon: "desktopcomputer")
+                        FabricSettingsRow("Last Seen", value: "2m ago", icon: "clock")
+                    }
+                }
+                .frame(maxWidth: 320)
+
+                // Interactive rows with disclosure
+                FabricCard {
+                    VStack(spacing: 0) {
+                        FabricSettingsRow("Account", icon: "person.crop.circle", disclosure: true) { }
+                        FabricSettingsRow("Notifications", icon: "bell", disclosure: true) { }
+                        FabricSettingsRow("Storage", icon: "internaldrive") {
+                        } trailing: {
+                            FabricBadge("2.4 GB", accent: .ochre)
+                        }
+                        FabricSettingsRow("About", icon: "info.circle", disclosure: true) { }
+                    }
+                }
+                .frame(maxWidth: 320)
+
+                // Mixed: values, accents, trailing accessories
+                FabricCard {
+                    VStack(spacing: 0) {
+                        FabricSettingsRow("Version", value: "1.0.9")
+                        FabricSettingsRow("Build", value: "247")
+                        FabricSettingsRow("Issues") {
+                        } trailing: {
+                            HStack(spacing: FabricSpacing.xs) {
+                                FabricBadge("3 open", accent: .madder)
+                                FabricBadge("12 resolved", accent: .sage)
+                            }
+                        }
+                        FabricSettingsRow("Copy Diagnostics", icon: "doc.on.clipboard") { }
+                    }
+                }
+                .frame(maxWidth: 320)
             }
         }
     }
