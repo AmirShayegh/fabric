@@ -162,6 +162,7 @@ private struct FabricTabBarBody<Selection: Hashable>: View {
                         isSelected || isHovered ? FabricColors.inkPrimary : FabricColors.inkSecondary
                     )
                     .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                     .padding(.horizontal, FabricSpacing.sm)
                     .padding(.vertical, FabricSpacing.sm)
 
