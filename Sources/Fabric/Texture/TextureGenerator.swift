@@ -80,11 +80,12 @@ public enum TextureGenerator {
             for x in 0..<pixelSize {
                 let offset = (y * pixelSize + x) * 4
 
-                // Deterministic hash noise → 0...1
-                let n = noise(x: x, y: y, seed: seed)
+                // Tileable noise: blend with wrapped samples near edges
+                // so opposite edges produce matching values
+                let n = tileableNoise(x: x, y: y, size: pixelSize, seed: seed)
 
-                // Weave modulation: every 2nd row/col gets boosted —
-                // denser grid creates more textile-like warp/weft character
+                // Weave modulation: every 2nd row/col gets boosted.
+                // Spacing 2 tiles seamlessly for even-sized tiles.
                 let weave = weaveWeight(x: x, y: y, spacing: 2)
 
                 // Signed deviation from 0.5 midpoint
@@ -123,6 +124,37 @@ public enum TextureGenerator {
         h = (h ^ (h >> 13)) &* 1103515245
         h = h ^ (h >> 16)
         return Float(abs(h) % 10000) / 10000.0
+    }
+
+    /// Tileable noise: near tile edges, cross-fade between the base sample
+    /// and the wrapped sample so opposite edges produce matching values.
+    /// Uses cosine interpolation for a smooth blend within a border margin.
+    private static func tileableNoise(x: Int, y: Int, size: Int, seed: Int) -> Float {
+        let margin = max(4, size / 8)
+        let n00 = noise(x: x, y: y, seed: seed)
+        let n10 = noise(x: x + size, y: y, seed: seed)
+        let n01 = noise(x: x, y: y + size, seed: seed)
+        let n11 = noise(x: x + size, y: y + size, seed: seed)
+
+        // Blend factor: 0 at center, 1 at edge (cosine curve for smoothness)
+        func blend(_ coord: Int) -> Float {
+            if coord < margin {
+                let t = Float(margin - coord) / Float(margin)
+                return (1.0 - cosf(t * .pi)) * 0.5
+            } else if coord >= size - margin {
+                let t = Float(coord - (size - margin)) / Float(margin)
+                return (1.0 - cosf(t * .pi)) * 0.5
+            }
+            return 0.0
+        }
+
+        let bx = blend(x)
+        let by = blend(y)
+
+        // Bilinear cross-fade between all four wrapped samples
+        let top = n00 * (1.0 - bx) + n10 * bx
+        let bottom = n01 * (1.0 - bx) + n11 * bx
+        return top * (1.0 - by) + bottom * by
     }
 
     /// Weave modulation: every Nth row/col gets boosted intensity.
