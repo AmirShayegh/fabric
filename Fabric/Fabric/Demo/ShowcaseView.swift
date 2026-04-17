@@ -299,11 +299,11 @@ struct ShowcaseView: View {
                     .fabricInk(.soft)
                     .italic()
 
-                (
-                    Text("Claude Story ")
-                    + Text("CLI.").fabricEmphasis()
-                )
-                .fabricEditorialDisplay()
+                // Text interpolation embeds a styled Text inline — replaces the
+                // deprecated `Text + Text` concatenation while preserving mixed
+                // runs (the `CLI.` span gets the serif-italic em-word treatment).
+                Text("Claude Story \(Text("CLI.").fabricEmphasis())")
+                    .fabricEditorialDisplay()
 
                 Text("The em-word pattern — serif italic accent on a tight-tracked display. Paired here with a soft ink lede on a dim, candle-lit surface.")
                     .fabricBodySoft()
