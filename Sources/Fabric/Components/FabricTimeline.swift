@@ -50,17 +50,10 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
         case horizontal
     }
 
-    public enum VerticalStyle {
-        case leading     // dot at leading edge, labels trailing (default)
-        case trailing    // dot at trailing edge, labels leading
-        case alternating // even-index labels trailing, odd-index labels leading
-    }
-
     public let items: [FabricTimelineItem]
     @Binding public var selection: String?
     public let accent: FabricAccent
     public let axis: Axis
-    public let verticalStyle: VerticalStyle
     public let currentItemID: String?
     public let descriptionAlignment: HorizontalAlignment
     private let isInteractive: Bool
@@ -73,7 +66,6 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
             selection: $selection,
             accent: accent,
             axis: axis,
-            verticalStyle: verticalStyle,
             currentItemID: currentItemID,
             isInteractive: isInteractive,
             descriptionAlignment: descriptionAlignment,
@@ -88,14 +80,12 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
 extension FabricTimeline where ItemOverlay == EmptyView, Trailing == EmptyView {
     public init(
         items: [FabricTimelineItem],
-        axis: Axis = .vertical,
-        verticalStyle: VerticalStyle = .leading
+        axis: Axis = .vertical
     ) {
         self.items = items
         self._selection = .constant(nil)
         self.accent = .indigo
         self.axis = axis
-        self.verticalStyle = verticalStyle
         self.currentItemID = nil
         self.descriptionAlignment = .leading
         self.isInteractive = false
@@ -114,14 +104,12 @@ extension FabricTimeline where ItemOverlay == EmptyView, Trailing == EmptyView {
         currentItemID: String? = nil,
         accent: FabricAccent = .indigo,
         axis: Axis = .vertical,
-        verticalStyle: VerticalStyle = .leading,
         descriptionAlignment: HorizontalAlignment = .leading
     ) {
         self.items = items
         self._selection = selection
         self.accent = accent
         self.axis = axis
-        self.verticalStyle = verticalStyle
         self.currentItemID = currentItemID
         self.descriptionAlignment = descriptionAlignment
         self.isInteractive = true
@@ -138,7 +126,6 @@ extension FabricTimeline where Trailing == EmptyView {
         currentItemID: String? = nil,
         accent: FabricAccent = .indigo,
         axis: Axis = .vertical,
-        verticalStyle: VerticalStyle = .leading,
         descriptionAlignment: HorizontalAlignment = .leading,
         @ViewBuilder itemOverlay: @escaping (FabricTimelineItem) -> ItemOverlay
     ) {
@@ -146,7 +133,6 @@ extension FabricTimeline where Trailing == EmptyView {
         self._selection = selection
         self.accent = accent
         self.axis = axis
-        self.verticalStyle = verticalStyle
         self.currentItemID = currentItemID
         self.descriptionAlignment = descriptionAlignment
         self.isInteractive = true
@@ -163,7 +149,6 @@ extension FabricTimeline where ItemOverlay == EmptyView {
         currentItemID: String? = nil,
         accent: FabricAccent = .indigo,
         axis: Axis = .vertical,
-        verticalStyle: VerticalStyle = .leading,
         descriptionAlignment: HorizontalAlignment = .leading,
         @ViewBuilder trailingContent: () -> Trailing
     ) {
@@ -171,7 +156,6 @@ extension FabricTimeline where ItemOverlay == EmptyView {
         self._selection = selection
         self.accent = accent
         self.axis = axis
-        self.verticalStyle = verticalStyle
         self.currentItemID = currentItemID
         self.descriptionAlignment = descriptionAlignment
         self.isInteractive = true
@@ -188,7 +172,6 @@ extension FabricTimeline {
         currentItemID: String? = nil,
         accent: FabricAccent = .indigo,
         axis: Axis = .vertical,
-        verticalStyle: VerticalStyle = .leading,
         descriptionAlignment: HorizontalAlignment = .leading,
         @ViewBuilder itemOverlay: @escaping (FabricTimelineItem) -> ItemOverlay,
         @ViewBuilder trailingContent: () -> Trailing
@@ -197,7 +180,6 @@ extension FabricTimeline {
         self._selection = selection
         self.accent = accent
         self.axis = axis
-        self.verticalStyle = verticalStyle
         self.currentItemID = currentItemID
         self.descriptionAlignment = descriptionAlignment
         self.isInteractive = true
@@ -224,7 +206,6 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     @Binding var selection: String?
     let accent: FabricAccent
     let axis: FabricTimeline<ItemOverlay, Trailing>.Axis
-    let verticalStyle: FabricTimeline<ItemOverlay, Trailing>.VerticalStyle
     let currentItemID: String?
     let isInteractive: Bool
     let descriptionAlignment: HorizontalAlignment
@@ -396,15 +377,10 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     @ViewBuilder
     private var verticalTrailingConnector: some View {
         GeometryReader { geo in
-            let spineX: CGFloat = switch verticalStyle {
-            case .leading: Metrics.nodeFrameSize / 2
-            case .trailing: geo.size.width - Metrics.nodeFrameSize / 2
-            case .alternating: geo.size.width / 2
-            }
             Capsule()
                 .fill(FabricColors.connector)
                 .frame(width: Metrics.connectorThickness, height: FabricSpacing.lg)
-                .position(x: spineX, y: FabricSpacing.lg / 2)
+                .position(x: geo.size.width / 2, y: FabricSpacing.lg / 2)
         }
         .frame(height: FabricSpacing.lg)
     }
@@ -444,11 +420,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     // MARK: - Vertical Label Side
 
     private func verticalLabelOnTrailingSide(for index: Int) -> Bool {
-        switch verticalStyle {
-        case .leading: return true
-        case .trailing: return false
-        case .alternating: return index.isMultiple(of: 2)
-        }
+        index.isMultiple(of: 2)
     }
 
     // MARK: - Vertical Spine Background
@@ -456,11 +428,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     @ViewBuilder
     private func verticalSpineBackground(index: Int) -> some View {
         GeometryReader { geo in
-            let spineX: CGFloat = switch verticalStyle {
-            case .leading: Metrics.nodeFrameSize / 2
-            case .trailing: geo.size.width - Metrics.nodeFrameSize / 2
-            case .alternating: geo.size.width / 2
-            }
+            let spineX: CGFloat = geo.size.width / 2
             let dotCenterY = Metrics.nodeFrameSize / 2
             let nodeRadius = Metrics.nodeSize / 2
 
@@ -499,60 +467,33 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
         let itemAcc = itemAccent(for: item)
         let labelsOnTrailing = verticalLabelOnTrailingSide(for: index)
 
-        let content: some View = Group {
-            switch verticalStyle {
-            case .leading:
-                HStack(alignment: .top, spacing: FabricSpacing.sm) {
-                    timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
-                        .frame(width: Metrics.nodeFrameSize)
-                    verticalLabelContent(
-                        item: item, isSelected: isSelected,
-                        state: state, itemAcc: itemAcc, alignment: .leading
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-
-            case .trailing:
-                HStack(alignment: .top, spacing: FabricSpacing.sm) {
+        let content: some View = HStack(alignment: .top, spacing: FabricSpacing.sm) {
+            Group {
+                if labelsOnTrailing {
+                    Color.clear
+                } else {
                     verticalLabelContent(
                         item: item, isSelected: isSelected,
                         state: state, itemAcc: itemAcc, alignment: .trailing
                     )
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
-                        .frame(width: Metrics.nodeFrameSize)
-                }
-
-            case .alternating:
-                HStack(alignment: .top, spacing: FabricSpacing.sm) {
-                    Group {
-                        if labelsOnTrailing {
-                            Color.clear
-                        } else {
-                            verticalLabelContent(
-                                item: item, isSelected: isSelected,
-                                state: state, itemAcc: itemAcc, alignment: .trailing
-                            )
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: labelsOnTrailing ? .center : .trailing)
-
-                    timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
-                        .frame(width: Metrics.nodeFrameSize)
-
-                    Group {
-                        if labelsOnTrailing {
-                            verticalLabelContent(
-                                item: item, isSelected: isSelected,
-                                state: state, itemAcc: itemAcc, alignment: .leading
-                            )
-                        } else {
-                            Color.clear
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: labelsOnTrailing ? .leading : .center)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: labelsOnTrailing ? .center : .trailing)
+
+            timelineNode(state: state, accent: itemAcc, isHovered: isHovered)
+                .frame(width: Metrics.nodeFrameSize)
+
+            Group {
+                if labelsOnTrailing {
+                    verticalLabelContent(
+                        item: item, isSelected: isSelected,
+                        state: state, itemAcc: itemAcc, alignment: .leading
+                    )
+                } else {
+                    Color.clear
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: labelsOnTrailing ? .leading : .center)
         }
         .frame(maxWidth: .infinity)
         .frame(minHeight: Metrics.verticalRowMinHeight)

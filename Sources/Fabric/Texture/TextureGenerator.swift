@@ -3,26 +3,36 @@ import CoreGraphics
 
 public enum TextureGenerator {
 
+    /// Which weave pattern to synthesize.
+    /// - `linen`: isotropic warp/weft noise — the default surface grain.
+    /// - `paper`: directional fibers + sparse warm flecks, reads as handmade paper
+    ///   rather than cloth. Use under editorial long-form layouts.
+    public enum Weave: Hashable {
+        case linen
+        case paper
+    }
+
     private static let baseTilePoints: CGFloat = 128
 
     nonisolated(unsafe) private static let cache: NSCache<NSString, CGImage> = {
         let c = NSCache<NSString, CGImage>()
-        c.countLimit = 8
-        c.totalCostLimit = 4 * 1024 * 1024  // 4 MB
+        c.countLimit = 12
+        c.totalCostLimit = 6 * 1024 * 1024  // 6 MB — two weaves × a few scales
         return c
     }()
 
-    /// Generate a tileable linen/fabric texture as an ImagePaint.
+    /// Generate a tileable fabric texture as an ImagePaint.
     ///
-    /// The texture is a transparent RGBA overlay of subtle noise with weave modulation.
-    /// Composited with normal blend mode over any base color.
+    /// The texture is a transparent RGBA overlay composited with normal blend
+    /// mode over any base color.
     @MainActor
     public static func linenPaint(
         displayScale: CGFloat,
         intensity: CGFloat = 0.04,
-        seed: Int = 42
+        seed: Int = 42,
+        weave: Weave = .linen
     ) -> ImagePaint {
-        let image = linenImage(displayScale: displayScale, intensity: intensity, seed: seed)
+        let image = linenImage(displayScale: displayScale, intensity: intensity, seed: seed, weave: weave)
         return ImagePaint(image: image)
     }
 
@@ -30,9 +40,10 @@ public enum TextureGenerator {
     public static func linenImage(
         displayScale: CGFloat,
         intensity: CGFloat = 0.04,
-        seed: Int = 42
+        seed: Int = 42,
+        weave: Weave = .linen
     ) -> Image {
-        let cgImage = linenCGImage(displayScale: displayScale, intensity: intensity, seed: seed)
+        let cgImage = linenCGImage(displayScale: displayScale, intensity: intensity, seed: seed, weave: weave)
         return Image(cgImage, scale: displayScale, label: Text("Fabric texture"))
     }
 
@@ -41,23 +52,24 @@ public enum TextureGenerator {
     public static func linenCGImage(
         displayScale: CGFloat,
         intensity: CGFloat = 0.04,
-        seed: Int = 42
+        seed: Int = 42,
+        weave: Weave = .linen
     ) -> CGImage {
         let pixelSize = max(1, min(512, Int(round(baseTilePoints * displayScale))))
-        let key = "\(pixelSize)-\(intensity)-\(seed)" as NSString
+        let key = "\(pixelSize)-\(intensity)-\(seed)-\(weave)" as NSString
 
         if let cached = cache.object(forKey: key) {
             return cached
         }
 
-        let cgImage = generateTile(pixelSize: pixelSize, intensity: Float(intensity), seed: seed)
+        let cgImage = generateTile(pixelSize: pixelSize, intensity: Float(intensity), seed: seed, weave: weave)
         cache.setObject(cgImage, forKey: key, cost: pixelSize * pixelSize * 4)
         return cgImage
     }
 
     // MARK: - Bitmap Generation
 
-    private static func generateTile(pixelSize: Int, intensity: Float, seed: Int) -> CGImage {
+    private static func generateTile(pixelSize: Int, intensity: Float, seed: Int, weave: Weave) -> CGImage {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
 
@@ -83,11 +95,21 @@ public enum TextureGenerator {
                 // Deterministic hash noise → 0...1
                 let n = noise(x: x, y: y, seed: seed)
 
-                // Weave modulation: every 2nd row/col gets boosted
-                let weave = weaveWeight(x: x, y: y, spacing: 2)
+                // Modulation depends on weave pattern
+                let modulation: Float
+                switch weave {
+                case .linen:
+                    // Every 2nd row/col gets boosted — warp/weft crossings
+                    modulation = weaveWeight(x: x, y: y, spacing: 2)
+                case .paper:
+                    // Long horizontal fibers + slow vertical drift. The `fiberRun`
+                    // value is coherent across ~8-pixel runs so streaks read as
+                    // handmade-paper grain rather than cloth weave.
+                    modulation = paperWeight(x: x, y: y, seed: seed)
+                }
 
                 // Signed deviation from 0.5 midpoint
-                let deviation = (n - 0.5) * 2.0 * weave
+                let deviation = (n - 0.5) * 2.0 * modulation
 
                 // Map to warm-tinted RGBA: cream highlights, warm brown shadows
                 let alpha = abs(deviation) * intensity
@@ -107,6 +129,19 @@ public enum TextureGenerator {
                     buffer[offset + 1] = UInt8(min(Float(tint) * 0.7, 255))  // G
                     buffer[offset + 2] = 0       // B
                     buffer[offset + 3] = a       // A
+                }
+
+                // Paper-only: sparse warm flecks — tiny amber specks from the pulp.
+                // Only fire for ~0.3% of pixels, and only add, never overwrite.
+                if weave == .paper {
+                    let flk = noise(x: x &+ 9173, y: y &+ 4271, seed: seed &+ 7)
+                    if flk > 0.997 {
+                        let speckAlpha = UInt8(min(Float(60), 255))
+                        buffer[offset + 0] = max(buffer[offset + 0], UInt8(min(Float(140), 255)))
+                        buffer[offset + 1] = max(buffer[offset + 1], UInt8(min(Float(90),  255)))
+                        buffer[offset + 2] = max(buffer[offset + 2], UInt8(min(Float(40),  255)))
+                        buffer[offset + 3] = max(buffer[offset + 3], speckAlpha)
+                    }
                 }
             }
         }
@@ -130,6 +165,23 @@ public enum TextureGenerator {
         let rowThread: Float = (y % spacing == 0) ? 1.5 : 1.0
         let colThread: Float = (x % spacing == 0) ? 1.5 : 1.0
         return rowThread * colThread
+    }
+
+    /// Paper modulation: strongly anisotropic. Produces horizontal fiber streaks
+    /// (grain runs with a dominant direction in handmade paper), punctuated by
+    /// mid-frequency clumps. Output ~0.6 … 2.2.
+    private static func paperWeight(x: Int, y: Int, seed: Int) -> Float {
+        // A row-coherent value: every ~8-pixel band shares a noise sample, so
+        // fibers read as streaks instead of isotropic speckle.
+        let bandY = y / 8
+        let fiberRun = noise(x: x / 3, y: bandY, seed: seed &+ 101)
+
+        // Slow vertical drift: low-freq modulation so the streak density varies
+        // gently down the page rather than being uniform.
+        let drift = noise(x: x / 16, y: y / 16, seed: seed &+ 211)
+
+        // Strong horizontal bias (1.6) + variation from the streak + drift.
+        return 1.6 * fiberRun + 0.5 * drift + 0.2
     }
 
     // MARK: - Fallback

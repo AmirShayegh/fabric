@@ -4,6 +4,7 @@ import SwiftUI
 
 public enum FabricTextStyle {
     case display    // Hero/feature text
+    case editorialDisplay // Tight-tracked hero for long-form/editorial layouts
     case title      // Section titles
     case heading    // Card headings
     case body       // Reading text
@@ -18,6 +19,8 @@ public enum FabricTextStyle {
     public var font: Font {
         switch self {
         case .display:     return .system(size: 38, weight: .regular, design: .serif)
+        // Larger + lighter weight lets system serif's optical size kick in.
+        case .editorialDisplay: return .system(size: 52, weight: .regular, design: .serif)
         case .title:       return .system(size: 28, weight: .medium, design: .serif)
         case .heading:     return .system(size: 18, weight: .semibold, design: .serif)
         case .body:        return .system(size: 15, weight: .regular, design: .default)
@@ -33,7 +36,9 @@ public enum FabricTextStyle {
 
     public var tracking: CGFloat {
         switch self {
-        case .display:      return 0.8
+        case .display:          return 0.8
+        // Tight letterpress tracking (~ -0.025em on web).
+        case .editorialDisplay: return -0.8
         case .title:        return 0.5
         case .heading:      return 0.2
         case .body:         return 0.1
@@ -49,7 +54,8 @@ public enum FabricTextStyle {
 
     public var lineSpacing: CGFloat {
         switch self {
-        case .display:      return 6
+        case .display:          return 6
+        case .editorialDisplay: return 2
         case .title:        return 4
         case .body, .mono:  return 5
         case .sectionLabel: return 2
@@ -59,11 +65,12 @@ public enum FabricTextStyle {
 }
 
 public enum FabricInkStyle {
-    case primary, secondary, tertiary
+    case primary, soft, secondary, tertiary
 
     public var color: Color {
         switch self {
         case .primary:   return FabricColors.inkPrimary
+        case .soft:      return FabricColors.inkSoft
         case .secondary: return FabricColors.inkSecondary
         case .tertiary:  return FabricColors.inkTertiary
         }
@@ -72,6 +79,7 @@ public enum FabricInkStyle {
     public var shadowRadius: CGFloat {
         switch self {
         case .primary:   return 0.5
+        case .soft:      return 0.4
         case .secondary: return 0.3
         case .tertiary:  return 0
         }
@@ -116,6 +124,25 @@ public struct FabricInkModifier: ViewModifier {
     }
 }
 
+// MARK: - Emphasis Modifier
+// Editorial italic accent — serif, italic, accent-colored. Used for the
+// "em-word" treatment (e.g. "Claude Story *CLI.*"). Apply to a Text directly
+// or to any inline view. When used on Text, composes with `+` concatenation.
+
+public struct FabricEmphasisModifier: ViewModifier {
+    public let accent: FabricAccent
+
+    public init(accent: FabricAccent) {
+        self.accent = accent
+    }
+
+    public func body(content: Content) -> some View {
+        content
+            .italic()
+            .foregroundStyle(accent.foreground)
+    }
+}
+
 // MARK: - View Extensions
 
 extension View {
@@ -127,8 +154,19 @@ extension View {
         modifier(FabricInkModifier(style: style))
     }
 
+    /// Serif italic accent — the editorial "em-word" treatment.
+    /// Defaults to `.thread` (warm cinnamon). Apply after a typography modifier.
+    public func fabricEmphasis(_ accent: FabricAccent = .thread) -> some View {
+        modifier(FabricEmphasisModifier(accent: accent))
+    }
+
     public func fabricDisplay() -> some View {
         fabricTypography(.display).fabricInk(.primary)
+    }
+
+    /// Tight-tracked editorial hero — pairs with `.fabricEmphasis()` for em-words.
+    public func fabricEditorialDisplay() -> some View {
+        fabricTypography(.editorialDisplay).fabricInk(.primary)
     }
 
     public func fabricTitle() -> some View {
@@ -141,6 +179,11 @@ extension View {
 
     public func fabricBody() -> some View {
         fabricTypography(.body).fabricInk(.primary)
+    }
+
+    /// Long-form reading body — softer ink, less stark than primary.
+    public func fabricBodySoft() -> some View {
+        fabricTypography(.body).fabricInk(.soft)
     }
 
     public func fabricLabel() -> some View {
@@ -171,5 +214,16 @@ extension View {
         fabricTypography(.sectionLabel)
             .foregroundStyle(FabricColors.inkTertiary)
             .textCase(.uppercase)
+    }
+}
+
+// MARK: - Text Concatenation Support
+// Lets em-words participate in `Text("Claude Story ") + Text("CLI.").fabricEmphasis()`
+
+extension Text {
+    /// Serif italic accent for inline em-word treatment inside a `Text` concatenation.
+    /// Keeps the surrounding typography; only italicizes and recolors the span.
+    public func fabricEmphasis(_ accent: FabricAccent = .thread) -> Text {
+        self.italic().foregroundStyle(accent.foreground)
     }
 }
