@@ -169,6 +169,9 @@ struct ShowcaseView: View {
                 heroSection
                     .padding(.bottom, FabricSpacing.xxxl)
 
+                editorialDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
                 contentGrid
                     .padding(.bottom, FabricSpacing.xxxl)
 
@@ -281,6 +284,224 @@ struct ShowcaseView: View {
         }
     }
 
+    // MARK: - Editorial
+
+    /// Showcases the "editorial" extension to Fabric: thread/moss/rust accents,
+    /// soft ink tier, italic em-word emphasis, tight-tracked editorial display,
+    /// hairline corner radius, dim surface with warm radial glows, and FabricDivider.
+    private var editorialDemo: some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.xl) {
+
+            // ── Editorial hero on a dim warm surface
+            VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                Text("§ Editorial extension")
+                    .fabricCaption()
+                    .fabricInk(.soft)
+                    .italic()
+
+                (
+                    Text("Claude Story ")
+                    + Text("CLI.").fabricEmphasis()
+                )
+                .fabricEditorialDisplay()
+
+                Text("The em-word pattern — serif italic accent on a tight-tracked display. Paired here with a soft ink lede on a dim, candle-lit surface.")
+                    .fabricBodySoft()
+                    .frame(maxWidth: 560, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(FabricSpacing.xxl)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .fabricSurfaceDim()
+            .clipShape(FabricSpacing.shape(radius: FabricSpacing.radiusMd))
+            .fabricShadow(.high)
+
+            // ── Full accent lineup: foreground + pill + chip per accent
+            VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                Text("All seven accents").fabricHeading()
+
+                let accents: [(FabricAccent, String)] = [
+                    (.indigo, "Indigo"),
+                    (.madder, "Madder"),
+                    (.sage,   "Sage"),
+                    (.ochre,  "Ochre"),
+                    (.thread, "Thread"),
+                    (.moss,   "Moss"),
+                    (.rust,   "Rust"),
+                ]
+
+                FabricFlowLayout(spacing: FabricSpacing.sm) {
+                    ForEach(accents, id: \.1) { accent, name in
+                        editorialAccentRow(name: name, accent: accent)
+                    }
+                }
+            }
+
+            // ── FabricDivider ladder: all 4 combinations
+            VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                Text("Dividers").fabricHeading()
+
+                VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                    dividerRow("Solid · Neutral",
+                               FabricDivider(style: .solid, tint: .neutral))
+                    dividerRow("Solid · Thread",
+                               FabricDivider(style: .solid, tint: .thread))
+                    dividerRow("Dotted · Neutral",
+                               FabricDivider(style: .dotted, tint: .neutral))
+                    dividerRow("Dotted · Thread",
+                               FabricDivider(style: .dotted, tint: .thread))
+                }
+                .padding(FabricSpacing.lg)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    FabricSpacing.shape(radius: FabricSpacing.radiusSm)
+                        .fill(FabricColors.canvas)
+                )
+            }
+
+            // ── Corner radius ramp
+            VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                Text("Corner radius").fabricHeading()
+
+                HStack(spacing: FabricSpacing.md) {
+                    radiusChip("Hairline", FabricSpacing.radiusHairline)
+                    radiusChip("XS", FabricSpacing.radiusXs)
+                    radiusChip("SM", FabricSpacing.radiusSm)
+                    radiusChip("MD", FabricSpacing.radiusMd)
+                    radiusChip("LG", FabricSpacing.radiusLg)
+                }
+            }
+
+            // ── Ink tier comparison
+            VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                Text("Ink tiers").fabricHeading()
+
+                HStack(alignment: .top, spacing: FabricSpacing.lg) {
+                    inkSample(label: "Primary") {
+                        Text("Text settles into the warp and weft of the surface beneath.")
+                            .fabricBody()
+                    }
+                    inkSample(label: "Soft") {
+                        Text("Text settles into the warp and weft of the surface beneath.")
+                            .fabricBodySoft()
+                    }
+                }
+            }
+
+            // ── Paper ground + editorial card variant
+            VStack(alignment: .leading, spacing: FabricSpacing.md) {
+                Text("Paper ground · editorial cards").fabricHeading()
+                Text("Handmade-paper weave carries directional fibers and sparse warm flecks. Editorial cards sit on it as pressed pages — deckle rim, softer shadow, no texture bleed.")
+                    .fabricCaption()
+                    .frame(maxWidth: 560, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(alignment: .top, spacing: FabricSpacing.lg) {
+                    FabricCard(style: .editorial) {
+                        VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                            Text("Editorial").fabricHeading()
+                            Text("Parchment fill, hairline thread rim, .mid shadow. Reads as a page resting on the paper.")
+                                .fabricBodySoft()
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    FabricCard {
+                        VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                            Text("Elevated").fabricHeading()
+                            Text("Canvas with linen grain, .high double shadow, top-edge highlight. The default pebble.")
+                                .fabricBody()
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .padding(FabricSpacing.lg)
+                .frame(maxWidth: .infinity)
+                .fabricSurfacePaper()
+                .clipShape(FabricSpacing.shape(radius: FabricSpacing.radiusMd))
+                .fabricShadow(.mid)
+            }
+        }
+    }
+
+    private func editorialAccentRow(name: String, accent: FabricAccent) -> some View {
+        HStack(spacing: FabricSpacing.sm) {
+            // Foreground swatch
+            Circle()
+                .fill(accent.foreground)
+                .frame(width: 18, height: 18)
+
+            Text(name)
+                .fabricLabel()
+                .frame(width: 60, alignment: .leading)
+
+            // Button pebble
+            Text("Button")
+                .fabricTypography(.caption)
+                .foregroundStyle(FabricColors.onPrimary)
+                .padding(.horizontal, FabricSpacing.md)
+                .padding(.vertical, 5)
+                .background(
+                    FabricSpacing.shape(radius: FabricSpacing.radiusXs)
+                        .fill(accent.buttonFill)
+                )
+
+            // Low-opacity chip
+            Text("Chip")
+                .fabricTypography(.caption)
+                .foregroundStyle(accent.textOnFill)
+                .padding(.horizontal, FabricSpacing.md)
+                .padding(.vertical, 5)
+                .background(
+                    FabricSpacing.shape(radius: FabricSpacing.radiusXs)
+                        .fill(accent.fill)
+                )
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func dividerRow<Divider: View>(_ label: String, _ divider: Divider) -> some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+            Text(label).fabricCaption()
+            divider
+        }
+    }
+
+    private func radiusChip(_ name: String, _ radius: CGFloat) -> some View {
+        VStack(spacing: FabricSpacing.xs) {
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                .fill(FabricColors.canvas)
+                .frame(width: 80, height: 56)
+                .overlay {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(FabricColors.thread.opacity(0.4), lineWidth: 1)
+                }
+                .fabricShadow(.low)
+
+            Text("\(name) · \(Int(radius))pt")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(FabricColors.inkTertiary)
+        }
+    }
+
+    private func inkSample<Content: View>(label: String, @ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+            Text(label).fabricCaption()
+            content()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(FabricSpacing.md)
+        .background(
+            FabricSpacing.shape(radius: FabricSpacing.radiusSm)
+                .fill(FabricColors.parchment)
+        )
+    }
+
     // MARK: - Content Grid
 
     private var contentGrid: some View {
@@ -317,7 +538,7 @@ struct ShowcaseView: View {
                     swatch("Burlap", FabricColors.burlap)
                 }
 
-                // Accent swatches
+                // Accent swatches — core
                 Text("Accents").fabricCaption()
                     .padding(.top, FabricSpacing.xs)
                 HStack(spacing: FabricSpacing.sm) {
@@ -327,11 +548,21 @@ struct ShowcaseView: View {
                     swatch("Ochre", FabricColors.ochre)
                 }
 
+                // Accent swatches — editorial
+                Text("Editorial accents").fabricCaption()
+                    .padding(.top, FabricSpacing.xs)
+                HStack(spacing: FabricSpacing.sm) {
+                    swatch("Thread", FabricColors.thread)
+                    swatch("Moss", FabricColors.moss)
+                    swatch("Rust", FabricColors.rust)
+                }
+
                 // Ink swatches
                 Text("Ink").fabricCaption()
                     .padding(.top, FabricSpacing.xs)
                 HStack(spacing: FabricSpacing.sm) {
                     swatch("Primary", FabricColors.inkPrimary)
+                    swatch("Soft", FabricColors.inkSoft)
                     swatch("Secondary", FabricColors.inkSecondary)
                     swatch("Tertiary", FabricColors.inkTertiary)
                 }
@@ -975,28 +1206,6 @@ struct ShowcaseView: View {
                         .init(timestamp: "Q2", title: "Build"),
                         .init(timestamp: "Q3", title: "Launch"),
                     ])
-                }
-                .padding(.horizontal, FabricSpacing.lg)
-
-                // Vertical — alternating
-                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
-                    Text("Vertical — Alternating").fabricCaption()
-
-                    FabricTimeline(
-                        items: [
-                            .init(id: "alt-q1", timestamp: "Q1 2026", title: "Planning",
-                                  description: "Requirements and design"),
-                            .init(id: "alt-q2", timestamp: "Q2 2026", title: "Development",
-                                  description: "Core feature implementation"),
-                            .init(id: "alt-q3", timestamp: "Q3 2026", title: "Beta Release",
-                                  kind: .milestone(accent: .ochre)),
-                            .init(id: "alt-q4", timestamp: "Q4 2026", title: "General Availability",
-                                  kind: .milestone(accent: .sage)),
-                        ],
-                        selection: $selectedTimelineItem,
-                        currentItemID: "alt-q2",
-                        verticalStyle: .alternating
-                    )
                 }
                 .padding(.horizontal, FabricSpacing.lg)
 

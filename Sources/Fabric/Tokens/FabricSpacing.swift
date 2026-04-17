@@ -14,6 +14,7 @@ public enum FabricSpacing {
 
     // MARK: - Corner Radii (iOS 26 continuous corners — plush, pillowy)
 
+    public static let radiusHairline: CGFloat = 2 // editorial/letterpress contexts
     public static let radiusXs: CGFloat = 8     // chips, badges
     public static let radiusSm: CGFloat = 16
     public static let radiusMd: CGFloat = 24

@@ -50,7 +50,7 @@ private struct FabricChipBody: View {
         HStack(spacing: FabricSpacing.xs) {
             Text(label)
                 .fabricTypography(.caption)
-                .foregroundStyle(accent.foreground)
+                .foregroundStyle(accent.textOnFill)
                 .accessibilityHidden(isRemovable)
 
             if isRemovable {
@@ -59,7 +59,7 @@ private struct FabricChipBody: View {
                 } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(accent.foreground)
+                        .foregroundStyle(accent.textOnFill)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Remove \(label)")
