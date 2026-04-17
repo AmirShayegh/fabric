@@ -132,15 +132,20 @@ public enum TextureGenerator {
                 }
 
                 // Paper-only: sparse warm flecks — tiny amber specks from the pulp.
-                // Only fire for ~0.3% of pixels, and only add, never overwrite.
+                // Only fire for ~0.3% of pixels. The bitmap is premultipliedLast,
+                // so RGB *must* be ≤ A — we scale the speck hue down by alpha
+                // before writing. Replace the pixel unconditionally: at this hit
+                // rate, mixing with the underlying noise via max() would violate
+                // premultiplied-alpha invariants and shift hue in CoreGraphics.
                 if weave == .paper {
                     let flk = noise(x: x &+ 9173, y: y &+ 4271, seed: seed &+ 7)
                     if flk > 0.997 {
-                        let speckAlpha = UInt8(min(Float(60), 255))
-                        buffer[offset + 0] = max(buffer[offset + 0], UInt8(min(Float(140), 255)))
-                        buffer[offset + 1] = max(buffer[offset + 1], UInt8(min(Float(90),  255)))
-                        buffer[offset + 2] = max(buffer[offset + 2], UInt8(min(Float(40),  255)))
-                        buffer[offset + 3] = max(buffer[offset + 3], speckAlpha)
+                        let speckA: Float = 60
+                        let norm = speckA / 255
+                        buffer[offset + 0] = UInt8(140 * norm)  // ≈ 33
+                        buffer[offset + 1] = UInt8(90  * norm)  // ≈ 21
+                        buffer[offset + 2] = UInt8(40  * norm)  // ≈ 9
+                        buffer[offset + 3] = UInt8(speckA)
                     }
                 }
             }

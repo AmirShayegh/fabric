@@ -7,6 +7,7 @@ public struct FabricSurfaceModifier: ViewModifier {
     public let weave: TextureGenerator.Weave
 
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.colorScheme) private var colorScheme
 
     public init(
         color: Color,
@@ -26,8 +27,12 @@ public struct FabricSurfaceModifier: ViewModifier {
                 ZStack {
                     color
 
-                    if warmGlow {
-                        // Paper-by-candlelight: two soft warm radial glows in opposing corners.
+                    // Paper-by-candlelight glow is dark-mode only. In light mode
+                    // the surface is already cream, so layering `.plusLighter`
+                    // warm gradients over it pushes the whole surface toward
+                    // yellow. The candlelight metaphor only reads on dim paper.
+                    if warmGlow && colorScheme == .dark {
+                        // Two soft warm radial glows in opposing corners.
                         // Ochre bottom-left, thread top-right. Very low opacity — ambient, not decorative.
                         GeometryReader { geo in
                             ZStack {
@@ -77,15 +82,18 @@ extension View {
         ))
     }
 
-    /// Editorial "paper by candlelight" surface — dark canvas with subtle warm
-    /// radial glows in the corners. Especially good for dark-mode hero sections.
+    /// Editorial "paper by candlelight" surface — canvas with subtle warm
+    /// radial glows in the corners **in dark mode only**. In light mode the
+    /// glow is suppressed (it would push the already-cream surface yellow),
+    /// so this modifier reads as plain textured canvas.
     public func fabricSurfaceDim() -> some View {
         fabricSurface(FabricColors.canvas, textureIntensity: 0.06, warmGlow: true)
     }
 
     /// Handmade-paper surface — parchment tone with directional fiber grain and
     /// sparse warm flecks. Use as the *ground* that editorial `FabricCard`s sit
-    /// on (pair with `FabricCard(style: .editorial)`).
+    /// on (pair with `FabricCard(style: .editorial)`). `warmGlow` only renders
+    /// in dark mode; in light mode the parchment stands alone.
     public func fabricSurfacePaper(warmGlow: Bool = true) -> some View {
         fabricSurface(
             FabricColors.parchment,

@@ -120,16 +120,19 @@ public enum FabricColors {
     }()
 
     // MARK: - Button Fills
-    // Opaque — guaranteed WCAG AA contrast against onPrimary text in both modes.
-    // Each accent is hand-tuned: hue/saturation match the accent, brightness is
-    // lowered to reach ≥ 4.5:1 contrast vs onPrimary (B ≈ 0.99 light / 0.95 dark).
+    // Opaque — hand-tuned to hold WCAG 2.1 §1.4.11 non-text contrast (3:1) for
+    // UI components against the surrounding surface, and to keep onPrimary
+    // (cream) labels legible on top. Buttons are governed by 1.4.11 (3:1), not
+    // 1.4.3 body text (4.5:1); individual ramps land between ~3.8:1 and ~5.5:1
+    // depending on accent hue/saturation.
+    //
+    // Each accent: hue/saturation match the foreground, brightness is lowered
+    // to darken the fill (B ≈ 0.99 light / 0.95 dark for onPrimary).
+    // Hovered/pressed progressively drop brightness by ~2 points per state.
 
     // Indigo — H=225
-    /// Default ~5.2:1 (light) / ~5.5:1 (dark) vs onPrimary
     public static let buttonPrimary        = hsb(225/360, 0.35, 0.46, dark: 225/360, 0.30, 0.55)
-    /// Hovered ~5.7:1 / ~5.9:1
     public static let buttonPrimaryHovered = hsb(225/360, 0.35, 0.44, dark: 225/360, 0.30, 0.52)
-    /// Pressed ~6.1:1 / ~6.5:1
     public static let buttonPrimaryPressed = hsb(225/360, 0.35, 0.42, dark: 225/360, 0.30, 0.48)
 
     // Madder — H=12, warm terracotta

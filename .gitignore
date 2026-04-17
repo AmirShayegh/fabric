@@ -10,6 +10,7 @@ xcuserdata/
 # Claude / tooling
 .claude/
 .agents/
+.story/
 reviews.db
 skills-lock.json
 
