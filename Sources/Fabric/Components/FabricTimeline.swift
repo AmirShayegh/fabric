@@ -1,5 +1,59 @@
 import SwiftUI
 
+// MARK: - Explicit-Mode Status Resolver
+//
+// Extracted to file scope (internal) so test targets can reach it via
+// `@testable import Fabric` without plumbing through the private
+// FabricTimelineBody. Pure function: no UI, no side effects.
+
+/// Non-fatal issues detected during explicit-mode resolution.
+internal struct TimelineStatusResolutionIssues: Equatable {
+    var missingStatusCount: Int
+    var extraCurrentCount: Int
+
+    static let none = TimelineStatusResolutionIssues(missingStatusCount: 0, extraCurrentCount: 0)
+    var isEmpty: Bool { missingStatusCount == 0 && extraCurrentCount == 0 }
+}
+
+/// Normalizes an item list into explicit-mode statuses, or returns nil
+/// when every item has `status == nil` (legacy index-comparison mode).
+///
+/// In explicit mode:
+/// - Items with `status == nil` are coerced to `.future` and reported
+///   via `issues.missingStatusCount`.
+/// - Multiple `.current` entries are coerced so only the FIRST keeps
+///   `.current`; additional ones become `.inProgress` and reported via
+///   `issues.extraCurrentCount`.
+///
+/// Pure function: no assertions, no side effects, no UI. Callers that
+/// want debug-time noise for caller bugs should inspect `issues` and
+/// trigger `assertionFailure` themselves. Tests can verify both the
+/// statuses and the issues without the host process terminating.
+internal func resolveExplicitTimelineStatuses(
+    _ items: [FabricTimelineItem]
+) -> (statuses: [FabricTimelineItem.Status], issues: TimelineStatusResolutionIssues)? {
+    let hasAnyExplicit = items.contains { $0.status != nil }
+    guard hasAnyExplicit else { return nil }
+    var sawCurrent = false
+    var issues = TimelineStatusResolutionIssues.none
+    let resolved: [FabricTimelineItem.Status] = items.map { item in
+        guard let s = item.status else {
+            issues.missingStatusCount += 1
+            return .future
+        }
+        if s == .current {
+            if sawCurrent {
+                issues.extraCurrentCount += 1
+                return .inProgress
+            }
+            sawCurrent = true
+            return .current
+        }
+        return s
+    }
+    return (resolved, issues)
+}
+
 // MARK: - Data Model
 
 public struct FabricTimelineItem: Identifiable {
@@ -9,10 +63,40 @@ public struct FabricTimelineItem: Identifiable {
     public let title: String
     public let description: String?
     public let kind: Kind
+    public let status: Status?
 
     public enum Kind {
         case event
         case milestone(accent: FabricAccent)
+    }
+
+    /// Explicit per-item state for non-linear timelines where completion
+    /// does not follow index order (for example, a project roadmap where
+    /// phase 1 is complete while phase 0 is still in progress).
+    ///
+    /// When any item in a timeline sets `status`, `FabricTimeline`
+    /// switches to "explicit mode": every node and connector derives
+    /// from resolved per-item status. `currentItemID` in that mode
+    /// becomes only the horizontal-layout scroll target and plays no
+    /// role in visual state.
+    ///
+    /// When every item has `status == nil`, the legacy index-comparison
+    /// behavior against `currentItemID` applies unchanged.
+    public enum Status {
+        /// Filled accent circle with a checkmark. Connectors to other
+        /// completed / inProgress / current items use the accent color.
+        case completed
+        /// Filled accent circle with no checkmark. For items that are
+        /// active but NOT the single primary-focus item.
+        case inProgress
+        /// Pulse ring plus stroked circle. Reserved for the single item
+        /// the user's attention should focus on. In debug builds,
+        /// having more than one `.current` in a timeline triggers an
+        /// `assertionFailure`; release builds tolerate it but the
+        /// pulse rendering becomes visually noisy.
+        case current
+        /// Outlined empty circle in connector color.
+        case future
     }
 
     public init(
@@ -20,13 +104,15 @@ public struct FabricTimelineItem: Identifiable {
         timestamp: String,
         title: String,
         description: String? = nil,
-        kind: Kind = .event
+        kind: Kind = .event,
+        status: Status? = nil
     ) {
         self.id = id
         self.timestamp = timestamp
         self.title = title
         self.description = description
         self.kind = kind
+        self.status = status
     }
 }
 
@@ -249,10 +335,40 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     // MARK: - Node State
 
     private enum NodeState {
-        case completed, current, future
+        case completed, inProgress, current, future
+    }
+
+    /// Explicit per-item statuses, resolved once per render.
+    /// See `resolveExplicitTimelineStatuses(_:)` for the full contract.
+    private var resolvedStatuses: [NodeState] {
+        guard let result = resolveExplicitTimelineStatuses(items) else { return [] }
+        // Debug-only nudges for caller bugs. Release builds render the
+        // normalized output unchanged.
+        if result.issues.missingStatusCount > 0 {
+            assertionFailure(
+                "FabricTimeline: \(result.issues.missingStatusCount) item(s) have nil status in explicit mode; coerced to .future"
+            )
+        }
+        if result.issues.extraCurrentCount > 0 {
+            assertionFailure(
+                "FabricTimeline: \(result.issues.extraCurrentCount + 1) items have .current status; only one primary-current is supported. Extras coerced to .inProgress"
+            )
+        }
+        return result.statuses.map { s in
+            switch s {
+            case .completed: return .completed
+            case .inProgress: return .inProgress
+            case .current: return .current
+            case .future: return .future
+            }
+        }
     }
 
     private func nodeState(at index: Int) -> NodeState {
+        let resolved = resolvedStatuses
+        if !resolved.isEmpty {
+            return resolved[index]
+        }
         guard let currentID = currentItemID,
               let currentIndex = items.firstIndex(where: { $0.id == currentID }) else {
             return .future
@@ -276,6 +392,25 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
                 Image(systemName: "checkmark")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(FabricColors.onPrimary)
+
+                Circle()
+                    .stroke(accent.foreground.opacity(0.15), lineWidth: 3)
+                    .frame(width: Metrics.nodeFrameSize, height: Metrics.nodeFrameSize)
+            }
+            .frame(width: Metrics.nodeFrameSize, height: Metrics.nodeFrameSize)
+            .scaleEffect(isHovered ? 1.15 : 1.0)
+            .animation(reduceMotion ? nil : FabricAnimation.hover, value: isHovered)
+
+        case .inProgress:
+            // Filled accent circle with no checkmark. For active items
+            // that are NOT the single primary-current. Intentionally
+            // lighter than .completed (no checkmark) but heavier than
+            // .future (filled, not outlined) and without the pulse
+            // animation reserved for .current.
+            ZStack {
+                Circle()
+                    .fill(accent.foreground)
+                    .frame(width: Metrics.nodeSize, height: Metrics.nodeSize)
 
                 Circle()
                     .stroke(accent.foreground.opacity(0.15), lineWidth: 3)
@@ -327,6 +462,37 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
         startPoint: UnitPoint,
         endPoint: UnitPoint
     ) -> AnyShapeStyle {
+        let resolved = resolvedStatuses
+        // Note: callers may pass `beforeIndex: items.count` for the
+        // trailing-connector sentinel (vertical bottom segment after
+        // the last item). In explicit mode that index has no
+        // right-neighbor status, so we fall through to the legacy
+        // branch which correctly returns connector color when
+        // `currentItemID` is nil.
+        if !resolved.isEmpty && index > 0 && index < resolved.count {
+            // Explicit mode: derive connector fill from per-item statuses
+            // rather than index comparison. Rules applied in order:
+            //   1. right == .future  -> connector color (nothing to flow into)
+            //   2. left  == .future  -> connector color (nothing to flow from)
+            //   3. left or right == .current -> gradient (attention hand-off)
+            //   4. otherwise -> full accent
+            let left = resolved[index - 1]
+            let right = resolved[index]
+            if right == .future || left == .future {
+                return AnyShapeStyle(FabricColors.connector)
+            }
+            if left == .current || right == .current {
+                let colors = left == .current
+                    ? [accent.foreground, accent.foreground.opacity(0.25)]
+                    : [accent.foreground.opacity(0.25), accent.foreground]
+                return AnyShapeStyle(
+                    LinearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
+                )
+            }
+            return AnyShapeStyle(accent.foreground)
+        }
+
+        // Legacy index-comparison mode: unchanged behavior.
         let currentIndex = currentItemID.flatMap { id in
             items.firstIndex(where: { $0.id == id })
         }
@@ -353,6 +519,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     private func labelColor(state: NodeState) -> Color {
         switch state {
         case .completed: FabricColors.inkSecondary
+        case .inProgress: accent.foreground
         case .current: accent.foreground
         case .future: FabricColors.inkTertiary
         }
@@ -695,6 +862,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             switch nodeState(at: index) {
             case .completed: parts.append("Completed")
+            case .inProgress: parts.append("In progress")
             case .current: parts.append("Current")
             case .future: break
             }
