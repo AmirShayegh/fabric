@@ -199,6 +199,19 @@ If you ship something built with Fabric, open a PR to add yourself here.
 
 Issues and pull requests welcome. Keep changes consistent with the "pebbles on fabric" metaphor: surfaces stay recessed and textured, objects stay elevated with warm double shadows, text stays absorbed and flat.
 
+### Commit convention
+
+Fabric uses [Conventional Commits](https://www.conventionalcommits.org). Release versioning is automatic via [release-please](https://github.com/googleapis/release-please):
+
+| Prefix | Effect on next version | Example |
+|--------|------------------------|---------|
+| `fix:` | patch bump (1.0.x) | `fix: clip checkmark on .completed timeline node` |
+| `feat:` | minor bump (1.x.0) | `feat: add FabricSegmentedControl` |
+| `feat!:` or `BREAKING CHANGE:` footer | major bump (x.0.0) | `feat!: drop iOS 16 support` |
+| `docs:` / `refactor:` / `chore:` / `test:` / `ci:` | no version bump (or patch for `refactor`) | `docs: clarify elevation tokens` |
+
+Every push to `main` updates a rolling "Release PR". When that PR is merged, release-please tags the commit and publishes a GitHub Release with a generated CHANGELOG.
+
 ## License
 
 [MIT](LICENSE) © Amir Shayegh
