@@ -146,6 +146,24 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
     let itemOverlay: (FabricTimelineItem) -> ItemOverlay
     let trailingContent: Trailing
 
+    /// Optional max width applied to each label column in vertical
+    /// timelines. When set, long titles and descriptions wrap inside
+    /// this width rather than stretching to half the container width.
+    /// `nil` preserves the existing full-width behavior.
+    public var labelMaxWidth: CGFloat? = nil
+
+    /// Returns a copy of the timeline with `labelMaxWidth` applied.
+    /// Chainable modifier so existing call sites do not need to change
+    /// their initializer invocations:
+    ///
+    ///     FabricTimeline(items: items, selection: $sel)
+    ///         .labelMaxWidth(360)
+    public func labelMaxWidth(_ width: CGFloat?) -> Self {
+        var copy = self
+        copy.labelMaxWidth = width
+        return copy
+    }
+
     public var body: some View {
         FabricTimelineBody(
             items: items,
@@ -155,6 +173,7 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
             currentItemID: currentItemID,
             isInteractive: isInteractive,
             descriptionAlignment: descriptionAlignment,
+            labelMaxWidth: labelMaxWidth,
             itemOverlay: itemOverlay,
             trailingContent: trailingContent
         )
@@ -295,6 +314,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     let currentItemID: String?
     let isInteractive: Bool
     let descriptionAlignment: HorizontalAlignment
+    let labelMaxWidth: CGFloat?
     let itemOverlay: (FabricTimelineItem) -> ItemOverlay
     let trailingContent: Trailing
 
@@ -643,6 +663,12 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
                         item: item, isSelected: isSelected,
                         state: state, itemAcc: itemAcc, alignment: .trailing
                     )
+                    // Clamp the label content's width when requested,
+                    // so long titles wrap into multiple lines instead
+                    // of stretching to half the container width. The
+                    // outer Group still fills .infinity to keep the
+                    // node centered and alignment stable.
+                    .frame(maxWidth: labelMaxWidth, alignment: .trailing)
                 }
             }
             .frame(maxWidth: .infinity, alignment: labelsOnTrailing ? .center : .trailing)
@@ -656,6 +682,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
                         item: item, isSelected: isSelected,
                         state: state, itemAcc: itemAcc, alignment: .leading
                     )
+                    .frame(maxWidth: labelMaxWidth, alignment: .leading)
                 } else {
                     Color.clear
                 }
