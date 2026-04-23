@@ -1,8 +1,8 @@
 # Fabric
 
-A textile-inspired SwiftUI design system for macOS and iOS.
+A warm, textured SwiftUI design system for macOS and iOS.
 
-Warm surfaces, soft interactions, and text that feels absorbed into cloth. The aesthetic is implied, not literal — no stitching or overt textile references. Instead: barely-perceptible woven texture, warm muted colors, and buttons that press in softly like cloth.
+Linen-textured surfaces, four natural-dye accent colors (indigo, sage, ochre, madder), and a small set of components that share consistent geometry. The aesthetic is implied, not literal — no stitching or overt textile references, just barely-perceptible woven texture and warm muted colors.
 
 [![Swift 6.0](https://img.shields.io/badge/Swift-6.0-F05138?logo=swift&logoColor=white)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%2014%20%7C%20iOS%2017-lightgrey)](#)
