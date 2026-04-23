@@ -152,6 +152,13 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
     /// `nil` preserves the existing full-width behavior.
     public var labelMaxWidth: CGFloat? = nil
 
+    /// Optional cap on the number of lines the title text renders before
+    /// truncating. When set, clamps the title to this many lines in the
+    /// vertical layout. Horizontal layout is unaffected (it keeps its
+    /// own `.lineLimit(1)` because horizontal columns are narrow).
+    /// `nil` preserves the default vertical behavior (2 lines).
+    public var titleLineLimit: Int? = nil
+
     /// Returns a copy of the timeline with `labelMaxWidth` applied.
     /// Chainable modifier so existing call sites do not need to change
     /// their initializer invocations:
@@ -161,6 +168,19 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
     public func labelMaxWidth(_ width: CGFloat?) -> Self {
         var copy = self
         copy.labelMaxWidth = width
+        return copy
+    }
+
+    /// Returns a copy of the timeline with `titleLineLimit` applied.
+    /// Chainable:
+    ///
+    ///     FabricTimeline(items: items, selection: $sel)
+    ///         .titleLineLimit(7)
+    ///
+    /// Vertical layout only. See the property doc for details.
+    public func titleLineLimit(_ limit: Int?) -> Self {
+        var copy = self
+        copy.titleLineLimit = limit
         return copy
     }
 
@@ -174,6 +194,7 @@ public struct FabricTimeline<ItemOverlay: View, Trailing: View>: View {
             isInteractive: isInteractive,
             descriptionAlignment: descriptionAlignment,
             labelMaxWidth: labelMaxWidth,
+            titleLineLimit: titleLineLimit,
             itemOverlay: itemOverlay,
             trailingContent: trailingContent
         )
@@ -315,6 +336,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
     let isInteractive: Bool
     let descriptionAlignment: HorizontalAlignment
     let labelMaxWidth: CGFloat?
+    let titleLineLimit: Int?
     let itemOverlay: (FabricTimelineItem) -> ItemOverlay
     let trailingContent: Trailing
 
@@ -592,7 +614,7 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
                 .foregroundStyle(
                     isSelected ? itemAcc.foreground : FabricColors.inkPrimary
                 )
-                .lineLimit(2)
+                .lineLimit(titleLineLimit ?? 2)
 
             if let description = item.description {
                 Text(description)
