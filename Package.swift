@@ -8,6 +8,7 @@ let package = Package(
         .library(name: "Fabric", targets: ["Fabric"])
     ],
     targets: [
-        .target(name: "Fabric", path: "Sources/Fabric")
+        .target(name: "Fabric", path: "Sources/Fabric"),
+        .testTarget(name: "FabricTests", dependencies: ["Fabric"], path: "Tests/FabricTests")
     ]
 )
