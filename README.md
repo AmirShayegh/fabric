@@ -4,14 +4,26 @@ A textile-inspired SwiftUI design system for macOS and iOS.
 
 Warm surfaces, soft interactions, and text that feels absorbed into cloth. The aesthetic is implied, not literal — no stitching or overt textile references. Instead: barely-perceptible woven texture, warm muted colors, and buttons that press in softly like cloth.
 
+[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-F05138?logo=swift&logoColor=white)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%2014%20%7C%20iOS%2017-lightgrey)](#)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ## Installation
 
 Add Fabric to your project via Swift Package Manager:
 
 ```swift
-// Package.swift
+// Package.swift — pin to a release
 dependencies: [
     .package(url: "https://github.com/AmirShayegh/fabric.git", from: "1.0.0")
+]
+```
+
+Or track `main` if you want the latest components as they land:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/AmirShayegh/fabric.git", branch: "main")
 ]
 ```
 
@@ -97,7 +109,7 @@ Four accent colors drawn from natural dyes: **indigo**, **sage**, **ochre**, **m
 | `FabricStepIndicator` | Multi-step progress with dots, connectors, labels |
 | `FabricProgressBar` | Horizontal progress bar with optional label/percentage |
 | `FabricProgressRing` | Circular progress ring with center content |
-| `FabricTimeline` | Vertical timeline with event/milestone dots |
+| `FabricTimeline` | Vertical or horizontal timeline with event/milestone dots. Supports linear (index-based) and non-linear (per-item status) modes for roadmaps where completion does not follow sequence. |
 | `FabricSkeleton` | Shimmer placeholder (line, block, or circle) |
 | `FabricLoadingIndicator` | Dots or ring spinner |
 | `FabricRadarScanner` | Animated radar/scanning indicator |
@@ -177,6 +189,16 @@ open Fabric/Fabric.xcworkspace
 
 Select the **FabricDemo** scheme and run. The workspace resolves the local Fabric package automatically.
 
+## Used By
+
+- [Storybloq](https://storybloq.com) — agentic development framework for macOS. Fabric provides the entire UI surface: sidebar, cards, timeline, kanban columns, chips, status dots, toggles.
+
+If you ship something built with Fabric, open a PR to add yourself here.
+
+## Contributing
+
+Issues and pull requests welcome. Keep changes consistent with the "pebbles on fabric" metaphor: surfaces stay recessed and textured, objects stay elevated with warm double shadows, text stays absorbed and flat.
+
 ## License
 
-MIT
+[MIT](LICENSE) © Amir Shayegh
