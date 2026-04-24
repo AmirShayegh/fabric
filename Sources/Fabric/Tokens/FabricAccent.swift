@@ -7,7 +7,8 @@ public enum FabricAccent: CaseIterable, Sendable {
     // of truth rather than the HSB-derived legacy accents above. Use these
     // anywhere chrome needs to match the web's editorial rendering exactly
     // (tags, pills, badges, chips).
-    case editorialOchre, editorialThread, editorialMoss, editorialRust
+    case editorialOchre, editorialThread, editorialMoss, editorialRust, editorialRed
+    case editorialAmber, editorialPlum
 
     /// Full-strength foreground for text and icons
     public var foreground: Color {
@@ -23,6 +24,9 @@ public enum FabricAccent: CaseIterable, Sendable {
         case .editorialThread: FabricColors.editorialThread
         case .editorialMoss:   FabricColors.editorialMoss
         case .editorialRust:   FabricColors.editorialRust
+        case .editorialRed:    FabricColors.editorialRed
+        case .editorialAmber:  FabricColors.editorialAmber
+        case .editorialPlum:   FabricColors.editorialPlum
         }
     }
 
@@ -41,6 +45,9 @@ public enum FabricAccent: CaseIterable, Sendable {
         case .editorialThread: FabricColors.editorialThread.opacity(0.12)
         case .editorialMoss:   FabricColors.editorialMoss.opacity(0.14)
         case .editorialRust:   FabricColors.editorialRust.opacity(0.12)
+        case .editorialRed:    FabricColors.editorialRed.opacity(0.12)
+        case .editorialAmber:  FabricColors.editorialAmber.opacity(0.12)
+        case .editorialPlum:   FabricColors.editorialPlum.opacity(0.14)
         }
     }
 
@@ -71,6 +78,9 @@ public enum FabricAccent: CaseIterable, Sendable {
         case .editorialThread: FabricColors.buttonThread
         case .editorialMoss:   FabricColors.buttonMoss
         case .editorialRust:   FabricColors.buttonRust
+        case .editorialRed:    FabricColors.buttonMadder
+        case .editorialAmber:  FabricColors.buttonOchre
+        case .editorialPlum:   FabricColors.buttonMoss
         }
     }
 
@@ -88,6 +98,9 @@ public enum FabricAccent: CaseIterable, Sendable {
         case .editorialThread: FabricColors.buttonThreadHovered
         case .editorialMoss:   FabricColors.buttonMossHovered
         case .editorialRust:   FabricColors.buttonRustHovered
+        case .editorialRed:    FabricColors.buttonMadderHovered
+        case .editorialAmber:  FabricColors.buttonOchreHovered
+        case .editorialPlum:   FabricColors.buttonMossHovered
         }
     }
 
@@ -105,6 +118,9 @@ public enum FabricAccent: CaseIterable, Sendable {
         case .editorialThread: FabricColors.buttonThreadPressed
         case .editorialMoss:   FabricColors.buttonMossPressed
         case .editorialRust:   FabricColors.buttonRustPressed
+        case .editorialRed:    FabricColors.buttonMadderPressed
+        case .editorialAmber:  FabricColors.buttonOchrePressed
+        case .editorialPlum:   FabricColors.buttonMossPressed
         }
     }
 }

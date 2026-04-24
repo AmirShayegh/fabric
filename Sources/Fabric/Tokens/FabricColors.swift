@@ -153,6 +153,16 @@ public enum FabricColors {
     public static let editorialMoss          = hex(0x5F6B4A, dark: 0x8A9668)
     /// Editorial rust -- editorial red emphasis.
     public static let editorialRust          = hex(0xA84F2E, dark: 0xC76A4A)
+    /// Editorial red -- higher-saturation crimson for critical/severe
+    /// emphasis. Distinct from rust (more orange) and madder (browner).
+    public static let editorialRed           = hex(0xB8342E, dark: 0xD05449)
+    /// Editorial amber -- brighter warm amber between ochre and rust.
+    /// For attention/warning tags that shouldn't read as pure gold.
+    public static let editorialAmber         = hex(0xD98E3A, dark: 0xE6A658)
+    /// Editorial plum -- muted warm-purple-brown. A cool-leaning warm
+    /// that differentiates subtle chrome (phase tags, meta annotations)
+    /// without leaving the editorial family.
+    public static let editorialPlum          = hex(0x6B4A5F, dark: 0x8F6A83)
 
     // Cold surfaces (distinct ".cold" theme in web, used sparingly)
     /// Editorial cold background -- cooler counterpart to parchment.
