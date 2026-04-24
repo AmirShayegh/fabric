@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/AmirShayegh/fabric/compare/v1.2.0...v1.3.0) (2026-04-24)
+
+
+### Features
+
+* **colors:** add editorial palette tokens (hex-keyed) ([cdb8fdb](https://github.com/AmirShayegh/fabric/commit/cdb8fdb2efd5162d2a77062eb95278de669bce39))
+
 ## [1.2.0](https://github.com/AmirShayegh/fabric/compare/v1.1.0...v1.2.0) (2026-04-23)
 
 
