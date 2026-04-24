@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/AmirShayegh/fabric/compare/v1.3.0...v1.4.0) (2026-04-24)
+
+
+### Features
+
+* **accents:** editorial FabricAccent cases + optional icon in FabricBadge ([07994c6](https://github.com/AmirShayegh/fabric/commit/07994c6115db7da0cc51475520929df0ecc87ac2))
+
 ## [1.3.0](https://github.com/AmirShayegh/fabric/compare/v1.2.0...v1.3.0) (2026-04-24)
 
 
