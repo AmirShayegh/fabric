@@ -49,6 +49,35 @@ public enum FabricColors {
         #endif
     }
 
+    /// sRGB color keyed by 24-bit hex literals -- for tokens sampled directly
+    /// from a designer's source of truth (e.g. CSS hex codes). Unlike `hsb`,
+    /// this is lossless round-trip against the source hex.
+    private static func hex(_ light: UInt32, dark: UInt32) -> Color {
+        #if canImport(AppKit)
+        Color(nsColor: NSColor(name: nil, dynamicProvider: { appearance in
+            let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            let v = isDark ? dark : light
+            return NSColor(
+                srgbRed: CGFloat((v >> 16) & 0xFF) / 255.0,
+                green: CGFloat((v >> 8) & 0xFF) / 255.0,
+                blue: CGFloat(v & 0xFF) / 255.0,
+                alpha: 1.0
+            )
+        }))
+        #elseif canImport(UIKit)
+        Color(uiColor: UIColor { traitCollection in
+            let isDark = traitCollection.userInterfaceStyle == .dark
+            let v = isDark ? dark : light
+            return UIColor(
+                red: CGFloat((v >> 16) & 0xFF) / 255.0,
+                green: CGFloat((v >> 8) & 0xFF) / 255.0,
+                blue: CGFloat(v & 0xFF) / 255.0,
+                alpha: 1.0
+            )
+        })
+        #endif
+    }
+
     // MARK: - Surfaces
     // Light: warm linen tones.  Dark: warm charcoal-brown (dark wool / denim).
 
@@ -94,6 +123,42 @@ public enum FabricColors {
     /// Editorial — warm rust. Brighter editorial cousin of madder
     /// (which stays semantic/destructive).
     public static let rust   = hsb(16/360, 0.73, 0.66, dark: 15/360, 0.63, 0.78)
+
+    // MARK: - Editorial Palette
+    // Designer-sampled hex literals, in sync with CPM's `web/src/app/globals.css`
+    // (light block + `@media (prefers-color-scheme: dark)`). Additive: these are
+    // for surfaces that need to speak the editorial palette across web/Mac/iOS.
+    // Existing HSB accents above stay put for non-editorial chrome.
+
+    // Surfaces and ink
+    /// Editorial primary text color (walnut ink light / cream dark).
+    public static let editorialInk           = hex(0x1C1A17, dark: 0xF4EDE0)
+    /// Editorial soft ink for long-form reading body.
+    public static let editorialInkSoft       = hex(0x2B2722, dark: 0xDFD3BA)
+    /// Editorial page/parchment background.
+    public static let editorialParchment     = hex(0xF4EDE0, dark: 0x1C1A17)
+    /// Editorial deeper parchment -- section bands, emphasized surfaces.
+    public static let editorialParchmentDeep = hex(0xEADFC9, dark: 0x26221E)
+    /// Editorial dim parchment -- muted panels and trays.
+    public static let editorialParchmentDim  = hex(0xDFD3BA, dark: 0x2B2722)
+
+    // Accents
+    /// Editorial ochre -- warm attention / active highlight.
+    public static let editorialOchre         = hex(0xC48A3E, dark: 0xD9A055)
+    /// Editorial deep ochre -- pressed/hover, darker ochre variants.
+    public static let editorialOchreDeep     = hex(0x9A6A2C, dark: 0xBD8338)
+    /// Editorial thread -- brand umber. Canonical brand hex.
+    public static let editorialThread        = hex(0x905830, dark: 0xC48568)
+    /// Editorial moss -- editorial green emphasis.
+    public static let editorialMoss          = hex(0x5F6B4A, dark: 0x8A9668)
+    /// Editorial rust -- editorial red emphasis.
+    public static let editorialRust          = hex(0xA84F2E, dark: 0xC76A4A)
+
+    // Cold surfaces (distinct ".cold" theme in web, used sparingly)
+    /// Editorial cold background -- cooler counterpart to parchment.
+    public static let editorialColdBg        = hex(0xE4E2DD, dark: 0x2A2D31)
+    /// Editorial cold ink -- counterpart ink on cold surfaces.
+    public static let editorialColdInk       = hex(0x3B3E42, dark: 0xD1D3D6)
 
     // MARK: - Functional
     // Shadows need higher opacity on dark surfaces. Dark mode drops warm tint.
