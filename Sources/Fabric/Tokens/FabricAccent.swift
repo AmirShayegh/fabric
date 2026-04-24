@@ -1,7 +1,13 @@
 import SwiftUI
 
-public enum FabricAccent: CaseIterable {
+public enum FabricAccent: CaseIterable, Sendable {
     case indigo, madder, sage, ochre, thread, moss, rust
+    // Editorial palette cases (v1.4.0). Route through hex-keyed
+    // `FabricColors.editorial*` tokens sampled from the designer's source
+    // of truth rather than the HSB-derived legacy accents above. Use these
+    // anywhere chrome needs to match the web's editorial rendering exactly
+    // (tags, pills, badges, chips).
+    case editorialOchre, editorialThread, editorialMoss, editorialRust
 
     /// Full-strength foreground for text and icons
     public var foreground: Color {
@@ -13,6 +19,10 @@ public enum FabricAccent: CaseIterable {
         case .thread: FabricColors.thread
         case .moss:   FabricColors.moss
         case .rust:   FabricColors.rust
+        case .editorialOchre:  FabricColors.editorialOchre
+        case .editorialThread: FabricColors.editorialThread
+        case .editorialMoss:   FabricColors.editorialMoss
+        case .editorialRust:   FabricColors.editorialRust
         }
     }
 
@@ -27,6 +37,10 @@ public enum FabricAccent: CaseIterable {
         case .thread: FabricColors.thread.opacity(0.12)
         case .moss:   FabricColors.moss.opacity(0.14)
         case .rust:   FabricColors.rust.opacity(0.12)
+        case .editorialOchre:  FabricColors.editorialOchre.opacity(0.12)
+        case .editorialThread: FabricColors.editorialThread.opacity(0.12)
+        case .editorialMoss:   FabricColors.editorialMoss.opacity(0.14)
+        case .editorialRust:   FabricColors.editorialRust.opacity(0.12)
         }
     }
 
@@ -39,6 +53,11 @@ public enum FabricAccent: CaseIterable {
 
     /// Opaque button fill — darker than `foreground` to guarantee WCAG AA
     /// contrast against `onPrimary` text on both light and dark backgrounds.
+    ///
+    /// Editorial cases route through the closest legacy button ramp until a
+    /// dedicated editorial button ramp exists; this keeps press states
+    /// working on buttons that consume editorial accents, at the cost of a
+    /// slight hue mismatch between the foreground and the pressed fill.
     public var buttonFill: Color {
         switch self {
         case .indigo: FabricColors.buttonPrimary
@@ -48,6 +67,10 @@ public enum FabricAccent: CaseIterable {
         case .thread: FabricColors.buttonThread
         case .moss:   FabricColors.buttonMoss
         case .rust:   FabricColors.buttonRust
+        case .editorialOchre:  FabricColors.editorialOchreDeep
+        case .editorialThread: FabricColors.buttonThread
+        case .editorialMoss:   FabricColors.buttonMoss
+        case .editorialRust:   FabricColors.buttonRust
         }
     }
 
@@ -61,6 +84,10 @@ public enum FabricAccent: CaseIterable {
         case .thread: FabricColors.buttonThreadHovered
         case .moss:   FabricColors.buttonMossHovered
         case .rust:   FabricColors.buttonRustHovered
+        case .editorialOchre:  FabricColors.buttonOchreHovered
+        case .editorialThread: FabricColors.buttonThreadHovered
+        case .editorialMoss:   FabricColors.buttonMossHovered
+        case .editorialRust:   FabricColors.buttonRustHovered
         }
     }
 
@@ -74,6 +101,10 @@ public enum FabricAccent: CaseIterable {
         case .thread: FabricColors.buttonThreadPressed
         case .moss:   FabricColors.buttonMossPressed
         case .rust:   FabricColors.buttonRustPressed
+        case .editorialOchre:  FabricColors.buttonOchrePressed
+        case .editorialThread: FabricColors.buttonThreadPressed
+        case .editorialMoss:   FabricColors.buttonMossPressed
+        case .editorialRust:   FabricColors.buttonRustPressed
         }
     }
 }
