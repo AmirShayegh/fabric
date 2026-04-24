@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/AmirShayegh/fabric/compare/v1.4.0...v1.5.0) (2026-04-24)
+
+
+### Features
+
+* **colors:** editorialRed + editorialAmber + editorialPlum accents ([941c881](https://github.com/AmirShayegh/fabric/commit/941c881234500723ef6f0ad5603b8fa4b24d342d))
+
 ## [1.4.0](https://github.com/AmirShayegh/fabric/compare/v1.3.0...v1.4.0) (2026-04-24)
 
 
