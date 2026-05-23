@@ -1368,6 +1368,24 @@ struct ShowcaseView: View {
                     FabricPill("Madder", accent: .madder)
                 }
 
+                Text("Progress Pills").fabricCaption()
+                    .padding(.top, FabricSpacing.xs)
+                FabricFlowLayout(spacing: FabricSpacing.sm) {
+                    FabricPill("Complete", accent: .editorialThread, progress: 1.0)
+                    FabricPill("Halfway", accent: .editorialAmber, progress: 0.5)
+                    FabricPill("Starting", accent: .editorialRust, progress: 0.1)
+                    FabricPill("Empty", accent: .editorialPlum, progress: 0.0)
+                }
+
+                Text("Completion Health").fabricCaption()
+                    .padding(.top, FabricSpacing.xs)
+                FabricFlowLayout(spacing: FabricSpacing.sm) {
+                    FabricPill("100%", accent: FabricAccent.forCompletionHealth(1.0), progress: 1.0)
+                    FabricPill("75%", accent: FabricAccent.forCompletionHealth(0.75), progress: 0.75)
+                    FabricPill("30%", accent: FabricAccent.forCompletionHealth(0.3), progress: 0.3)
+                    FabricPill("0%", accent: FabricAccent.forCompletionHealth(0.0), progress: 0.0)
+                }
+
                 Text("Status Dots").fabricCaption()
                     .padding(.top, FabricSpacing.xs)
                 HStack(spacing: FabricSpacing.md) {
@@ -1661,6 +1679,30 @@ struct ShowcaseView: View {
                     showPercentage: true,
                     accent: .indigo
                 )
+
+                // Micro progress (inline, embeddable)
+                VStack(alignment: .leading, spacing: FabricSpacing.sm) {
+                    Text("Micro Progress (3pt inline)").fabricCaption()
+                    HStack(spacing: FabricSpacing.lg) {
+                        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                            Text("Thread").fabricCaption()
+                            FabricMicroProgress(value: 1.0, accent: .editorialThread)
+                        }
+                        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                            Text("Amber").fabricCaption()
+                            FabricMicroProgress(value: 0.6, accent: .editorialAmber)
+                        }
+                        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                            Text("Rust").fabricCaption()
+                            FabricMicroProgress(value: 0.2, accent: .editorialRust)
+                        }
+                        VStack(alignment: .leading, spacing: FabricSpacing.xs) {
+                            Text("Zero").fabricCaption()
+                            FabricMicroProgress(value: 0)
+                        }
+                    }
+                    .frame(maxWidth: 500)
+                }
 
                 // Progress ring
                 HStack(spacing: FabricSpacing.xl) {
