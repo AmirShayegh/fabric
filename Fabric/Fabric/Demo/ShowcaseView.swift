@@ -242,6 +242,9 @@ struct ShowcaseView: View {
                     .padding(.bottom, FabricSpacing.xxxl)
 
                 messageBubbleDemo
+                    .padding(.bottom, FabricSpacing.xxxl)
+
+                graphLayoutDemo
             }
             .padding(.horizontal, FabricSpacing.xxl)
             .padding(.vertical, FabricSpacing.xxxl)
@@ -1990,6 +1993,92 @@ struct ShowcaseView: View {
                             .foregroundStyle(FabricColors.inkSecondary)
                     }
                 }
+            }
+        }
+    }
+    // MARK: - Graph Layout Demo
+
+    private var graphLayoutDemo: some View {
+        FabricCard {
+            VStack(alignment: .leading, spacing: FabricSpacing.lg) {
+                Text("Graph Layout").fabricTitle()
+                Text("FabricGraphLayoutEngine -- layered DAG with crossing reduction and port assignment")
+                    .fabricCaption()
+
+                let layers: [[String]] = [
+                    ["Models"],
+                    ["API", "Auth"],
+                    ["Dashboard", "Settings"],
+                    ["App"]
+                ]
+                let edges: [(source: String, target: String)] = [
+                    ("Models", "API"), ("Models", "Auth"),
+                    ("API", "Dashboard"), ("Auth", "Dashboard"), ("Auth", "Settings"),
+                    ("Dashboard", "App"), ("Settings", "App")
+                ]
+                let config = FabricGraphLayoutEngine.Config(
+                    nodeWidth: 100, nodeHeight: 36,
+                    layerGap: 60, nodeGap: 16,
+                    dummySlotHeight: 8, componentGap: 40, padding: 20
+                )
+                let result = FabricGraphLayoutEngine.layout(layers: layers, edges: edges, config: config)
+
+                Canvas { context, _ in
+                    for (key, route) in result.edgeRoutes where route.count >= 2 {
+                        var path = Path()
+                        path.move(to: route[0])
+                        if route.count == 2 {
+                            path.addLine(to: route[1])
+                        } else {
+                            for i in 1..<route.count {
+                                let prev = route[i - 1]
+                                let curr = route[i]
+                                let midX = (prev.x + curr.x) / 2
+                                path.addCurve(
+                                    to: curr,
+                                    control1: CGPoint(x: midX, y: prev.y),
+                                    control2: CGPoint(x: midX, y: curr.y)
+                                )
+                            }
+                        }
+                        context.stroke(path, with: .color(FabricColors.connector), lineWidth: 1.5)
+
+                        let last = route[route.count - 1]
+                        let prev = route[route.count - 2]
+                        let angle = atan2(last.y - prev.y, last.x - prev.x)
+                        var arrow = Path()
+                        arrow.move(to: last)
+                        arrow.addLine(to: CGPoint(
+                            x: last.x - 6 * cos(angle - .pi / 6),
+                            y: last.y - 6 * sin(angle - .pi / 6)
+                        ))
+                        arrow.move(to: last)
+                        arrow.addLine(to: CGPoint(
+                            x: last.x - 6 * cos(angle + .pi / 6),
+                            y: last.y - 6 * sin(angle + .pi / 6)
+                        ))
+                        context.stroke(arrow, with: .color(FabricColors.connector), lineWidth: 1.5)
+
+                        _ = key
+                    }
+
+                    for (name, pos) in result.nodePositions {
+                        let rect = CGRect(
+                            x: pos.x - config.nodeWidth / 2,
+                            y: pos.y - config.nodeHeight / 2,
+                            width: config.nodeWidth,
+                            height: config.nodeHeight
+                        )
+                        let rr = RoundedRectangle(cornerRadius: 8)
+                        context.fill(Path(rr.path(in: rect)), with: .color(FabricColors.surfaceSecondary))
+                        context.stroke(Path(rr.path(in: rect)), with: .color(FabricColors.connector), lineWidth: 1)
+                        context.draw(
+                            Text(name).font(.system(size: 11, weight: .medium)).foregroundColor(FabricColors.inkPrimary),
+                            at: pos
+                        )
+                    }
+                }
+                .frame(width: result.totalSize.width, height: result.totalSize.height)
             }
         }
     }
