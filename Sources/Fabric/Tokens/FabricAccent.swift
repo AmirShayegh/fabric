@@ -123,4 +123,11 @@ public enum FabricAccent: CaseIterable, Sendable {
         case .editorialPlum:   FabricColors.buttonMossPressed
         }
     }
+
+    public static func forCompletionHealth(_ value: Double, empty: FabricAccent = .editorialPlum) -> FabricAccent {
+        guard value.isFinite, value > 0 else { return empty }
+        if value >= 1.0 { return .editorialThread }
+        if value >= 0.5 { return .editorialAmber }
+        return .editorialRust
+    }
 }
