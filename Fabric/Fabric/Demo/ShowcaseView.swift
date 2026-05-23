@@ -2070,7 +2070,7 @@ struct ShowcaseView: View {
                             height: config.nodeHeight
                         )
                         let rr = RoundedRectangle(cornerRadius: 8)
-                        context.fill(Path(rr.path(in: rect)), with: .color(FabricColors.surfaceSecondary))
+                        context.fill(Path(rr.path(in: rect)), with: .color(FabricColors.canvas))
                         context.stroke(Path(rr.path(in: rect)), with: .color(FabricColors.connector), lineWidth: 1)
                         context.draw(
                             Text(name).font(.system(size: 11, weight: .medium)).foregroundColor(FabricColors.inkPrimary),
