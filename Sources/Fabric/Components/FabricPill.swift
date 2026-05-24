@@ -14,44 +14,44 @@ public struct FabricPill: View {
         self.progress = progress
     }
 
+    private var clampedProgress: Double {
+        guard let progress, progress.isFinite else { return 0 }
+        return min(max(progress, 0), 1)
+    }
+
     public var body: some View {
-        Group {
-            if let progress {
-                VStack(spacing: 0) {
-                    textContent
-                        .padding(.top, 3)
-                        .padding(.bottom, 1)
-                    FabricMicroProgress(
-                        value: progress,
-                        accent: accent ?? .editorialThread
-                    )
-                    .padding(.horizontal, FabricSpacing.sm)
-                    .padding(.bottom, 3)
+        textContent
+            .frame(height: FabricSpacing.pillHeight)
+            .background {
+                if progress != nil {
+                    progressBackground
+                } else {
+                    Capsule().fill(accent?.fill ?? FabricColors.badgeFill)
                 }
-            } else {
-                textContent
             }
-        }
-        .frame(height: FabricSpacing.pillHeight)
-        .background {
-            Capsule().fill(accent?.fill ?? FabricColors.badgeFill)
-        }
-        .clipShape(Capsule())
-        .overlay {
-            Capsule().strokeBorder(
-                LinearGradient(
-                    colors: [FabricColors.highlight, Color.clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                ),
-                lineWidth: 0.5
-            )
-        }
-        .fabricShadow(.low, ambientColor: .clear)
-        .opacity(isEnabled ? 1.0 : 0.5)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(text)
-        .accessibilityValue(progressAccessibilityValue)
+            .clipShape(Capsule())
+            .overlay {
+                if progress != nil {
+                    Capsule().strokeBorder(
+                        (accent?.foreground ?? FabricColors.inkTertiary).opacity(0.35),
+                        lineWidth: 1
+                    )
+                } else {
+                    Capsule().strokeBorder(
+                        LinearGradient(
+                            colors: [FabricColors.highlight, Color.clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 0.5
+                    )
+                }
+            }
+            .fabricShadow(.low, ambientColor: .clear)
+            .opacity(isEnabled ? 1.0 : 0.5)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(text)
+            .accessibilityValue(progressAccessibilityValue)
     }
 
     private var textContent: some View {
@@ -61,6 +61,17 @@ public struct FabricPill: View {
             .lineLimit(1)
             .minimumScaleFactor(0.75)
             .padding(.horizontal, FabricSpacing.sm)
+    }
+
+    private var progressBackground: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(accent?.fill.opacity(0.3) ?? FabricColors.badgeFill.opacity(0.3))
+                Capsule()
+                    .fill(accent?.fill ?? FabricColors.badgeFill)
+                    .frame(width: max(geo.size.height, geo.size.width * clampedProgress))
+            }
+        }
     }
 
     private var progressAccessibilityValue: String {
