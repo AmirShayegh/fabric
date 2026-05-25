@@ -58,7 +58,7 @@ private struct FabricDisclosureGroupBody<Content: View>: View {
                     .padding(.horizontal, FabricSpacing.md)
 
                 content
-                    .padding(.top, FabricSpacing.xs)
+                    .padding(.top, FabricSpacing.sm)
                     .padding(.bottom, FabricSpacing.md)
                     .padding(.horizontal, FabricSpacing.md)
             }
