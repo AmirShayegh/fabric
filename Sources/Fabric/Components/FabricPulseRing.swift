@@ -100,7 +100,7 @@ struct FabricPulseRing: View {
 /// screen. `occlusionState` covers every invisible case at once: fully
 /// covered by other windows, minimized, app hidden, and Spaces the user is
 /// not looking at. Reports `false` when detached from any window.
-private struct WindowOcclusionReader: NSViewRepresentable {
+struct WindowOcclusionReader: NSViewRepresentable {
     let onChange: (Bool) -> Void
 
     final class ReaderView: NSView {
