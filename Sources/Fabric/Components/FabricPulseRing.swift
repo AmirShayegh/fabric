@@ -114,22 +114,32 @@ private struct WindowOcclusionReader: NSViewRepresentable {
             NotificationCenter.default.removeObserver(
                 self, name: NSWindow.didChangeOcclusionStateNotification, object: nil
             )
-            guard let window else {
-                onChange?(false)
-                return
+            if let window {
+                NotificationCenter.default.addObserver(
+                    self,
+                    selector: #selector(occlusionChanged(_:)),
+                    name: NSWindow.didChangeOcclusionStateNotification,
+                    object: window
+                )
             }
-            onChange?(window.occlusionState.contains(.visible))
-            NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(occlusionChanged(_:)),
-                name: NSWindow.didChangeOcclusionStateNotification,
-                object: window
-            )
+            // viewDidMoveToWindow fires while SwiftUI is attaching the
+            // representable, and reporting synchronously would mutate view
+            // state during that update. Defer one main-actor turn and
+            // RECOMPUTE there (rather than capturing a value now) so rapid
+            // attach/detach sequences settle on the final truth.
+            reportDeferred()
         }
 
         @objc private func occlusionChanged(_ note: Notification) {
             guard let win = note.object as? NSWindow, win == window else { return }
             onChange?(win.occlusionState.contains(.visible))
+        }
+
+        private func reportDeferred() {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.onChange?(self.window?.occlusionState.contains(.visible) ?? false)
+            }
         }
     }
 
