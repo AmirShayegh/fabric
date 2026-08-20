@@ -465,8 +465,8 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
         case .current:
             ZStack {
                 if !reduceMotion {
-                    FabricTimelinePulseRing(accent: accent, delay: 0)
-                    FabricTimelinePulseRing(
+                    FabricPulseRing(accent: accent, delay: 0)
+                    FabricPulseRing(
                         accent: accent,
                         delay: FabricAnimation.pulseStagger
                     )
@@ -946,31 +946,4 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
         return .handled
     }
     #endif
-}
-
-// MARK: - Pulse Ring
-
-private struct FabricTimelinePulseRing: View {
-    let accent: FabricAccent
-    let delay: Double
-
-    @State private var isAnimating = false
-
-    var body: some View {
-        Circle()
-            .stroke(accent.foreground, lineWidth: 1.5)
-            .frame(width: 26, height: 26)
-            .scaleEffect(isAnimating ? 1.8 : 0.9)
-            .opacity(isAnimating ? 0 : 0.5)
-            .onAppear {
-                withAnimation(
-                    .easeOut(duration: FabricAnimation.pulseDuration)
-                    .repeatForever(autoreverses: false)
-                    .delay(delay)
-                ) {
-                    isAnimating = true
-                }
-            }
-            .accessibilityHidden(true)
-    }
 }

@@ -188,8 +188,8 @@ private struct FabricStepIndicatorBody: View {
     private func activeNode(number: Int) -> some View {
         ZStack {
             if !reduceMotion {
-                PulseRing(accent: accent, delay: 0)
-                PulseRing(accent: accent, delay: FabricAnimation.pulseStagger)
+                FabricPulseRing(accent: accent, delay: 0)
+                FabricPulseRing(accent: accent, delay: FabricAnimation.pulseStagger)
             }
 
             Circle()
@@ -231,31 +231,6 @@ private struct FabricStepIndicatorBody: View {
 }
 
 // MARK: - Pulse Ring Animation
-
-private struct PulseRing: View {
-    let accent: FabricAccent
-    let delay: Double
-
-    @State private var isAnimating = false
-
-    var body: some View {
-        Circle()
-            .stroke(accent.foreground, lineWidth: 1.5)
-            .frame(width: 26, height: 26)
-            .scaleEffect(isAnimating ? 1.8 : 0.9)
-            .opacity(isAnimating ? 0 : 0.5)
-            .onAppear {
-                withAnimation(
-                    .easeOut(duration: FabricAnimation.pulseDuration)
-                    .repeatForever(autoreverses: false)
-                    .delay(delay)
-                ) {
-                    isAnimating = true
-                }
-            }
-            .accessibilityHidden(true)
-    }
-}
 
 // MARK: - Step Accessibility Modifier
 
