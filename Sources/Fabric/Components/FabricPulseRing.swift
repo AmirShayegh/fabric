@@ -22,52 +22,74 @@ struct FabricPulseRing: View {
     let accent: FabricAccent
     let delay: Double
 
-    @State private var isAnimating = false
+    #if os(macOS)
+    @State private var windowVisible = false
 
     var body: some View {
-        ring
-        #if os(macOS)
-            .background(WindowOcclusionReader { visible in
-                if visible {
-                    startPulse()
-                } else {
-                    stopPulse()
+        ZStack {
+            if windowVisible {
+                AnimatedRing(accent: accent, delay: delay)
+            } else {
+                StaticRing(accent: accent)
+            }
+        }
+        .background(WindowOcclusionReader { visible in
+            if visible != windowVisible { windowVisible = visible }
+        })
+    }
+    #else
+    var body: some View {
+        AnimatedRing(accent: accent, delay: delay)
+    }
+    #endif
+
+    /// The animated form, mounted ONLY while the window is visible. Removing
+    /// the view is what actually cancels the repeatForever animation: writing
+    /// the animated state back inside a disablesAnimations transaction does
+    /// NOT stop the running animator on macOS (measured: the display-link
+    /// render loop keeps ticking). Identity change tears the animator down
+    /// deterministically; re-mounting restarts the pulse from onAppear.
+    private struct AnimatedRing: View {
+        let accent: FabricAccent
+        let delay: Double
+
+        @State private var isAnimating = false
+
+        var body: some View {
+            Circle()
+                .stroke(accent.foreground, lineWidth: 1.5)
+                .frame(width: 26, height: 26)
+                .scaleEffect(isAnimating ? 1.8 : 0.9)
+                .opacity(isAnimating ? 0 : 0.5)
+                .onAppear {
+                    withAnimation(
+                        .easeOut(duration: FabricAnimation.pulseDuration)
+                        .repeatForever(autoreverses: false)
+                        .delay(delay)
+                    ) {
+                        isAnimating = true
+                    }
                 }
-            })
-        #else
-            .onAppear { startPulse() }
-        #endif
-    }
-
-    private var ring: some View {
-        Circle()
-            .stroke(accent.foreground, lineWidth: 1.5)
-            .frame(width: 26, height: 26)
-            .scaleEffect(isAnimating ? 1.8 : 0.9)
-            .opacity(isAnimating ? 0 : 0.5)
-            .accessibilityHidden(true)
-    }
-
-    private func startPulse() {
-        guard !isAnimating else { return }
-        withAnimation(
-            .easeOut(duration: FabricAnimation.pulseDuration)
-            .repeatForever(autoreverses: false)
-            .delay(delay)
-        ) {
-            isAnimating = true
+                .accessibilityHidden(true)
         }
     }
 
-    private func stopPulse() {
-        // Writing the state back without animation is what actually cancels a
-        // repeatForever animation; plain assignment would leave it running.
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            isAnimating = false
+    #if os(macOS)
+    /// The resting form shown while the window is not visible: the ring at
+    /// its base scale and opacity, no animation attached.
+    private struct StaticRing: View {
+        let accent: FabricAccent
+
+        var body: some View {
+            Circle()
+                .stroke(accent.foreground, lineWidth: 1.5)
+                .frame(width: 26, height: 26)
+                .scaleEffect(0.9)
+                .opacity(0.5)
+                .accessibilityHidden(true)
         }
     }
+    #endif
 }
 
 #if os(macOS)
