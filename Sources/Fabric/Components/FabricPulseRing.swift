@@ -83,33 +83,31 @@ private struct WindowOcclusionReader: NSViewRepresentable {
 
     final class ReaderView: NSView {
         var onChange: ((Bool) -> Void)?
-        private var observer: NSObjectProtocol?
 
+        // Selector-based observation: auto-unregistered on dealloc since
+        // macOS 10.11, so no deinit cleanup (which strict concurrency
+        // forbids for a MainActor-isolated stored token anyway).
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            if let observer {
-                NotificationCenter.default.removeObserver(observer)
-                self.observer = nil
-            }
+            NotificationCenter.default.removeObserver(
+                self, name: NSWindow.didChangeOcclusionStateNotification, object: nil
+            )
             guard let window else {
                 onChange?(false)
                 return
             }
             onChange?(window.occlusionState.contains(.visible))
-            observer = NotificationCenter.default.addObserver(
-                forName: NSWindow.didChangeOcclusionStateNotification,
-                object: window,
-                queue: .main
-            ) { [weak self] note in
-                guard let win = note.object as? NSWindow else { return }
-                self?.onChange?(win.occlusionState.contains(.visible))
-            }
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(occlusionChanged(_:)),
+                name: NSWindow.didChangeOcclusionStateNotification,
+                object: window
+            )
         }
 
-        deinit {
-            if let observer {
-                NotificationCenter.default.removeObserver(observer)
-            }
+        @objc private func occlusionChanged(_ note: Notification) {
+            guard let win = note.object as? NSWindow, win == window else { return }
+            onChange?(win.occlusionState.contains(.visible))
         }
     }
 
