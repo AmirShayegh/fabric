@@ -516,7 +516,10 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
             // rather than index comparison. Rules applied in order:
             //   1. right == .future  -> connector color (nothing to flow into)
             //   2. left  == .future  -> connector color (nothing to flow from)
-            //   3. left or right == .current -> gradient (attention hand-off)
+            //   3. left or right == .current -> gradient (attention hand-off):
+            //      full accent at the finished neighbour, fading toward the
+            //      current (unfinished) node, so the fade reads as "work
+            //      still to do" on the side that is still open.
             //   4. otherwise -> full accent
             let left = resolved[index - 1]
             let right = resolved[index]
@@ -525,8 +528,8 @@ private struct FabricTimelineBody<ItemOverlay: View, Trailing: View>: View {
             }
             if left == .current || right == .current {
                 let colors = left == .current
-                    ? [accent.foreground, accent.foreground.opacity(0.25)]
-                    : [accent.foreground.opacity(0.25), accent.foreground]
+                    ? [accent.foreground.opacity(0.25), accent.foreground]
+                    : [accent.foreground, accent.foreground.opacity(0.25)]
                 return AnyShapeStyle(
                     LinearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
                 )
